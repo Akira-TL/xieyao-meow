@@ -1,40 +1,43 @@
-import { CommunityDemo } from "@/components/community-demo";
-import { ExperienceDemo } from "@/components/experience-demo";
-import { COMMUNITY_RESIDENTS } from "@/data/community-residents";
-import { DEMO_FALLBACK } from "@/data/demo-fallback";
+import {
+  BrandHeader,
+  DemoBanner,
+  DemoLabel,
+  DemoPage,
+  KanshanPlaceholder,
+  PersonaEgg,
+  Surface,
+} from "@/features/demo/components";
+import { LandingActions } from "@/features/demo/client";
+import { DEMO_FIXTURE } from "@/features/demo/fixtures";
 
-export default function HomePage() {
+export default function LandingPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden px-5 py-8 sm:px-8 lg:px-12 lg:py-10">
-      <div className="ambient-grid" aria-hidden="true" />
-      <div className="relative mx-auto max-w-7xl">
-        <header className="mb-8 flex flex-col justify-between gap-6 sm:mb-10 sm:flex-row sm:items-end">
+    <DemoPage>
+      <DemoBanner />
+      <BrandHeader right={<a className="hover:text-zinc-200" href="/explore?mode=public">先逛逛</a>} />
+      <Surface className="min-h-[72vh]">
+        <div className="grid min-h-[62vh] items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="flex items-end justify-center gap-4 lg:order-2">
+            <KanshanPlaceholder />
+            <PersonaEgg />
+          </div>
           <div>
-            <p className="eyebrow">ZHIHU HACKATHON 2026 · DIGITAL PERSONA</p>
-            <h1 className="mt-3 text-5xl font-semibold tracking-[-0.05em] text-zinc-100 sm:text-7xl">
-              谢邀<span className="text-amber-300">喵</span>
+            <DemoLabel>FIRST HOOK</DemoLabel>
+            <h1 className="mt-5 text-4xl font-semibold leading-tight tracking-[-0.055em] text-zinc-100 sm:text-6xl">
+              你在知乎这些年，其实已经偷偷养出了一只东西。
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
-              用你的知乎兴趣、收藏和创作，孵化一只会替你逛知乎、读问题、认真回答的赛博宠物。
+            <p className="mt-5 max-w-xl text-sm leading-7 text-zinc-400 sm:text-base">
+              你的关注、收藏和创作决定它是什么脾气，也决定它最容易和谁一见如故。
             </p>
+            <div className="mt-8">
+              <LandingActions />
+            </div>
+            <div className="mt-8 border-l border-zinc-800 pl-4 text-xs leading-6 text-zinc-500">
+              {DEMO_FIXTURE.landing.publicEvent}
+            </div>
           </div>
-          <div className="max-w-sm border-l border-zinc-800 pl-4 text-xs leading-5 text-zinc-600">
-            当前开发版先使用项目 Access Secret 所属账号跑通完整 L0；OAuth 获批后，同一链路直接切换到每位授权用户的知乎人格。
-          </div>
-        </header>
-
-        <ExperienceDemo
-          initialExperience={DEMO_FALLBACK}
-          allowForceRefresh={process.env.NODE_ENV !== "production"}
-        />
-
-        <CommunityDemo residents={COMMUNITY_RESIDENTS} />
-
-        <footer className="mt-6 flex flex-col justify-between gap-2 text-[11px] tracking-wide text-zinc-700 sm:flex-row">
-          <span>REAL ZHIHU DATA → KNOWLEDGE LAYER → PERSONA LAYER</span>
-          <span>没有实时数据时，界面会明确显示 DEMO CACHE</span>
-        </footer>
-      </div>
-    </main>
+        </div>
+      </Surface>
+    </DemoPage>
   );
 }

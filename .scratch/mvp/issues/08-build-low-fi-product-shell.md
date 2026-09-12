@@ -1,6 +1,6 @@
 # 08｜Build low-fi product shell
 
-Status: ready-for-agent
+Status: resolved
 
 ## Goal
 
@@ -154,3 +154,29 @@ Landing
 - Activation Shell / App Shell 导航边界。
 
 不要为纯 CSS 或组件内部实现细节写脆弱测试。
+
+## Completion notes
+
+2026-09-12 完成低保真产品壳：
+
+- 已接通 `Landing → Consent → Scanning → Reveal → First Match → First Encounter → Share → Home`；
+- 激活后 `窝 / 逛 / 遇见 / 图鉴` 四入口均可浏览器实机访问；
+- 首访 `/encounter/first` 与日常 `/encounter` 已分离，避免激活状态与长期关系页互相污染；
+- 低保真阶段使用 `localStorage` activation adapter，仅用于验证 route/state guard，目标正式架构仍以服务端状态为权威；
+- 所有页面明确标记 `DEMO FIXTURE / provenance=demo`，两个 resident Persona 均标记为“演示居民”；
+- fixture 的 Encounter 锚定真实知乎公开问题，不把演示 Persona 冒充真实注册用户；
+- Scanning 渐进展示 fixture finding；正式接入时必须由真实已完成数据驱动；
+- 未激活用户直达 `/home` 会回到 Landing；已激活用户访问首访 activation route 会回 `/home`；刷新后 demo Persona 状态可恢复；
+- 激活用户再次打开 Landing，主 CTA 变为“回我的窝”，不会引导重复孵化；
+- 390px 移动端 Landing / Encounter 无横向溢出，四导航可见；
+- 新壳对 `ZHIHU_ACCESS_SECRET`、`X-OAuth-Token`、`/api/experience` 无直接耦合；
+- 仓库中来源未确认的 auth/OAuth 未提交改动未被本 issue 修改或纳入提交。
+
+验证：
+
+- `pnpm typecheck`：通过；
+- `pnpm test`：9 个测试文件、31 个测试通过；
+- `pnpm build`：通过；
+- `git diff --check`：通过；
+- `codegraph sync .`：通过；
+- Windows Chrome CDP：完整首访、App 四导航、route guard 和移动端 390px 实机验收通过。
