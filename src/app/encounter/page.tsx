@@ -37,8 +37,8 @@ export default async function EncounterHubPage({
 function EncounterHub() {
   return (
     <>
-      <p className="eyebrow">ENCOUNTER</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-100">今天最值得闻的一只。</h1>
+      <p className="eyebrow">ENCOUNTER / MET ON THE ROAD</p>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-100">上次它出去时，遇见了齿轮。</h1>
       <div className="mt-6 grid gap-6 border border-zinc-800 bg-black/20 p-5 sm:grid-cols-[auto_1fr] sm:items-center">
         <PetStage
           size="small"

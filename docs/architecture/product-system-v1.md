@@ -291,9 +291,55 @@ encounterCount
 lastEncounterAt
 ```
 
+### Outing
+
+宠物一次有限的自主出门。它不是无限自治 Agent，而是受预算约束的事件图。
+
+```text
+outingId
+personaId
+state              AT_HOME / PREPARING / AWAY / RETURNED
+routeBias           用户留下的弱引导，可为空
+startedAt
+returnedAt
+contentEncounterId?
+socialEncounterId?
+returnArtifactId?
+growthDelta?
+```
+
+一次 outing 最多产生 1 个内容发现、0–1 个社交 Encounter、1 个带回物和 0–1 个成长变化。
+
+### ReturnArtifact
+
+宠物回家时带回的长期资产，不使用随机金币/普通道具。
+
+```text
+artifactId
+outingId
+type                NOTE / QUESTION_TICKET / RELATION_TICKET / OPINION_FRAGMENT / NEW_SCENT
+title
+summary
+sourceRef?
+createdAt
+```
+
+### JourneyLog
+
+`逛`与`图鉴`使用的长期旅途记录索引：
+
+```text
+personaId
+outingId
+artifactId?
+visitedTopics[]
+metPersonaIds[]
+createdAt
+```
+
 ### DailyEvent
 
-首页“今天最值得看的事情”：
+首页“今天最值得看的事情”。在采用自主出门后，它更多是 Outing / Return / Relationship 的投影，而不是独立生成的推荐 Feed：
 
 ```text
 type
@@ -304,7 +350,7 @@ occurredAt
 seenAt
 ```
 
-`type` 可为：内容发现、被串门、关系变化、称号解锁、公共热点事件。
+`type` 可为：出门、归来、内容发现、被串门、关系变化、称号解锁、公共热点事件。
 
 ## 6. 服务边界
 
@@ -342,6 +388,13 @@ ExploreService
 ├─ Personalized content candidate pool
 └─ “为什么叼回来” explanation
 
+OutingService
+├─ route bias normalization
+├─ finite outing plan
+├─ content / social event selection
+├─ return artifact assembly
+└─ outing state transition
+
 GrowthService
 ├─ XP rules
 ├─ unlock rules
@@ -364,7 +417,7 @@ ShareService
 | 公共事件池 | 热榜 | 是，但可缓存 |
 | 兴趣内容搜索 | 知乎搜索 | 是 |
 | 第一次 Agent 讨论 | 搜索/问题回答 + 直答 | 是 |
-| 每日“叼回来” | 热榜 + 搜索 | 是 |
+| 自主出门 / “叼回来” | 热榜 + 搜索 + 应用 Persona 池 | 是 |
 | 外部事实补充 | 全网搜索 | 否 |
 | 更真实关注流 | 关注流 | 合同确认后再接 |
 | 宠物副本 | 知乎故事 | 否 |
@@ -411,29 +464,43 @@ ShareService
 
 ## 9. 日常循环数据流
 
+日常循环改为以 `Outing` 为中心，而不是每天现场生成一条推荐。
+
 ```text
-Daily trigger / 用户打开
+宠物在家 AT_HOME
+        ↓
+用户可留一张短纸条（可选 route bias）
+        ↓
+OutingService 创建有限 outing
+        ↓
+AWAY
         ↓
 公共内容候选（热榜缓存）
         +
 人格兴趣检索（知乎搜索缓存）
         +
-关系事件候选
+Persona / Relationship 候选
         ↓
-EventService 排序
+选择 1 个 ContentEncounter
+        +
+可选 0–1 个 AgentEncounter
         ↓
-只选一个最高价值事件进入「窝」首屏
+生成 1 个 ReturnArtifact
         ↓
-用户点击
+RETURNED
         ↓
-逛 / 遇见 / 图鉴中的具体深链
+EventService 将“它回来了”置为 Home 主事件
         ↓
-Growth 更新
+用户查看旅途札记 / 票根 / 关系变化
         ↓
-下一轮事件池发生变化
+Growth 更新（最多一项主要变化）
+        ↓
+JourneyLog / Atlas 沉淀
+        ↓
+回到 AT_HOME，等待下一次出门
 ```
 
-留存依赖的是“我不在的时候它也发生了事情”的感受，而不是签到。
+留存依赖的是“我不在的时候它自己出去经历了什么”和“它什么时候回来”，而不是签到或精准倒计时。
 
 ## 10. 数据存储分层
 
@@ -444,6 +511,8 @@ Growth 更新
 - ZhihuComposition 的结构化结果与解释；
 - Growth；
 - Match / Relationship / Encounter；
+- Outing 状态与历史；
+- ReturnArtifact / JourneyLog；
 - DailyEvent；
 - ShareCard 元数据。
 

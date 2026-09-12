@@ -11,6 +11,7 @@ import {
   type DemoActivationStage,
 } from "./activation";
 import { DEMO_FIXTURE } from "./fixtures";
+import { DEMO_OUTING_STORAGE_KEY } from "./outing";
 
 function currentStage(): DemoActivationStage {
   if (typeof window === "undefined") return "VISITOR";
@@ -120,6 +121,7 @@ export function ResetDemoButton() {
       className="text-xs text-zinc-600 transition hover:text-zinc-300"
       onClick={() => {
         window.localStorage.removeItem(DEMO_STAGE_STORAGE_KEY);
+        window.localStorage.removeItem(DEMO_OUTING_STORAGE_KEY);
         router.push("/");
       }}
       type="button"

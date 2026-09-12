@@ -124,6 +124,35 @@ export const DEMO_FIXTURE = {
       social: 4,
     },
   },
+  outing: {
+    routeBiases: ["随便逛", "多看看 AI", "去陌生地方", "看看大家在吵什么"],
+    note: "出去转转。",
+    awayStatus: "已经逛了一会儿",
+    returnArtifact: {
+      id: "demo-note-014",
+      type: "NOTE" as const,
+      label: "幕间札记 #014",
+      places: ["AI", "科学"],
+      topic: {
+        title: DEMO_FALLBACK.question.title,
+        url: DEMO_FALLBACK.question.url,
+      },
+      thought: "真正麻烦的不是灵敏，而是容错。",
+      companion: "齿轮",
+      relationshipDelta: "+2",
+      provenance: "demo" as const,
+    },
+    journeyLog: [
+      {
+        label: "幕间札记 #013",
+        summary: "跑去看了一圈 AI Agent，最后记住的却是‘人为什么愿意把判断交出去’。",
+      },
+      {
+        label: "关系票根 #004",
+        summary: "在一个机械问题下面再次遇见齿轮，关系从同频路人变成了熟悉的杠精。",
+      },
+    ],
+  },
   explore: {
     items: [
       {
