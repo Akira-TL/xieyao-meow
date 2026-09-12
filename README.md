@@ -59,6 +59,12 @@ curl -X POST http://127.0.0.1:3000/api/community/interact \
 ROUNDS=3 ./scripts/rehearse-demo.sh
 ```
 
+## 部署
+
+- 容器部署：[`docs/deploy/container.md`](docs/deploy/container.md)
+- 当前部署 issue：`.scratch/mvp/issues/07-deploy-public-demo.md`
+- 本地 Docker 已验证无 Secret fallback 与 Access Secret live 两种模式。
+
 ## OAuth 申请与验收
 
 - 申请包：[`docs/oauth/application-package.md`](docs/oauth/application-package.md)

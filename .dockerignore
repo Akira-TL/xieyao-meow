@@ -1,0 +1,12 @@
+.git
+.codegraph
+.secrets
+.env
+.env.*
+!.env.example
+.next
+node_modules
+logs
+.scratch
+*.log
+*.tsbuildinfo
