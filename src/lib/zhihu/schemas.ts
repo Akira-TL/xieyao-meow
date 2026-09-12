@@ -104,3 +104,48 @@ export const oauthTokenSchema = z.object({
   token_type: z.string(),
   expires_in: z.number().int().positive(),
 });
+
+export const hotListEnvelopeSchema = z.object({
+  Code: z.number().int(),
+  Message: z.string(),
+  Data: z.object({
+    Total: z.number().int(),
+    Items: z.array(
+      z.object({
+        Title: z.string(),
+        Url: z.string(),
+        ThumbnailUrl: z.string(),
+        Summary: z.string(),
+      }),
+    ),
+  }).nullable(),
+});
+
+export const questionAnswersEnvelopeSchema = z.object({
+  Code: z.number().int(),
+  Message: z.string(),
+  Data: z.object({
+    Items: z.array(
+      z.object({
+        ContentType: z.literal("answer"),
+        ContentToken: identifierSchema,
+        Url: z.string(),
+        Summary: z.string(),
+      }),
+    ),
+    Paging: pagingSchema,
+  }).nullable(),
+});
+
+export const zhidaCompletionSchema = z.object({
+  model: z.string(),
+  choices: z.array(
+    z.object({
+      message: z.object({
+        content: z.string(),
+        reasoning_content: z.string().optional(),
+      }),
+      finish_reason: z.string().nullable(),
+    }),
+  ).min(1),
+});

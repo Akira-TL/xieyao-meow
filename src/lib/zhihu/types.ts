@@ -80,3 +80,35 @@ export interface ZhihuOAuthConfig {
 export interface GetUserProfileInput {
   oauthAccessToken?: string;
 }
+
+export interface ZhihuHotItem {
+  title: string;
+  url: string;
+  thumbnailUrl: string;
+  summary: string;
+}
+
+export interface ZhihuAnswerSummary {
+  contentToken: string;
+  url: string;
+  summary: string;
+}
+
+export type ZhidaModel = "zhida-fast-1p5" | "zhida-thinking-1p5" | "zhida-agent";
+
+export interface ZhidaMessage {
+  role: string;
+  content: string;
+}
+
+export interface ZhidaRequest {
+  model: ZhidaModel;
+  messages: ZhidaMessage[];
+}
+
+export interface ZhidaResult {
+  model: string;
+  content: string;
+  reasoningContent?: string;
+  finishReason: string | null;
+}

@@ -5,7 +5,10 @@ import {
   contentsEnvelopeSchema,
   favlistsEnvelopeSchema,
   followeesEnvelopeSchema,
+  hotListEnvelopeSchema,
   oauthTokenSchema,
+  questionAnswersEnvelopeSchema,
+  zhidaCompletionSchema,
 } from "./schemas";
 import type {
   GetUserProfileInput,
@@ -14,8 +17,12 @@ import type {
   ZhihuCollection,
   ZhihuContent,
   ZhihuFavlist,
+  ZhihuAnswerSummary,
   ZhihuFollowee,
+  ZhihuHotItem,
   ZhihuOAuthConfig,
+  ZhidaRequest,
+  ZhidaResult,
 } from "./types";
 
 const DATA_BASE_URL = "https://developer.zhihu.com";
@@ -111,6 +118,59 @@ export class ZhihuGateway {
       followees,
       collections,
       favlists,
+    };
+  }
+
+  async getHotList(limit = 30): Promise<ZhihuHotItem[]> {
+    const payload = await this.getJson(
+      "/api/v1/content/hot_list",
+      { Limit: String(limit) },
+      hotListEnvelopeSchema,
+    );
+    const data = this.requireSuccessData(payload.Code, payload.Message, payload.Data);
+    return data.Items.map((item) => ({
+      title: item.Title,
+      url: item.Url,
+      thumbnailUrl: item.ThumbnailUrl,
+      summary: item.Summary,
+    }));
+  }
+
+  async getQuestionAnswers(questionUrl: string, limit = 20): Promise<ZhihuAnswerSummary[]> {
+    const payload = await this.getJson(
+      "/api/v1/content/question_answers",
+      { QuestionUrl: questionUrl, Offset: "0", Limit: String(limit) },
+      questionAnswersEnvelopeSchema,
+    );
+    const data = this.requireSuccessData(payload.Code, payload.Message, payload.Data);
+    return data.Items.map((item) => ({
+      contentToken: item.ContentToken,
+      url: item.Url,
+      summary: item.Summary,
+    }));
+  }
+
+  async askZhida(input: ZhidaRequest): Promise<ZhidaResult> {
+    const payload = await this.postJson(
+      "/v1/chat/completions",
+      {
+        model: input.model,
+        messages: input.messages,
+        stream: false,
+      },
+      zhidaCompletionSchema,
+    );
+    const choice = payload.choices[0];
+    if (!choice) {
+      throw new Error("Zhihu Zhida returned no choices");
+    }
+    return {
+      model: payload.model,
+      content: choice.message.content,
+      ...(choice.message.reasoning_content
+        ? { reasoningContent: choice.message.reasoning_content }
+        : {}),
+      finishReason: choice.finish_reason,
     };
   }
 
@@ -218,6 +278,33 @@ export class ZhihuGateway {
       url.searchParams.set(key, value);
     }
 
+    const response = await this.fetchWithRetry(url, {
+      method: "GET",
+      headers: this.createDataHeaders(oauthAccessToken),
+    });
+    if (!response.ok) {
+      throw new Error(`Zhihu API request failed with HTTP ${response.status}`);
+    }
+    return schema.parse(await response.json());
+  }
+
+  private async postJson<TSchema extends z.ZodType>(
+    path: string,
+    body: unknown,
+    schema: TSchema,
+  ): Promise<z.infer<TSchema>> {
+    const response = await this.fetchWithRetry(new URL(path, DATA_BASE_URL), {
+      method: "POST",
+      headers: this.createDataHeaders(),
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      throw new Error(`Zhihu API request failed with HTTP ${response.status}`);
+    }
+    return schema.parse(await response.json());
+  }
+
+  private createDataHeaders(oauthAccessToken?: string): Headers {
     const headers = new Headers({
       authorization: `Bearer ${this.options.accessSecret}`,
       "content-type": "application/json",
@@ -226,15 +313,7 @@ export class ZhihuGateway {
     if (oauthAccessToken) {
       headers.set("x-oauth-token", oauthAccessToken);
     }
-
-    const response = await this.fetchWithRetry(url, {
-      method: "GET",
-      headers,
-    });
-    if (!response.ok) {
-      throw new Error(`Zhihu API request failed with HTTP ${response.status}`);
-    }
-    return schema.parse(await response.json());
+    return headers;
   }
 
   private async fetchWithRetry(input: RequestInfo | URL, init: RequestInit): Promise<Response> {

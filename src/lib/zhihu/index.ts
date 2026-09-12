@@ -3,6 +3,7 @@ export type {
   GetUserProfileInput,
   OAuthSession,
   UserProfile,
+  ZhihuAnswerSummary,
   ZhihuAuthor,
   ZhihuCollection,
   ZhihuContent,
@@ -10,5 +11,10 @@ export type {
   ZhihuFavlist,
   ZhihuFavlistRef,
   ZhihuFollowee,
+  ZhihuHotItem,
   ZhihuOAuthConfig,
+  ZhidaMessage,
+  ZhidaModel,
+  ZhidaRequest,
+  ZhidaResult,
 } from "./types";
