@@ -8,9 +8,10 @@
 
 - 已完成官方比赛手册、Hackathon Skill、开放平台 API 与官方素材的本地归档和能力核验。
 - 已有技术 PoC 证明两条能力可行：知乎数据 → Persona → Knowledge/回答卡；以及 Persona × Persona → Agent 社交事件。**这些 PoC 不是最终产品页面或信息架构。**
-- 当前正在冻结目标产品架构：**B「AI 社交匹配」承担首访拉新与传播，A「宠物养成」承担身份资产与长期留存，知乎真实内容连接两者。**
+- 目标产品架构已经冻结：**B「AI 社交匹配」承担首访拉新与传播，A「宠物养成」承担身份资产与长期留存，知乎真实内容连接两者。**
 - 首访目标是 60–90 秒完成：OAuth → 人格化验 → 宠物孵化 → 第一次可解释匹配 → Agent × Agent 短互动 → 分享/连接意愿。
 - 激活后的产品壳固定为四个入口：`窝 / 逛 / 遇见 / 图鉴`。
+- 低保真页面契约与前端应用契约已经冻结；下一实施边界是 `.scratch/mvp/issues/08-build-low-fi-product-shell.md`：先用明确标记的 demo fixture 跑通全部页面与状态，再接真实数据，不在该阶段重写 OAuth/Persona/社交算法。
 - 产品体验、系统架构、比赛信息与知乎 API 说明分别维护在 `docs/product/`、`docs/architecture/` 与 `docs/reference/`；本文件只保存稳定领域词汇与当前阶段边界。
 
 ## 领域词汇
@@ -66,4 +67,4 @@
 - 回答卡片仍保留，但属于内容探索/表达的一种产物，不再是整个产品的主入口。
 - 真实宠物图片情绪识别、复杂虚拟经济、传统喂食洗澡等不进入第一版核心架构。
 
-架构决策见 `docs/adr/0001-product-shell-and-activation-flow.md`；体验流程见 `docs/product/experience-flow-v2.md` 和 `docs/product/first-visit-storyboard-v1.md`。
+架构决策见 `docs/adr/0001-product-shell-and-activation-flow.md`；系统/前端契约见 `docs/architecture/product-system-v1.md` 与 `docs/architecture/frontend-application-contract-v1.md`；体验流程和页面契约见 `docs/product/experience-flow-v2.md`、`docs/product/first-visit-storyboard-v1.md`、`docs/product/low-fi-screen-contract-v1.md`。
