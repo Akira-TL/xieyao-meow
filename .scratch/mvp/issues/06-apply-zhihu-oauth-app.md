@@ -29,6 +29,15 @@ Blocked by:
 - 申请人知乎个人中心地址；
 - 申请权限：C. 公开内容。
 
+## 已准备资产
+
+- 申请包：`docs/oauth/application-package.md`；
+- 官方 OAuth 本地快照：`docs/reference/zhihu-open-platform/core/oauth.md`；
+- readiness 检查：`./scripts/check-oauth-readiness.sh`，只输出变量存在性与 redirect URI 形状，不输出任何凭证值；
+- 项目 callback 路径固定为：`/api/auth/zhihu/callback`。
+
+当前仍缺少人工申请所需的最终公开部署域名、申请人手机号、知乎个人主页 URL 与 >=256×256 应用图标附件。
+
 ## 完成标准
 
 - 获得 `app_id` / `app_key`；

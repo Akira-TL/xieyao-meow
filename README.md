@@ -59,6 +59,14 @@ curl -X POST http://127.0.0.1:3000/api/community/interact \
 ROUNDS=3 ./scripts/rehearse-demo.sh
 ```
 
+## OAuth 申请与验收
+
+- 申请包：[`docs/oauth/application-package.md`](docs/oauth/application-package.md)
+- 配置检查：`./scripts/check-oauth-readiness.sh`
+- Callback：`/api/auth/zhihu/callback`
+
+在 `app_id/app_key` 获批前，OAuth 登录保持明确的 `oauth-pending` 状态，不影响开发账号 L0/L1 Demo。
+
 ## 知乎官方文档
 
 官方入口：`https://developer.zhihu.com/docs`
