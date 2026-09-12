@@ -16,6 +16,7 @@
 8. **知乎问题回答 API 很适合 Knowledge Layer。** 可直接根据完整问题 URL 获取回答摘要列表，不需要先用搜索猜回答。
 9. **问题推荐 API 不等同于 OAuth 用户个性化推荐。** 官方文档描述它基于“当前 Access Secret 所属用户画像”或显式 Query 主题推荐，没有说明支持 `X-OAuth-Token` 身份切换。因此谢邀喵不能假定它会按每个终端用户画像推荐问题。
 10. **本人创作全文/评论/创作统计仅支持 Access Secret 所属账号，不支持 OAuth 身份切换。** 对普通终端用户，Persona 需要基于 `user/contents` 返回的标题、摘要、互动指标及收藏/关注数据构建，不能假定能读取其全部创作正文。
+11. **真实 Access Secret 已完成黑盒验证。** `/quota`、热榜、搜索、问题回答、用户内容/关注/收藏/收藏夹、问题推荐和 `zhida-fast-1p5` 均已成功调用，且官方 quota 记录与测试次数一致。
 
 ## 2. 通用 Bearer 鉴权
 
@@ -37,7 +38,7 @@ Content-Type: application/json
 {"Code":20001,"Message":"Authorization failed","Data":null}
 ```
 
-这证明业务 API 的 Bearer 鉴权路径真实存在；但这不等价于“已完成有效凭证调用”。
+随后已使用本项目真实 Access Secret 完成有效凭证调用，因此 Bearer 鉴权不再只是文档级验证。Secret 本身未输出、未写入仓库。
 
 ## 3. OAuth 2.0
 
@@ -424,21 +425,55 @@ Normalize → 知乎成分 → Persona
 
 只申请 **C：公开内容**。邮箱和手机号对 Persona 没有必要，不增加权限面。
 
-## 11. 尚未完成的实测
+## 11. 真实 Access Secret 黑盒验证
 
-本机目前没有发现已配置的知乎 Access Secret：
+2026-09-12 已取得本项目真实 Access Secret。凭证作为本地不透明 Secret 保存，未输出内容，也未提交 Git。
 
-- `ZHIHU_ACCESS_SECRET` 环境变量不存在；
-- `~/.config/zhihu-search/credentials.json` 不存在；
-- `~/.zhihu/openapi-credentials.json` 不存在；
-- `~/.zhihu-cli/config.toml` 不存在。
+### 11.1 实际额度快照
 
-因此本轮尚不能完成：
+调用 `/api/v1/quota` 得到：
 
-1. 有效 Access Secret 的 `/api/v1/quota` 调用；
-2. 搜索/热榜/直答的真实成功响应；
-3. 本人 `user_data` 成功响应；
-4. OAuth app_id/app_key 真实授权；
-5. callback 对 HTTPS、localhost/127.0.0.1 的实际限制验证。
+| API ID | TotalQuota | 首轮测试后 TotalUsed | RemainingQuota |
+|---|---:|---:|---:|
+| `zhihu_search` | 5000 | 1 | 4999 |
+| `hot_list` | 100 | 2 | 98 |
+| `question_answers` | 100 | 1 | 99 |
+| `user_data` | 10000 | 6 | 9994 |
+| `creator` | 100 | 1 | 99 |
+| `zhida_openai` | 100 | 1 | 99 |
 
-下一人工边界是：登录知乎开放平台个人中心并创建/取得 Access Secret；OAuth 应用则需要按官方文档发邮件申请。
+额度记录与本轮真实调用次数一致，可作为接口确实执行而非仅返回静态 200 的旁证。
+
+### 11.2 成功调用
+
+已验证成功且返回 `Code=0` 或等价成功响应：
+
+- `GET /api/v1/content/hot_list`；
+- `GET /api/v1/content/zhihu_search`；
+- `GET /api/v1/content/question_answers`，输入来自当时真实热榜问题；
+- `GET /api/v1/user/contents`；
+- `GET /api/v1/user/followees`；
+- `GET /api/v1/user/collections`；
+- `GET /api/v1/user/favlists`；
+- `GET /api/v1/user/favlist_contents`；
+- `GET /api/v1/user/question_recommendations`；
+- `POST /v1/chat/completions`，模型 `zhida-fast-1p5`，非流式响应正常结束。
+
+测试只记录状态、结构和额度，不把本人内容、关注对象、收藏内容或直答正文写入仓库。
+
+### 11.3 连接层观察
+
+首轮连续请求中出现过一次 TLS `SSL_ERROR_SYSCALL`；随后对连接层错误启用有限重试后相同接口成功。实现时应把 TLS/连接错误与知乎 JSON 业务错误码分层处理，并采用有限退避重试。
+
+## 12. 尚未完成的 OAuth 实测
+
+当前唯一关键外部依赖是 OAuth 应用 `app_id/app_key`。官方文档要求通过 `openplatform@zhihu.com` 邮件申请。
+
+在应用凭证获批前仍不能实测：
+
+1. 真实终端用户授权页；
+2. `authorization_code` → `access_token` 交换；
+3. `X-OAuth-Token` 读取另一名已授权用户的数据；
+4. callback 对 HTTPS、localhost/127.0.0.1 的实际限制。
+
+这不阻塞 Access Secret 级 API、Persona Normalizer、热榜/搜索/Knowledge Layer 与直答集成的开发。

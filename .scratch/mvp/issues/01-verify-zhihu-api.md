@@ -1,7 +1,7 @@
 # 01｜核验知乎 API 与 OAuth 真值
 
 Type: research
-Status: claimed
+Status: resolved
 Blocked by:
 
 ## 目标
@@ -34,4 +34,6 @@ Blocked by:
 - `/user/content_detail`、评论和创作统计仅支持 Access Secret 所属账号，不支持 OAuth 用户身份切换；
 - 未授权调用 `/api/v1/quota` 已真实返回 `Code=20001 Authorization failed`。
 
-当前人工阻塞：本机没有配置 Access Secret，也没有 OAuth app_id/app_key。因此尚不能完成有效凭证成功调用和真实终端用户 OAuth。下一步需要登录知乎开放平台个人中心取得 Access Secret；OAuth 应用按官方要求发邮件申请。
+2026-09-12：真实 Access Secret 已由用户提供并迁移到 Git 忽略的本地 Secret 目录；没有查看或输出 Secret 内容。真实调用已完成：quota、热榜、搜索、问题回答、本人内容/关注/收藏/收藏夹、问题推荐与 `zhida-fast-1p5` 均成功，且 quota 的 `TotalUsed` 与调用次数一致。
+
+本 issue 的 API 真值核验目标已完成。OAuth 应用 `app_id/app_key` 仍需按官方要求通过邮件申请；真实终端用户 OAuth、callback HTTPS/localhost 边界转为独立外部依赖，不再阻塞 Access Secret 级能力开发。

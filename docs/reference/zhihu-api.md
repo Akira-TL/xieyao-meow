@@ -323,12 +323,23 @@ RemainingQuota
 
 **实际额度以当前 Access Secret 查询结果为准。** 不再把“搜索 1000/天”等旧记录硬编码为事实。
 
-已确认固定默认额度只有官方对应页面明确写出的项目：
+2026-09-12 使用本项目真实 Access Secret 查询得到的额度快照：
+
+| API ID | 每日总额度 | 首轮黑盒测试后已用 |
+|---|---:|---:|
+| `zhihu_search` | 5000 | 1 |
+| `hot_list` | 100 | 2 |
+| `question_answers` | 100 | 1 |
+| `user_data` | 10000 | 6 |
+| `creator` | 100 | 1 |
+| `zhida_openai` | 100 | 1 |
+
+其中 `/api/v1/quota` 本身不消耗业务额度。该快照只代表当日当前账号/租户，不应作为所有部署环境的固定常量；运行时仍应查询 quota。
+
+官方对应页面另明确写明：
 
 - `question_answers`：默认 100/自然日，低额度账号 10；
 - `creator`：默认 100/自然日，低额度账号 10。
-
-搜索、热榜、直答、user_data 的真实额度待取得 Access Secret 后通过 `/api/v1/quota` 实测。
 
 ## 9. 错误码与重试
 
@@ -436,7 +447,27 @@ OAuth 用户 token 应作为用户会话级服务端 Secret 保存，而不是�
 - 日志输出完整 Secret、OAuth token、authorization code；
 - 把 Access Secret 与 OAuth app_key 混为同一个凭证。
 
-## 14. 当前未完成项
+## 14. 真实凭证黑盒验证
+
+2026-09-12 已使用真实 Access Secret 做最小调用，测试过程中不输出、不提交 Secret，也不把本人内容写入仓库。
+
+已成功验证：
+
+- [x] `/api/v1/quota`：有效 Bearer 鉴权成功；
+- [x] `/api/v1/content/hot_list`：真实热榜成功；
+- [x] `/api/v1/content/zhihu_search`：真实搜索成功；
+- [x] `/api/v1/content/question_answers`：从真实热榜问题取得回答摘要；
+- [x] `/api/v1/user/contents`：本人公开内容列表成功；
+- [x] `/api/v1/user/followees`：本人关注列表成功；
+- [x] `/api/v1/user/collections`：本人近期收藏成功；
+- [x] `/api/v1/user/favlists`：本人收藏夹列表成功；
+- [x] `/api/v1/user/favlist_contents`：指定收藏夹内容成功；
+- [x] `/api/v1/user/question_recommendations`：Access Secret 所属账号画像推荐成功；
+- [x] `/v1/chat/completions` + `zhida-fast-1p5`：非流式直答成功。
+
+首轮过程中出现过一次 TLS `SSL_ERROR_SYSCALL`，随后使用有限连接重试正常成功；因此项目 HTTP 客户端应针对连接层失败做有限退避，而不能把它误判成知乎业务错误码。
+
+## 15. 当前未完成项
 
 - [x] Bearer 鉴权方式；
 - [x] OAuth authorize/token 流程；
@@ -447,11 +478,10 @@ OAuth 用户 token 应作为用户会话级服务端 Secret 保存，而不是�
 - [x] 问题回答接口；
 - [x] 问题推荐边界；
 - [x] 直答 Agent 接口；
-- [x] 官方 quota 查询方式；
+- [x] 官方 quota 查询方式与真实额度；
 - [x] 主要错误码；
-- [ ] 有效 Access Secret 成功调用 `/api/v1/quota`；
-- [ ] 真实搜索/热榜/直答成功响应；
-- [ ] 真实本人 user_data 响应；
+- [x] 有效 Access Secret 的真实成功调用；
+- [x] 真实本人 user_data 响应；
 - [ ] OAuth app_id/app_key 获批；
 - [ ] OAuth callback HTTPS/localhost 限制实测；
 - [ ] 完成一次终端用户 OAuth 并读取 `X-OAuth-Token` 用户数据。
