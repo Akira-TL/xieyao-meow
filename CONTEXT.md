@@ -6,9 +6,9 @@
 
 ## 当前阶段
 
-- 当前处于黑客松冲刺前的项目初始化与需求固化阶段。
-- 目标是先跑通可稳定演示的主链路，再扩展 Agent × Agent 社交与可选多模态能力。
-- 产品定义、比赛信息与知乎 API 说明分别维护在 `docs/product/` 与 `docs/reference/`，本文件只保存稳定领域词汇。
+- L0 主链路已经真实跑通：知乎数据 → 知乎成分 → Persona → 热榜真实问题 → Knowledge Layer → Persona Layer → 回答卡片。
+- 当前开发前沿进入 L1：Agent × Agent 社交与社区动态流；OAuth 第三方应用审批仍由独立 issue 跟踪，不阻塞开发账号 Demo。
+- 产品定义、比赛信息与知乎 API 说明分别维护在 `docs/product/` 与 `docs/reference/`，本文件只保存稳定领域词汇与当前阶段边界。
 
 ## 领域词汇
 

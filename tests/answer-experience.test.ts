@@ -186,6 +186,25 @@ describe("AnswerExperienceService", () => {
     expect(gateway.zhidaCalls).toHaveLength(2);
   });
 
+  it("coalesces concurrent requests for the same cache key to protect quota", async () => {
+    const gateway = new FakeGateway();
+    const service = new AnswerExperienceService({
+      gateway,
+      cache: new InMemoryExperienceCache(),
+      fallback,
+    });
+
+    const results = await Promise.all(
+      Array.from({ length: 4 }, () => service.create({ cacheKey: "concurrent-user" })),
+    );
+
+    expect(results.every((item) => item.card.answer === results[0]?.card.answer)).toBe(true);
+    expect(gateway.profileCalls).toBe(1);
+    expect(gateway.hotListCalls).toBe(1);
+    expect(gateway.questionAnswerCalls).toBe(1);
+    expect(gateway.zhidaCalls).toHaveLength(2);
+  });
+
   it("returns an explicitly marked fallback when the live chain fails", async () => {
     const gateway = new FakeGateway();
     gateway.failHotList = true;

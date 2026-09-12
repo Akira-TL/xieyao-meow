@@ -38,8 +38,13 @@ MVP spec 与 issue 位于 [`.scratch/mvp/`](.scratch/mvp/)。
 pnpm install
 ./scripts/dev.sh
 curl http://127.0.0.1:3000/api/health
+curl -X POST http://127.0.0.1:3000/api/experience \
+  -H 'content-type: application/json' \
+  -d '{}'
 ./scripts/stop.sh
 ```
+
+`POST /api/experience` 是当前 L0 主链路入口，返回经过脱敏聚合后的知乎成分、Persona、真实问题、Knowledge Layer 和回答卡片，不返回原始用户 Profile 或任何 Secret。
 
 本地 Access Secret 默认读取 `.secrets/zhihu-access-secret`，该目录已被 Git 忽略；也可以直接通过 `ZHIHU_ACCESS_SECRET` 环境变量注入。OAuth 应用获批后按 `.env.example` 填写服务端变量。
 

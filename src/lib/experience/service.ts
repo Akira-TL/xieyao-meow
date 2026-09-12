@@ -76,6 +76,7 @@ function personaPrompt(
 
 export class AnswerExperienceService {
   private readonly now: () => number;
+  private readonly inFlight = new Map<string, Promise<AnswerExperience>>();
 
   constructor(private readonly options: AnswerExperienceServiceOptions) {
     this.now = options.now ?? Date.now;
@@ -87,6 +88,19 @@ export class AnswerExperienceService {
       if (cached) return cached;
     }
 
+    const active = this.inFlight.get(input.cacheKey);
+    if (active) return active;
+
+    const pending = this.createUncached(input).finally(() => {
+      if (this.inFlight.get(input.cacheKey) === pending) {
+        this.inFlight.delete(input.cacheKey);
+      }
+    });
+    this.inFlight.set(input.cacheKey, pending);
+    return pending;
+  }
+
+  private async createUncached(input: CreateAnswerExperienceInput): Promise<AnswerExperience> {
     try {
       const profile = await this.options.gateway.getUserProfile({
         oauthAccessToken: input.oauthAccessToken,
