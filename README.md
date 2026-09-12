@@ -8,7 +8,8 @@
 
 - 产品定义：[`docs/product/product-definition-v1.md`](docs/product/product-definition-v1.md)
 - 比赛信息：[`docs/reference/zhihu-hackathon-2026.md`](docs/reference/zhihu-hackathon-2026.md)
-- 知乎 API 工作稿：[`docs/reference/zhihu-api.md`](docs/reference/zhihu-api.md)
+- 知乎 API 集成说明：[`docs/reference/zhihu-api.md`](docs/reference/zhihu-api.md)
+- 知乎官方接口本地快照：[`docs/reference/zhihu-open-platform/`](docs/reference/zhihu-open-platform/)
 - 领域上下文：[`CONTEXT.md`](CONTEXT.md)
 - Agent 规则：[`AGENTS.md`](AGENTS.md)
 - Issue tracker 规则：[`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md)
@@ -31,8 +32,19 @@
 
 MVP spec 与 issue 位于 [`.scratch/mvp/`](.scratch/mvp/)。
 
-## 官方开发手册
+## 本地开发
 
-`https://my.feishu.cn/docx/Mc80dR5XvoPaYDxcTasc04POnjd`
+```bash
+pnpm install
+./scripts/dev.sh
+curl http://127.0.0.1:3000/api/health
+./scripts/stop.sh
+```
 
-当前项目文档中对 API 配额、OAuth 字段等未完成官方核验的内容均明确标记为“待官方确认”。
+本地 Access Secret 默认读取 `.secrets/zhihu-access-secret`，该目录已被 Git 忽略；也可以直接通过 `ZHIHU_ACCESS_SECRET` 环境变量注入。OAuth 应用获批后按 `.env.example` 填写服务端变量。
+
+## 知乎官方文档
+
+官方入口：`https://developer.zhihu.com/docs`
+
+项目已把当前依赖的官方接口正文保存到 `docs/reference/zhihu-open-platform/`，便于 `rg`、Agent 和离线开发检索。接口发生变化时，以线上官方文档为准并同步更新本地快照。
