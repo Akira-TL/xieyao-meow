@@ -1,81 +1,64 @@
 import { DemoFlowButton, DemoRouteGuard } from "@/features/demo/client";
-import { AppBottomNav, BrandHeader, DemoBanner, DemoPage, DemoLabel, Surface } from "@/features/demo/components";
+import {
+  AppBottomNav,
+  AppHeader,
+  ArtSlot,
+  DemoBanner,
+  DemoPage,
+  PaperCard,
+  PublicHeader,
+} from "@/features/demo/components";
 import { DEMO_FIXTURE } from "@/features/demo/fixtures";
 
 function ExploreContent({ appMode }: { appMode: boolean }) {
   const outing = DEMO_FIXTURE.outing;
   return (
-    <DemoPage>
+    <DemoPage scene="default">
       <DemoBanner />
-      <BrandHeader right={!appMode ? <a href="/">返回入口</a> : undefined} />
-      <Surface>
-        <p className="eyebrow">EXPLORE / JOURNEY LOG</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-100">
-          {appMode ? "它最近都跑去了哪。" : "先看看别人的人格都捡回了什么。"}
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-zinc-600">
-          {appMode
-            ? "「逛」不是实时搜索框，而是它真正出去以后留下来的路线和东西。"
-            : "这些是 DEMO 内容，用来预览谢邀喵会如何解释自己为什么对某个问题感兴趣。"}
-        </p>
-
-        {appMode ? (
-          <div className="mt-7 border border-amber-300/20 bg-amber-300/5 p-5">
-            <div className="flex items-center justify-between gap-3">
-              <DemoLabel>{outing.returnArtifact.label}</DemoLabel>
-              <span className="text-[10px] text-zinc-700">provenance=demo</span>
-            </div>
-            <p className="mt-4 text-xs text-zinc-600">去过：{outing.returnArtifact.places.join(" / ")}</p>
-            <a
-              className="mt-2 block text-lg font-medium leading-7 text-zinc-100 hover:text-amber-100"
-              href={outing.returnArtifact.topic.url}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {outing.returnArtifact.topic.title} ↗
-            </a>
-            <p className="mt-4 border-l border-amber-300/30 pl-4 text-sm leading-6 text-zinc-400">
-              “{outing.returnArtifact.thought}”
-            </p>
-          </div>
-        ) : null}
-
-        {appMode ? (
-          <div className="mt-7">
-            <p className="meta-label">以前的幕间记录</p>
-            <div className="mt-3 space-y-2">
-              {outing.journeyLog.map((item) => (
-                <article className="border border-zinc-800 bg-black/20 p-4" key={item.label}>
-                  <p className="text-xs text-zinc-500">{item.label}</p>
-                  <p className="mt-2 text-sm leading-6 text-zinc-400">{item.summary}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="mt-7">
-          <p className="meta-label">{appMode ? "它容易被这些东西吸引" : "DEMO 内容候选"}</p>
-          <div className="mt-3 space-y-3">
-            {DEMO_FIXTURE.explore.items.map((item) => (
-              <article className="border border-zinc-800 bg-black/20 p-4" key={item.title}>
-                <DemoLabel>DEMO · 知乎内容候选</DemoLabel>
-                <h2 className="mt-3 text-lg font-medium leading-7 text-zinc-200">{item.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-zinc-500">为什么会闻过去：{item.whyPicked}</p>
-                <div className="mt-4 text-xs">
-                  <a className="text-amber-200/70 hover:text-amber-200" href={item.sourceUrl} rel="noreferrer" target="_blank">看原内容 ↗</a>
-                </div>
-              </article>
-            ))}
-          </div>
+      {appMode ? <AppHeader active="explore" /> : <PublicHeader right={<span className="public-kicker">PUBLIC EXPLORE</span>} />}
+      <section className="explore-stage">
+        <div className="explore-hero-copy">
+          <p className="stage-caption">{appMode ? "JOURNEY LOG · 它今天去了哪里" : "PUBLIC EXPLORE · 看看别人养出了什么"}</p>
+          <h1>{appMode ? <>它今天去了<br /><span>知乎</span>。</> : <>在这个世界里，<br />问题会让<span>灵魂</span>相遇。</>}</h1>
+          <p>{appMode ? "在成千上万的问题里，本喵为你叼回了这些。" : "不同的灵魂，正在这个世界的某个角落认真生活着。"}</p>
         </div>
 
-        {!appMode ? (
-          <div className="mt-7"><DemoFlowButton href="/hatch/consent" stage="PRE_AUTH">看看我养出了什么</DemoFlowButton></div>
+        <div className="explore-hero-art">
+          <ArtSlot name={appMode ? "explore/hero-journey" : "explore/public-world"} label={appMode ? "本喵背包出发 / 知乎入口" : "多个 Persona 在舞台相遇"} aspect="wide" />
+        </div>
+
+        <div className="explore-cards">
+          {(appMode ? DEMO_FIXTURE.explore.items : DEMO_FIXTURE.explore.items.slice(0, 3)).map((item, index) => (
+            <PaperCard className={index === 0 ? "explore-card is-featured" : "explore-card"} key={item.title}>
+              <div className="explore-card-number">{String(index + 1).padStart(2, "0")}</div>
+              <span className="explore-card-badge">{index === 0 ? "值得一读" : index === 1 ? "有启发" : "很有趣"}</span>
+              <h2>{item.title}</h2>
+              <p>{index === 0 ? "从工具到伙伴，我们如何与 AI 共处一个更好的未来。" : item.whyPicked}</p>
+              <ArtSlot name={`explore/card-${index + 1}`} label={`旅途卡 ${index + 1}`} aspect="wide" />
+              <div className="explore-why">
+                <b>因为：</b>{item.whyPicked}
+              </div>
+              {appMode ? (
+                <a className="explore-card-link" href={`/journey/demo-note-014?item=${index}`}>看完整航迹 →</a>
+              ) : (
+                <a className="explore-card-link" href={item.sourceUrl} rel="noreferrer" target="_blank">围观这场讨论 →</a>
+              )}
+            </PaperCard>
+          ))}
+        </div>
+
+        {appMode ? (
+          <div className="explore-log-strip">
+            <strong>{outing.returnArtifact.label}</strong>
+            <span>{outing.returnArtifact.places.join(" / ")} · “{outing.returnArtifact.thought}”</span>
+            <a href="/journey/demo-note-014">看完整航迹 →</a>
+          </div>
         ) : (
-          <p className="mt-6 text-xs text-zinc-700">想影响下一趟？回「窝」留一张出门纸条。</p>
+          <div className="public-explore-action">
+            <DemoFlowButton href="/hatch/consent" stage="PRE_AUTH">我也想养一个</DemoFlowButton>
+          </div>
         )}
-      </Surface>
+      </section>
       {appMode ? <AppBottomNav active="explore" /> : null}
     </DemoPage>
   );

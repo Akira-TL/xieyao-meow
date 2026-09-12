@@ -43,12 +43,8 @@ export function LandingActions() {
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row">
-      <DemoFlowButton href="/hatch/consent" stage="PRE_AUTH">
-        看看我养出了什么
-      </DemoFlowButton>
-      <DemoFlowButton href="/explore?mode=public" variant="secondary">
-        先逛逛别人养出的东西
-      </DemoFlowButton>
+      <DemoFlowButton href="/hatch/consent" stage="PRE_AUTH">开幕</DemoFlowButton>
+      <DemoFlowButton href="/explore?mode=public" variant="secondary">先看看这个世界</DemoFlowButton>
     </div>
   );
 }
@@ -75,15 +71,11 @@ export function DemoFlowButton({
 
   return (
     <button
-      className={
-        variant === "primary"
-          ? "min-h-12 bg-amber-300 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-amber-200"
-          : "min-h-11 border border-zinc-800 px-4 text-sm text-zinc-400 transition hover:border-zinc-600 hover:text-zinc-100"
-      }
+      className={`theatre-button ${variant === "primary" ? "theatre-button-primary" : "theatre-button-secondary"}`}
       onClick={go}
       type="button"
     >
-      {children}
+      {children}<span aria-hidden="true">→</span>
     </button>
   );
 }
@@ -161,25 +153,34 @@ export function DemoScanningFlow() {
   );
 
   return (
-    <div className="space-y-3">
-      {rows.map((source) => (
-        <div className="border border-zinc-800 bg-black/20 p-4" key={source.key}>
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-zinc-300">{source.label}</span>
-            <span className="text-[10px] uppercase tracking-[0.12em] text-zinc-600">
-              {source.state === "complete" ? "DONE" : source.state === "loading" ? "READING" : "WAIT"}
-            </span>
+    <div className="scan-cues" aria-live="polite">
+      {rows.map((source, index) => (
+        <article className={`scan-cue scan-cue--${source.state}`} key={source.key}>
+          <span className="scan-cue-number">CUE {String(index + 1).padStart(2, "0")}</span>
+          <div>
+            <h2>{source.label === "公开创作" ? "写过什么？" : source.label === "关注" ? "关注谁？" : "收藏什么？"}</h2>
+            <strong>
+              {source.state === "complete"
+                ? source.label === "公开创作"
+                  ? "LONG FORM 81%"
+                  : source.label === "关注"
+                    ? "TECH CLUSTER HIGH"
+                    : "AI / SCIENCE / TOOLS"
+                : source.state === "loading"
+                  ? "READING…"
+                  : "WAIT"}
+            </strong>
+            <p>
+              {source.state === "complete"
+                ? `发现：${source.finding}`
+                : source.state === "loading"
+                  ? "正在读取演示快照……"
+                  : "等待上一项完成"}
+            </p>
           </div>
-          <p className="mt-2 text-sm leading-6 text-zinc-500">
-            {source.state === "complete"
-              ? source.finding
-              : source.state === "loading"
-                ? "正在读取演示快照……"
-                : "等待上一项完成"}
-          </p>
-        </div>
+        </article>
       ))}
-      <p className="pt-2 text-center text-xs text-zinc-600">所有“发现”均来自 DEMO fixture，不代表你的真实知乎数据。</p>
+      <p className="scan-footnote">正在拼出你的社交气味… · DEMO fixture</p>
     </div>
   );
 }
@@ -194,23 +195,15 @@ export function EvidenceList({
   return (
     <div className="space-y-2">
       {items.map((item) => (
-        <div className="border border-zinc-800 bg-black/20" key={item.label}>
-          <button
-            className="flex w-full items-center justify-between gap-3 p-3 text-left"
-            onClick={() => setOpen(open === item.label ? null : item.label)}
-            type="button"
-          >
+        <div className="evidence-card" key={item.label}>
+          <button onClick={() => setOpen(open === item.label ? null : item.label)} type="button">
             <span>
-              <span className="block text-[10px] text-zinc-600">{item.label}</span>
-              <span className="mt-1 block text-sm text-zinc-200">{item.value}</span>
+              <span className="evidence-label">{item.label}</span>
+              <span className="evidence-value">{item.value}</span>
             </span>
-            <span className="text-xs text-amber-200/70">为什么？</span>
+            <span className="evidence-why">WHY?</span>
           </button>
-          {open === item.label ? (
-            <p className="border-t border-zinc-800 px-3 py-3 text-xs leading-5 text-zinc-500">
-              {item.explanation}
-            </p>
-          ) : null}
+          {open === item.label ? <p>{item.explanation}</p> : null}
         </div>
       ))}
     </div>

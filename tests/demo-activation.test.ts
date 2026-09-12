@@ -38,5 +38,16 @@ describe("demo activation route guard", () => {
     expect(resolveRequestedDemoPath("ACTIVATED", "/hatch/consent")).toBe("/home");
     expect(resolveRequestedDemoPath("ACTIVATED", "/encounter/first?phase=match")).toBe("/home");
     expect(resolveRequestedDemoPath("ACTIVATED", "/atlas")).toBeNull();
+    expect(resolveRequestedDemoPath("ACTIVATED", "/journey/demo-note-014")).toBeNull();
+    expect(resolveRequestedDemoPath("ACTIVATED", "/relationship/gear")).toBeNull();
+  });
+
+  it("protects journey and relationship detail routes until activation", () => {
+    expect(resolveRequestedDemoPath("HATCH_REVEAL", "/journey/demo-note-014")).toBe(
+      "/hatch/reveal",
+    );
+    expect(resolveRequestedDemoPath("FIRST_MATCH_READY", "/relationship/gear")).toBe(
+      "/encounter/first?phase=match",
+    );
   });
 });

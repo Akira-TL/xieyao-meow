@@ -1,41 +1,66 @@
 import { DemoFlowButton, DemoRouteGuard } from "@/features/demo/client";
-import { BrandHeader, DemoBanner, DemoPage, PageTitle, Surface } from "@/features/demo/components";
+import {
+  ActivationHeader,
+  DemoBanner,
+  DemoPage,
+  KanshanPlaceholder,
+  PaperCard,
+} from "@/features/demo/components";
+import { BottomSheet } from "@/features/demo/interaction-client";
+
+const permissions = [
+  ["公开创作", "理解你的表达方式", "读取你公开的回答、文章、想法等，用于分析语言风格、思考方式与观点特征。"],
+  ["关注", "理解你的长期兴趣", "读取你公开关注的专栏、话题、用户等，了解持续关注的领域与兴趣方向。"],
+  ["公开收藏", "理解你真正留下什么", "读取你公开收藏的内容，发现反复认可的知识、观点与价值取向。"],
+] as const;
 
 export default function ConsentPage() {
   return (
     <DemoRouteGuard>
-      <DemoPage>
+      <DemoPage scene="default">
         <DemoBanner />
-        <BrandHeader step="孵化 1/4" />
-        <Surface>
-          <PageTitle
-            eyebrow="CONSENT"
-            title="孵化需要一点你的知乎成分。"
-            detail="正式版会在这里解释真实 OAuth 权限；当前低保真流程只使用 DEMO fixture。"
-          />
-          <div className="space-y-3">
-            {[
-              ["公开创作", "理解你的表达方式"],
-              ["关注", "理解你的长期兴趣方向"],
-              ["公开收藏 / 收藏夹", "理解你反复保存的主题"],
-            ].map(([name, reason]) => (
-              <div className="flex items-start gap-3 border border-zinc-800 bg-black/20 p-4" key={name}>
-                <span className="mt-0.5 text-amber-200">✓</span>
-                <div>
-                  <p className="text-sm text-zinc-200">{name}</p>
-                  <p className="mt-1 text-xs text-zinc-600">{reason}</p>
-                </div>
-              </div>
-            ))}
+        <ActivationHeader current={2} />
+        <section className="consent-layout">
+          <div className="consent-intro">
+            <p className="stage-caption">ACT 01 · PERMISSION</p>
+            <h1>孵化需要一点<br />你的<span>知乎</span>成分。</h1>
+            <p>这些公开内容，用来理解一个更像你的它。不是复制你，而是从你的思想轨迹里，孵化出一个更完整的你。</p>
+            <div className="consent-guide-row">
+              <KanshanPlaceholder />
+              <em>这些线索，让我们更懂你。</em>
+            </div>
           </div>
-          <div className="mt-5 border border-zinc-800 p-4 text-xs leading-6 text-zinc-500">
-            不读取私信、手机号或邮箱；不替你自动发布内容。
-          </div>
-          <div className="mt-7 grid gap-3">
-            <DemoFlowButton href="/hatch/scanning" stage="PROFILE_SCANNING">用知乎孵化我的分身</DemoFlowButton>
-            <a className="text-center text-xs text-zinc-600 hover:text-zinc-300" href="/privacy">查看数据边界</a>
-          </div>
-        </Surface>
+
+          <PaperCard className="consent-paper">
+            <h2>我们需要以下授权<br />来理解更真实的你：</h2>
+            <div className="permission-list">
+              {permissions.map(([name, reason, detail]) => (
+                <article key={name}>
+                  <span className="permission-icon">✓</span>
+                  <div>
+                    <strong>{name}</strong>
+                    <b>{reason}</b>
+                    <p>{detail}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="privacy-boundary">
+              <strong>我们有明确的隐私边界：</strong>
+              <span>✓ 不读取：私信 / 手机号 / 邮箱</span>
+              <span>✓ 不会：自动发布 / 自动私信</span>
+            </div>
+            <div className="consent-actions">
+              <DemoFlowButton href="/hatch/scanning" stage="PROFILE_SCANNING">用知乎开始孵化</DemoFlowButton>
+              <BottomSheet trigger={<span>数据怎么用？ →</span>} title="数据怎么用？">
+                <p>当前交互骨架只读取 DEMO fixture。正式接入时，页面只承诺实际 OAuth 已开放的公开数据能力。</p>
+                <p>公开创作、关注和公开收藏会先转成结构化「知乎成分」，再用于 Persona、匹配解释和后续 outing。</p>
+                <p>私信、手机号、邮箱以及自动发布、自动私信不在本产品的数据边界内。</p>
+                <a className="sheet-inline-link" href="/privacy">查看完整数据边界 →</a>
+              </BottomSheet>
+            </div>
+          </PaperCard>
+        </section>
       </DemoPage>
     </DemoRouteGuard>
   );

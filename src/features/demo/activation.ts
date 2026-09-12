@@ -19,7 +19,7 @@ const STAGE_ORDER: readonly DemoActivationStage[] = [
 
 const PUBLIC_PREFIXES = ["/share/", "/privacy"] as const;
 const ACTIVATION_PREFIXES = ["/hatch/", "/encounter/first"] as const;
-const APP_PREFIXES = ["/home", "/atlas", "/encounter", "/explore"] as const;
+const APP_PREFIXES = ["/home", "/atlas", "/encounter", "/explore", "/journey", "/relationship"] as const;
 
 function rank(stage: DemoActivationStage): number {
   return STAGE_ORDER.indexOf(stage);
@@ -52,7 +52,12 @@ export function activationPathForStage(stage: DemoActivationStage): string {
 }
 
 function requestedMinimumStage(path: string): DemoActivationStage | null {
-  if (path.startsWith("/home") || path.startsWith("/atlas")) return "ACTIVATED";
+  if (
+    path.startsWith("/home") ||
+    path.startsWith("/atlas") ||
+    path.startsWith("/journey") ||
+    path.startsWith("/relationship")
+  ) return "ACTIVATED";
   if (path === "/encounter" || path.startsWith("/encounter?")) return "ACTIVATED";
   if (path.startsWith("/hatch/consent")) return "PRE_AUTH";
   if (path.startsWith("/hatch/scanning")) return "PROFILE_SCANNING";

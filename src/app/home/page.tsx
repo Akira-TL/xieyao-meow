@@ -1,16 +1,16 @@
 import { DemoRouteGuard, ResetDemoButton } from "@/features/demo/client";
-import { AppBottomNav, BrandHeader, DemoBanner, DemoPage, Surface } from "@/features/demo/components";
+import { AppBottomNav, AppHeader, DemoBanner, DemoPage } from "@/features/demo/components";
 import { DemoOutingHome } from "@/features/demo/outing-client";
 
 export default function HomePage() {
   return (
     <DemoRouteGuard>
-      <DemoPage>
+      <DemoPage scene="default">
         <DemoBanner />
-        <BrandHeader right={<ResetDemoButton />} />
-        <Surface>
+        <AppHeader active="home" right={<ResetDemoButton />} />
+        <section className="app-stage-shell">
           <DemoOutingHome />
-        </Surface>
+        </section>
         <AppBottomNav active="home" />
       </DemoPage>
     </DemoRouteGuard>

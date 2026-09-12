@@ -1,31 +1,45 @@
 import { DemoFlowButton } from "@/features/demo/client";
-import { BrandHeader, DemoBanner, DemoPage, PetStage, Surface } from "@/features/demo/components";
+import {
+  ArtSlot,
+  DemoBanner,
+  DemoPage,
+  PublicHeader,
+} from "@/features/demo/components";
 import { DEMO_FIXTURE } from "@/features/demo/fixtures";
+import { ShareSceneButton } from "@/features/demo/interaction-client";
 
 export default function SharePage() {
-  const { relationship } = DEMO_FIXTURE.encounter;
   return (
-    <DemoPage>
+    <DemoPage scene="encounter">
       <DemoBanner />
-      <BrandHeader />
-      <Surface>
-        <p className="eyebrow">FIRST RELATIONSHIP</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-100">你们已经留下第一段关系。</h1>
-        <div className="mt-8 grid grid-cols-2 gap-6">
-          <PetStage size="small" name="本喵" species={DEMO_FIXTURE.persona.species} />
-          <PetStage size="small" name={DEMO_FIXTURE.match.candidate.displayName} species={DEMO_FIXTURE.match.candidate.species} demoResident />
+      <PublicHeader right={<span className="public-kicker">SCENE 07 · 第一段关系成立</span>} />
+      <section className="share-stage">
+        <p className="stage-caption">SCENE 07 · 第一次相遇 · 第一段关系成立</p>
+        <h1>第一段关系，<br />已经<span>成立</span>。</h1>
+
+        <div className="share-relationship-visual">
+          <div className="share-actors">
+            <ArtSlot name="share/first-relationship" label="两只 Persona 击掌 / 合照" aspect="wide" />
+          </div>
+          <div className="share-polaroid">
+            <ArtSlot name="share/polaroid" label="第一段关系纪念照" aspect="polaroid" />
+            <strong>第一段关系，已经成立。</strong>
+          </div>
         </div>
-        <div className="mt-7 grid grid-cols-3 gap-2 text-center">
-          <div className="border border-zinc-800 p-3"><p className="text-[10px] text-zinc-600">关系</p><p className="mt-1 text-sm text-zinc-200">{relationship.status}</p></div>
-          <div className="border border-zinc-800 p-3"><p className="text-[10px] text-zinc-600">好感</p><p className="mt-1 text-sm text-zinc-200">+{relationship.affinity}</p></div>
-          <div className="border border-zinc-800 p-3"><p className="text-[10px] text-zinc-600">争议</p><p className="mt-1 text-sm text-zinc-200">+{relationship.controversy}</p></div>
+
+        <div className="relationship-beliefs">
+          <article><b>⚙</b><strong>都相信技术是人的延伸</strong><span>用工具放大善意，让好奇走得更远。</span></article>
+          <article><b>♥</b><strong>对问题有长期耐心</strong><span>相信时间会给出更好的答案。</span></article>
+          <article><b>◆</b><strong>一理一感刚好互补</strong><span>理性的思考，感性的温度，让世界更完整。</span></article>
         </div>
-        <p className="mt-6 text-center text-lg text-zinc-300">「{DEMO_FIXTURE.match.relationPrediction}」</p>
-        <div className="mt-7 grid gap-3">
-          <DemoFlowButton href="/home" stage="ACTIVATED">回到我的窝</DemoFlowButton>
-          <DemoFlowButton href="/hatch/consent" stage="PRE_AUTH" variant="secondary">那你在知乎养出了什么？</DemoFlowButton>
+
+        <p className="share-pair">工具猫 × {DEMO_FIXTURE.match.candidate.displayName}<br /><span>从不同的角度，看见更大的世界。</span></p>
+
+        <div className="share-actions">
+          <ShareSceneButton />
+          <DemoFlowButton href="/home" stage="ACTIVATED">回我的窝</DemoFlowButton>
         </div>
-      </Surface>
+      </section>
     </DemoPage>
   );
 }

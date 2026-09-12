@@ -1,61 +1,164 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+export type AppSection = "home" | "explore" | "encounter" | "atlas";
+
+const APP_ITEMS: readonly [AppSection, string, string, string][] = [
+  ["home", "/home", "窝", "首页"],
+  ["explore", "/explore?mode=app", "逛", "探索"],
+  ["encounter", "/encounter", "遇见", "遇见"],
+  ["atlas", "/atlas", "图鉴", "档案"],
+];
+
+const ACTIVATION_STEPS = [
+  ["01", "序幕"],
+  ["02", "授权"],
+  ["03", "数据扫描"],
+  ["04", "人格登台"],
+  ["05", "首次相遇"],
+  ["06", "对手戏"],
+] as const;
+
 export function DemoPage({
   children,
-  width = "max-w-3xl",
+  width = "max-w-[1200px]",
+  scene = "default",
 }: {
   children: ReactNode;
   width?: string;
+  scene?: "default" | "landing" | "casting" | "reveal" | "encounter" | "archive";
 }) {
   return (
-    <main className="relative min-h-screen overflow-hidden px-4 py-5 sm:px-6 sm:py-8">
-      <div className="ambient-grid" aria-hidden="true" />
-      <div className={`relative mx-auto ${width}`}>{children}</div>
+    <main className={`theatre-page theatre-page--${scene}`}>
+      <div className="theatre-grain" aria-hidden="true" />
+      <div className="theatre-curtain theatre-curtain-left" aria-hidden="true" />
+      <div className="theatre-curtain theatre-curtain-right" aria-hidden="true" />
+      <div className={`relative z-10 mx-auto w-full ${width}`}>{children}</div>
     </main>
   );
 }
 
 export function DemoBanner() {
   return (
-    <div className="mb-4 flex items-center justify-between gap-3 border border-amber-300/20 bg-amber-300/5 px-3 py-2 text-[11px] leading-5 text-amber-100/80">
-      <span>DEMO FIXTURE · 当前只验证产品流程，不读取你的知乎账号</span>
-      <span className="hidden text-zinc-600 sm:inline">provenance=demo</span>
+    <div className="demo-provenance" role="status">
+      DEMO FIXTURE · 交互骨架 · 图片位待替换
     </div>
   );
 }
 
-export function BrandHeader({
-  step,
-  right,
-}: {
-  step?: string;
-  right?: ReactNode;
-}) {
+export function BrandMark() {
   return (
-    <header className="mb-5 flex items-center justify-between gap-4">
-      <Link className="text-lg font-semibold tracking-[-0.04em] text-zinc-100" href="/">
-        谢邀<span className="text-amber-300">喵</span>
-      </Link>
-      <div className="flex items-center gap-3 text-xs text-zinc-500">
-        {step ? <span>{step}</span> : null}
+    <Link className="theatre-brand" href="/" aria-label="谢邀喵首页">
+      <span className="theatre-brand-name">谢邀喵</span>
+      <span className="theatre-brand-tagline">每一个认真提问的人，都值得被看见</span>
+    </Link>
+  );
+}
+
+export function ActivationHeader({ current, right }: { current: number; right?: ReactNode }) {
+  return (
+    <header className="activation-header">
+      <BrandMark />
+      <nav className="activation-steps" aria-label="首访进度">
+        {ACTIVATION_STEPS.map(([number, label], index) => (
+          <span className={index + 1 === current ? "is-current" : index + 1 < current ? "is-done" : ""} key={number}>
+            <b>{number}</b> {label}
+          </span>
+        ))}
+      </nav>
+      <div className="activation-step-mobile" aria-label={`首访进度 ${current}/6`}>
+        <span>ACT {String(current).padStart(2, "0")}</span>
+        <strong>{ACTIVATION_STEPS[current - 1]?.[1]}</strong>
+      </div>
+      {right ? <div className="activation-header-right">{right}</div> : null}
+    </header>
+  );
+}
+
+export function AppHeader({ active, right }: { active: AppSection; right?: ReactNode }) {
+  return (
+    <header className="app-header">
+      <BrandMark />
+      <nav className="app-top-nav" aria-label="主导航">
+        {APP_ITEMS.map(([key, href, , desktopLabel]) => (
+          <Link className={active === key ? "is-active" : ""} href={href} key={key}>
+            {desktopLabel}
+          </Link>
+        ))}
+        <Link href="/privacy">关于</Link>
+      </nav>
+      <div className="app-header-right">
+        <span className="app-curiosity-dot" aria-hidden="true">?</span>
+        <span className="app-curiosity-copy">今天也在好奇<br />继续看世界吧</span>
         {right}
       </div>
     </header>
   );
 }
 
+export function PublicHeader({ right }: { right?: ReactNode }) {
+  return (
+    <header className="public-header">
+      <BrandMark />
+      <nav className="app-top-nav" aria-label="公开导航">
+        <Link href="/explore?mode=public">公开试看</Link>
+        <Link href="/privacy">关于谢邀喵</Link>
+      </nav>
+      <div className="app-header-right">{right}</div>
+    </header>
+  );
+}
+
+export function AppBottomNav({ active }: { active: AppSection }) {
+  return (
+    <nav className="app-bottom-nav" aria-label="移动端主导航">
+      {APP_ITEMS.map(([key, href, mobileLabel]) => (
+        <Link className={active === key ? "is-active" : ""} href={href} key={key}>
+          <span className="app-bottom-icon" aria-hidden="true">{key === "home" ? "⌂" : key === "explore" ? "⌁" : key === "encounter" ? "∞" : "▤"}</span>
+          <span>{mobileLabel}</span>
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
 export function Surface({
   children,
   className = "",
+  paper = false,
 }: {
   children: ReactNode;
   className?: string;
+  paper?: boolean;
 }) {
   return (
-    <section className={`border border-zinc-800 bg-zinc-950/72 p-5 shadow-2xl shadow-black/20 sm:p-7 ${className}`}>
+    <section className={`${paper ? "paper-surface" : "stage-surface"} ${className}`}>
       {children}
     </section>
+  );
+}
+
+export function ArtSlot({
+  name,
+  label,
+  aspect = "stage",
+  className = "",
+}: {
+  name: string;
+  label?: string;
+  aspect?: "stage" | "portrait" | "square" | "wide" | "polaroid" | "avatar";
+  className?: string;
+}) {
+  return (
+    <div
+      className={`art-slot art-slot--${aspect} ${className}`}
+      data-art-slot={name}
+      aria-label={`${label ?? name} 图片占位`}
+    >
+      <span className="art-slot-kicker">ART SLOT</span>
+      <strong>{label ?? name}</strong>
+      <small>{name}</small>
+    </div>
   );
 }
 
@@ -65,103 +168,57 @@ export function PetStage({
   title,
   size = "large",
   demoResident = false,
+  slot = "persona/self",
 }: {
   name?: string;
   species: string;
   title?: string;
   size?: "small" | "large";
   demoResident?: boolean;
+  slot?: string;
 }) {
-  const dimensions = size === "large" ? "h-36 w-36 text-5xl" : "h-20 w-20 text-3xl";
   return (
-    <div className="text-center">
-      <div
-        className={`mx-auto grid ${dimensions} place-items-center rounded-[32%] border border-amber-300/20 bg-gradient-to-br from-amber-300/10 via-zinc-900 to-zinc-950 text-amber-200 shadow-inner shadow-amber-300/5`}
-        aria-label={`${species}宠物占位图`}
-      >
-        ᓚᘏᗢ
-      </div>
-      {name ? <p className="mt-3 text-sm font-medium text-zinc-100">{name}</p> : null}
-      <p className="mt-1 text-xs text-zinc-500">{species}</p>
-      {title ? <p className="mt-1 text-xs text-amber-200/70">{title}</p> : null}
-      {demoResident ? (
-        <span className="mt-2 inline-flex border border-zinc-700 px-2 py-1 text-[10px] text-zinc-500">
-          演示居民
-        </span>
-      ) : null}
+    <div className={`pet-stage pet-stage--${size}`}>
+      <ArtSlot name={slot} label={name ?? species} aspect={size === "large" ? "portrait" : "avatar"} />
+      {name ? <p className="pet-stage-name">{name}</p> : null}
+      <p className="pet-stage-species">{species}</p>
+      {title ? <p className="pet-stage-title">{title}</p> : null}
+      {demoResident ? <span className="demo-resident-badge">演示居民</span> : null}
     </div>
   );
 }
 
 export function KanshanPlaceholder() {
-  return (
-    <div className="grid h-20 w-20 place-items-center rounded-full border border-blue-400/20 bg-blue-400/5 text-center text-[10px] leading-4 text-blue-200/70">
-      刘看山
-      <br />
-      官方向导
-    </div>
-  );
+  return <ArtSlot name="official/liukanshan" label="刘看山" aspect="avatar" />;
 }
 
 export function PersonaEgg() {
   return (
-    <div className="grid h-48 w-36 place-items-center rounded-[48%_48%_44%_44%] border border-amber-300/30 bg-gradient-to-b from-amber-100/10 via-amber-300/5 to-zinc-950 shadow-[0_0_80px_rgba(252,211,77,0.08)]">
-      <span className="text-xs tracking-[0.24em] text-amber-100/50">ZHIHU DNA</span>
+    <div className="persona-egg" data-art-slot="hatch/persona-egg" aria-label="人格蛋图片占位">
+      <span>?</span>
+      <small>PERSONA EGG</small>
     </div>
   );
 }
 
 export function PrimaryLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link
-      className="inline-flex min-h-12 items-center justify-center bg-amber-300 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-amber-200"
-      href={href}
-    >
-      {children}
+    <Link className="theatre-button theatre-button-primary" href={href}>
+      {children}<span aria-hidden="true">→</span>
     </Link>
   );
 }
 
 export function SecondaryLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link
-      className="inline-flex min-h-11 items-center justify-center border border-zinc-800 px-4 text-sm text-zinc-400 transition hover:border-zinc-600 hover:text-zinc-100"
-      href={href}
-    >
-      {children}
+    <Link className="theatre-button theatre-button-secondary" href={href}>
+      {children}<span aria-hidden="true">→</span>
     </Link>
   );
 }
 
 export function DemoLabel({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-flex border border-zinc-800 bg-zinc-950 px-2 py-1 text-[10px] tracking-[0.12em] text-zinc-500">
-      {children}
-    </span>
-  );
-}
-
-export function AppBottomNav({ active }: { active: "home" | "explore" | "encounter" | "atlas" }) {
-  const items = [
-    ["home", "/home", "窝"],
-    ["explore", "/explore?mode=app", "逛"],
-    ["encounter", "/encounter", "遇见"],
-    ["atlas", "/atlas", "图鉴"],
-  ] as const;
-
-  return (
-    <nav className="sticky bottom-3 mt-6 grid grid-cols-4 border border-zinc-800 bg-zinc-950/95 p-1 backdrop-blur">
-      {items.map(([key, href, label]) => (
-        <Link
-          className={`px-2 py-3 text-center text-xs transition ${active === key ? "bg-zinc-800 text-amber-200" : "text-zinc-500 hover:text-zinc-200"}`}
-          href={href}
-          key={key}
-        >
-          {label}
-        </Link>
-      ))}
-    </nav>
-  );
+  return <span className="demo-label">{children}</span>;
 }
 
 export function GrowthStrip({
@@ -174,15 +231,16 @@ export function GrowthStrip({
   social: number;
 }) {
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="growth-strip">
       {[
         ["见识", knowledge],
         ["表达", expression],
         ["社交", social],
       ].map(([label, value]) => (
-        <div className="border border-zinc-800 bg-black/20 p-3 text-center" key={label}>
-          <p className="text-[10px] text-zinc-600">{label}</p>
-          <p className="mt-1 text-sm font-semibold text-zinc-200">Lv.{value}</p>
+        <div key={label}>
+          <span>{label}</span>
+          <strong>Lv.{value}</strong>
+          <i style={{ width: `${Math.min(100, Number(value) * 18)}%` }} />
         </div>
       ))}
     </div>
@@ -191,10 +249,18 @@ export function GrowthStrip({
 
 export function PageTitle({ eyebrow, title, detail }: { eyebrow?: string; title: string; detail?: string }) {
   return (
-    <div className="mb-5">
+    <div className="page-title-block">
       {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-      <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-zinc-100 sm:text-4xl">{title}</h1>
-      {detail ? <p className="mt-3 text-sm leading-6 text-zinc-500">{detail}</p> : null}
+      <h1>{title}</h1>
+      {detail ? <p>{detail}</p> : null}
     </div>
   );
+}
+
+export function StageCaption({ children }: { children: ReactNode }) {
+  return <p className="stage-caption">{children}</p>;
+}
+
+export function PaperCard({ children, className = "", id }: { children: ReactNode; className?: string; id?: string }) {
+  return <article className={`paper-card ${className}`} id={id}>{children}</article>;
 }

@@ -1,20 +1,32 @@
 import { DemoRouteGuard, DemoScanningFlow } from "@/features/demo/client";
-import { BrandHeader, DemoBanner, DemoPage, PersonaEgg, Surface } from "@/features/demo/components";
+import {
+  ActivationHeader,
+  ArtSlot,
+  DemoBanner,
+  DemoPage,
+  PersonaEgg,
+} from "@/features/demo/components";
 
 export default function ScanningPage() {
   return (
     <DemoRouteGuard>
-      <DemoPage>
+      <DemoPage scene="casting">
         <DemoBanner />
-        <BrandHeader step="孵化 2/4" />
-        <Surface>
-          <div className="mb-8 flex justify-center"><PersonaEgg /></div>
-          <h1 className="text-center text-2xl font-semibold tracking-tight text-zinc-100">正在做人格化验</h1>
-          <p className="mx-auto mt-2 max-w-xl text-center text-sm leading-6 text-zinc-600">
-            不是普通 Loading：每一条“发现”只有对应来源完成后才出现。
-          </p>
-          <div className="mx-auto mt-7 max-w-xl"><DemoScanningFlow /></div>
-        </Surface>
+        <ActivationHeader current={3} />
+        <section className="scanning-layout">
+          <div className="scanning-hero">
+            <p className="stage-caption">ACT 02 · CASTING · 正在扫描你的知乎宇宙</p>
+            <h1>正在读取<br />你的<span>知乎</span>宇宙…</h1>
+            <p className="scanning-handwriting">Scanning Your Mind.</p>
+            <div className="scanning-egg-stage">
+              <PersonaEgg />
+              <ArtSlot name="official/liukanshan-casting" label="刘看山 / 扫描引导" aspect="avatar" />
+            </div>
+          </div>
+          <div className="scanning-cues-panel">
+            <DemoScanningFlow />
+          </div>
+        </section>
       </DemoPage>
     </DemoRouteGuard>
   );

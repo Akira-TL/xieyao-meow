@@ -1,48 +1,78 @@
 import { DemoRouteGuard } from "@/features/demo/client";
-import { AppBottomNav, BrandHeader, DemoBanner, DemoPage, GrowthStrip, PetStage, Surface } from "@/features/demo/components";
+import {
+  AppBottomNav,
+  AppHeader,
+  ArtSlot,
+  DemoBanner,
+  DemoPage,
+  PaperCard,
+} from "@/features/demo/components";
 import { DEMO_FIXTURE } from "@/features/demo/fixtures";
 
 export default function AtlasPage() {
   return (
     <DemoRouteGuard>
-      <DemoPage>
+      <DemoPage scene="archive">
         <DemoBanner />
-        <BrandHeader />
-        <Surface>
-          <p className="eyebrow">ATLAS</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-100">我的知乎人格图鉴。</h1>
-          <div className="mt-7 grid gap-7 sm:grid-cols-[0.8fr_1.2fr]">
-            <PetStage name="本喵" species={`${DEMO_FIXTURE.persona.species} · ${DEMO_FIXTURE.persona.archetype}`} title={DEMO_FIXTURE.persona.title} />
-            <div>
-              <p className="meta-label">知乎成分</p>
-              <div className="mt-3 space-y-2">
-                {DEMO_FIXTURE.persona.highlights.slice(0, 3).map((item) => (
-                  <div className="flex justify-between gap-4 border-b border-zinc-800 py-2 text-sm" key={item.label}><span className="text-zinc-600">{item.label}</span><span className="text-zinc-200">{item.value}</span></div>
+        <AppHeader active="atlas" />
+        <section className="atlas-stage">
+          <div className="atlas-hero-copy">
+            <p className="stage-caption">ARCHIVE · PERSONA HISTORY</p>
+            <h1>它的故事，<br />也是<span>你的</span><br />另一种履历。</h1>
+            <p>在这里，遇见一个更完整的它，也遇见一直好奇的你。</p>
+          </div>
+
+          <PaperCard className="atlas-persona-card">
+            <span>当前人格 · CURRENT PERSONA</span>
+            <ArtSlot name="atlas/current-persona" label="当前人格 / 英短工具猫" aspect="portrait" />
+            <h2>{DEMO_FIXTURE.persona.species}</h2>
+            <h3>{DEMO_FIXTURE.persona.archetype.toUpperCase()} · {DEMO_FIXTURE.persona.title}</h3>
+            <blockquote>“{DEMO_FIXTURE.persona.catchphrase}”</blockquote>
+            <div className="atlas-tags">
+              {DEMO_FIXTURE.persona.highlights.map((item) => <span key={item.label}>{item.value}</span>)}
+            </div>
+          </PaperCard>
+
+          <div className="atlas-grid">
+            <PaperCard>
+              <div className="section-heading-row"><h2>最近变化</h2><a href="#history">查看全部 →</a></div>
+              <div className="atlas-change-list">
+                <p>03.08　获得新称号「盐选级工具猫」</p>
+                <p>03.06　关注了「AI 与生产力」话题</p>
+                <p>03.03　解锁了新城市「上海」</p>
+              </div>
+            </PaperCard>
+            <PaperCard>
+              <div className="section-heading-row"><h2>旅途收藏</h2><a href="/journey/demo-note-014">查看全部 →</a></div>
+              <div className="atlas-stats"><b>28<small>收集的回答</small></b><b>12<small>收藏的想法</small></b><b>6<small>去过的城市</small></b><b>32<small>标记的问题</small></b></div>
+              <ArtSlot name="atlas/journey-collection" label="旅途收藏快照" aspect="wide" />
+            </PaperCard>
+          </div>
+
+          <div className="atlas-grid atlas-grid-bottom">
+            <PaperCard>
+              <div className="section-heading-row"><h2>关系图鉴</h2><a href="/encounter">查看全部 →</a></div>
+              <div className="atlas-relationship-polaroids">
+                {DEMO_FIXTURE.atlas.relationships.map((item, index) => (
+                  <a href={`/relationship/${index === 0 ? "gear" : "neighbor"}`} key={item.name}>
+                    <ArtSlot name={`atlas/relation-${index + 1}`} label={item.name} aspect="polaroid" />
+                    <span>{item.status}</span>
+                  </a>
                 ))}
               </div>
-              <p className="meta-label mt-6">已解锁称号</p>
-              <div className="mt-3 flex flex-wrap gap-2">{DEMO_FIXTURE.atlas.titles.map((title) => <span className="tag" key={title}>{title}</span>)}</div>
-            </div>
-          </div>
-          <div className="mt-7"><GrowthStrip knowledge={DEMO_FIXTURE.home.growth.knowledge} expression={DEMO_FIXTURE.home.growth.expression} social={DEMO_FIXTURE.home.growth.social} /></div>
-          <div className="mt-7 grid gap-5 sm:grid-cols-2">
-            <div><p className="meta-label">关系图鉴</p><div className="mt-3 space-y-2">{DEMO_FIXTURE.atlas.relationships.map((item) => <div className="border border-zinc-800 p-3 text-sm" key={item.name}><span className="text-zinc-200">{item.name}</span><span className="float-right text-zinc-600">{item.status}</span></div>)}</div></div>
-            <div><p className="meta-label">成长历史</p><div className="mt-3 space-y-2">{DEMO_FIXTURE.atlas.history.map((item) => <div className="border-l border-zinc-800 py-2 pl-3 text-sm text-zinc-500" key={item}>{item}</div>)}</div></div>
-          </div>
-          <div className="mt-7 border-t border-zinc-800 pt-6">
-            <p className="meta-label">旅途收藏</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div className="border border-zinc-800 bg-black/20 p-4">
-                <p className="text-xs text-zinc-600">{DEMO_FIXTURE.outing.returnArtifact.label}</p>
-                <p className="mt-2 text-sm leading-6 text-zinc-300">{DEMO_FIXTURE.outing.returnArtifact.thought}</p>
+            </PaperCard>
+            <PaperCard id="history">
+              <div className="section-heading-row"><h2>人格历史</h2><span>PERSONA HISTORY</span></div>
+              <div className="persona-history-flow">
+                <article><b>好奇新手</b><span>Lv.1 · 2024.10</span></article>
+                <i>→</i>
+                <article><b>思考者</b><span>Lv.5 · 2024.12</span></article>
+                <i>→</i>
+                <article className="is-current"><b>盐选级工具猫</b><span>Lv.8 · 当前</span></article>
               </div>
-              <div className="border border-zinc-800 bg-black/20 p-4">
-                <p className="text-xs text-zinc-600">关系票根 · {DEMO_FIXTURE.outing.returnArtifact.companion}</p>
-                <p className="mt-2 text-sm leading-6 text-zinc-300">一次 outing 中再次遇见，关系变化 {DEMO_FIXTURE.outing.returnArtifact.relationshipDelta}。</p>
-              </div>
-            </div>
+            </PaperCard>
           </div>
-        </Surface>
+        </section>
         <AppBottomNav active="atlas" />
       </DemoPage>
     </DemoRouteGuard>
