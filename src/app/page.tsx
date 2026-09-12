@@ -1,4 +1,6 @@
+import { CommunityDemo } from "@/components/community-demo";
 import { ExperienceDemo } from "@/components/experience-demo";
+import { COMMUNITY_RESIDENTS } from "@/data/community-residents";
 import { DEMO_FALLBACK } from "@/data/demo-fallback";
 
 export default function HomePage() {
@@ -25,6 +27,8 @@ export default function HomePage() {
           initialExperience={DEMO_FALLBACK}
           allowForceRefresh={process.env.NODE_ENV !== "production"}
         />
+
+        <CommunityDemo residents={COMMUNITY_RESIDENTS} />
 
         <footer className="mt-6 flex flex-col justify-between gap-2 text-[11px] tracking-wide text-zinc-700 sm:flex-row">
           <span>REAL ZHIHU DATA → KNOWLEDGE LAYER → PERSONA LAYER</span>
