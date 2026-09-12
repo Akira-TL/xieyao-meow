@@ -1,7 +1,7 @@
 # 01｜核验知乎 API 与 OAuth 真值
 
 Type: research
-Status: ready-for-agent
+Status: claimed
 Blocked by:
 
 ## 目标
@@ -21,3 +21,17 @@ Blocked by:
 ## Comments
 
 2026-09-12：公开抓取飞书开发手册链接会跳转登录页，后续可使用已登录浏览器能力继续核验。
+
+2026-09-12：已通过 `https://developer.zhihu.com/docs` 官方文档中心完成第一轮一手核验，并将完整记录写入 `docs/research/zhihu-open-platform-2026-09-12.md`。已确认：
+
+- 通用 API 使用 Access Secret Bearer 鉴权，并要求 `X-Request-Timestamp`；
+- OAuth 为 Authorization Code Flow，用于第三方登录和被授权用户个人数据；
+- OAuth 应用当前需邮件申请 `app_id` / `app_key`，谢邀喵最小权限为“C. 公开内容”；
+- OAuth token 响应文档化 `expires_in=3600`，但未文档化 state/PKCE/refresh/revoke；
+- 官方没有声明 callback 必须 HTTPS 或 localhost/127.0.0.1 禁止，需真实应用凭证实测；
+- 已确认 `/user/contents`、`/user/followees`、`/user/collections`、`/user/favlists`、`/user/favlist_contents` 可通过 `X-OAuth-Token` 读取已授权用户公开数据；
+- 已确认热榜、知乎搜索、问题回答摘要、问题推荐、直答 Agent、quota 等正式 endpoint 与主要响应合同；
+- `/user/content_detail`、评论和创作统计仅支持 Access Secret 所属账号，不支持 OAuth 用户身份切换；
+- 未授权调用 `/api/v1/quota` 已真实返回 `Code=20001 Authorization failed`。
+
+当前人工阻塞：本机没有配置 Access Secret，也没有 OAuth app_id/app_key。因此尚不能完成有效凭证成功调用和真实终端用户 OAuth。下一步需要登录知乎开放平台个人中心取得 Access Secret；OAuth 应用按官方要求发邮件申请。

@@ -1,203 +1,457 @@
-# 知乎 API 使用说明（项目工作稿）
+# 知乎 API 使用说明
 
-> 官方开发手册：`https://my.feishu.cn/docx/Mc80dR5XvoPaYDxcTasc04POnjd`
+> 状态：2026-09-12 已根据知乎数据开放平台官方文档核验主要接口。
 >
-> 2026-09-12 初始化时，公开抓取该链接会跳转飞书登录页，当前无法读取正文。因此本文档把**项目已有记录**与**项目侧实现约定**分开书写；任何标记为“待官方确认”的字段、接口和配额，在真实实现前都必须回到官方开发手册核验。
+> 官方文档中心：`https://developer.zhihu.com/docs`
+>
+> 调查证据与页面级来源：`docs/research/zhihu-open-platform-2026-09-12.md`
 
-## 1. 使用目标
+## 1. 本项目需要的知乎能力
 
-知乎 API 在「谢邀喵」中承担四类职责：
+「谢邀喵」把知乎开放平台能力分成三层：
 
-1. **身份与用户数据**：取得用户授权，并读取可用于“知乎成分”与 Persona 构建的公开/授权数据。
-2. **真实问题来源**：通过热榜、搜索等接口取得真实知乎问题。
-3. **知识基础**：通过知乎内容或直答 Agent 获得问题背景、事实和观点，作为 Knowledge Layer 输入。
-4. **作品回流**：若官方接口允许，进一步探索回答卡片、分享或社区回流能力；具体写入权限待官方确认。
+1. **应用级数据能力**：热榜、搜索、问题回答、直答 Agent。使用 Access Secret 调用。
+2. **用户授权数据能力**：终端用户的创作摘要、关注、收藏、收藏夹。使用 Access Secret，并对其他已授权用户额外携带 `X-OAuth-Token`。
+3. **项目内部 Persona 能力**：把官方 API 结果 Normalize 为“知乎成分”和 Persona。该层是项目自定义逻辑，不是知乎官方 API。
 
-## 2. 当前已有记录
+## 2. 鉴权模型
 
-以下内容来自现有《谢邀喵产品定义 v1》，尚未在本次初始化中通过官方开发手册逐条核验：
+### 2.1 通用数据 API
 
-| 能力 | 项目当前记录 | 核验状态 |
-|---|---:|---|
-| 热榜 | 约 100 次/天 | 待官方确认 |
-| 搜索 | 约 1000 次/天 | 待官方确认 |
-| 直答 Agent | 约 100 次/天 | 待官方确认 |
-| OAuth `app_id` | 项目记录为纯数字 | 待官方确认 |
-| OAuth 回调 | 需要公网 HTTPS，项目记录称 `127.0.0.1` 无法完成真实登录 | 待官方确认 |
-| 应用凭证 | 项目记录提到 `app_id` / `app_key` / Access Secret | 待官方确认具体字段名与用途 |
+官方统一 Bearer 鉴权：
 
-**不要依据上表直接硬编码生产逻辑。** 第一优先级 issue 是取得官方手册正文并真实调用接口。
+```http
+Authorization: Bearer <your_access_secret>
+X-Request-Timestamp: <unix_seconds>
+Content-Type: application/json
+```
 
-## 3. 项目侧适配层
+`X-Request-Timestamp` 为秒级 Unix 时间戳；额度查询文档明确要求与服务端时间相差不超过 10 分钟。
 
-无论官方最终字段如何，应用内部都应通过 adapter 隔离知乎 API，避免页面和 Persona 逻辑直接依赖原始响应。
+Access Secret 从知乎开放平台个人中心获取。
 
-建议的内部接口：
+### 2.2 OAuth 用户身份
+
+OAuth **不是**搜索、热榜、直答等 API 的基础鉴权方式。它用于：
+
+- 知乎第三方登录；
+- 在应用 Access Secret 基础上读取被授权终端用户的个人数据。
+
+读取其他已授权用户的数据时：
+
+```http
+Authorization: Bearer <your_access_secret>
+X-OAuth-Token: <oauth_access_token>
+X-Request-Timestamp: <unix_seconds>
+```
+
+不传 `X-OAuth-Token` 时，用户数据 API 查询 Access Secret 所属账号本人。
+
+## 3. OAuth 2.0
+
+官方页面：`https://developer.zhihu.com/docs?key=zhihu_oauth_integrated`
+
+### 3.1 申请 app_id / app_key
+
+当前需邮件申请：
+
+```text
+openplatform@zhihu.com
+```
+
+必填材料包括应用名称、简介、>=256×256 图标、`redirect_uri`、申请人姓名、手机号、知乎个人主页和申请权限。
+
+权限选项：
+
+- A：邮箱；
+- B：手机；
+- C：公开内容（个人创作、关注用户列表、公开收藏夹）。
+
+**谢邀喵只需要申请 C。**
+
+### 3.2 Authorization Code Flow
+
+授权入口：
+
+```text
+https://openapi.zhihu.com/authorize?redirect_uri={redirect_uri}&app_id={app_id}&response_type=code
+```
+
+回调：
+
+```text
+{redirect_uri}?authorization_code={authorization_code}
+```
+
+换 token：
+
+```http
+POST https://openapi.zhihu.com/access_token
+Content-Type: application/x-www-form-urlencoded
+```
+
+参数：
+
+```text
+app_id
+app_key
+grant_type=authorization_code
+redirect_uri
+code=<authorization_code>
+```
+
+成功响应关键字段：
+
+```json
+{
+  "access_token": "xxx",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
+```
+
+OAuth code 交换和用户 token 使用都必须在服务端完成。
+
+### 3.3 仍待实测/官方确认
+
+当前官方 OAuth 页面没有说明：
+
+- `state`；
+- URL `scope` 参数；
+- PKCE；
+- refresh token；
+- revoke；
+- callback 必须 HTTPS；
+- localhost / `127.0.0.1` 是否允许。
+
+因此旧记录“OAuth 必须公网 HTTPS、127.0.0.1 不能完成真实登录”**不能作为官方合同**。真实 app_id/app_key 到手后再验证 callback 限制。
+
+## 4. Persona 用户数据
+
+### 4.1 用户内容
+
+```text
+GET https://developer.zhihu.com/api/v1/user/contents
+```
+
+主要参数：
+
+| 参数 | 说明 |
+|---|---|
+| `ContentType` | 必填：`all/answer/article/zvideo/pin/question` |
+| `Offset` | 默认 0 |
+| `Limit` | 默认 20，最大 50 |
+| `SortField` | `like_count/ts`，默认 `ts` |
+| `SortOrder` | `asc/desc`，默认 `desc` |
+
+主要字段：`ContentType`、`Url`、`CreatedAt`、`LikeCount`、`CommentCount`、`FavoriteCount`、`Title`、`Summary`。
+
+**注意：OAuth 用户这里只能拿标题/摘要等列表数据，不是全文。**
+
+### 4.2 用户关注
+
+```text
+GET https://developer.zhihu.com/api/v1/user/followees
+```
+
+Offset/Limit 分页，Limit 最大 50。返回用户名、UrlToken、主页、头像、Headline、Gender、FollowerCount。
+
+### 4.3 近期收藏
+
+```text
+GET https://developer.zhihu.com/api/v1/user/collections
+```
+
+`Limit` 默认 20。返回收藏内容的类型、标题、摘要、作者、互动指标、收藏时间及所属收藏夹。
+
+### 4.4 收藏夹列表
+
+```text
+GET https://developer.zhihu.com/api/v1/user/favlists
+```
+
+返回 `UrlToken`、链接、标题、描述、公开状态。
+
+### 4.5 收藏夹内容
+
+```text
+GET https://developer.zhihu.com/api/v1/user/favlist_contents
+```
+
+`FavlistUrlToken` 必填，支持 Offset/Limit 分页。
+
+### 4.6 Persona 数据映射建议
+
+| 官方信号 | 项目内部特征 |
+|---|---|
+| 收藏/收藏夹标题与摘要 | 兴趣主题分布、囤积癖彩蛋 |
+| 关注用户及 Headline | 关注圈层、偏好答主类型 |
+| 创作标题/摘要/内容类型 | 表达主题、长短答倾向、语体 |
+| CreatedAt / FavTime | 活跃时段与作息倾向 |
+| Like/Comment/FavoriteCount | 创作影响力与表达密度辅助特征 |
+
+不需要把完整官方响应长期保存；Persona 生成后优先保留聚合特征。
+
+## 5. 真实问题与知识基础
+
+### 5.1 知乎搜索
+
+```text
+GET https://developer.zhihu.com/api/v1/content/zhihu_search
+```
+
+- `Query` 必填；
+- `Count` 默认 10、最大 10；
+- `SortBy` 可按 `CommentCount`、`VoteUpCount`、`EditTime` 排序/过滤；
+- 当前文档明确 `HasMore=false`，不能依赖翻页。
+
+可返回标题、内容类型/ID、摘要、链接、互动指标、作者、发布时间、精选评论、权威等级和排序分数。
+
+### 5.2 热榜
+
+```text
+GET https://developer.zhihu.com/api/v1/content/hot_list
+```
+
+`Limit` 默认 30、最大 30。当前返回问题和文章两类，字段包括标题、知乎 URL、缩略图和摘要。
+
+### 5.3 问题回答摘要
+
+```text
+GET https://developer.zhihu.com/api/v1/content/question_answers
+```
+
+参数：
+
+- `QuestionUrl` 必填；
+- `Offset` 默认 0；
+- `Limit` 默认 20，范围 1–50。
+
+返回回答链接、ContentToken、Summary 和分页状态。
+
+`Summary` 是服务返回的摘要或截取文本，不是回答全文，也不是本接口额外生成的 AI 摘要。
+
+该接口使用独立 `question_answers` 额度。官方文档写明默认 100 次/自然日、低额度用户 10 次；实际额度以 `/api/v1/quota` 为准。
+
+### 5.4 问题推荐
+
+```text
+GET https://developer.zhihu.com/api/v1/user/question_recommendations
+```
+
+- 不传 `Query`：按 Access Secret 所属账号画像推荐；
+- 传 `Query`：按主题推荐；
+- `Count` 默认 5、范围 1–20；
+- 不支持分页。
+
+该接口没有文档化 `X-OAuth-Token` 用户切换，因此**不要用它实现每个终端用户的个性化问题推荐**。谢邀喵应自己根据 Persona 对热榜/搜索结果排序。
+
+## 6. 直答 Agent
+
+```text
+POST https://developer.zhihu.com/v1/chat/completions
+```
+
+当前正式支持：
+
+```text
+model
+messages
+stream
+```
+
+模型：
+
+```text
+zhida-fast-1p5
+zhida-thinking-1p5
+zhida-agent
+```
+
+`stream=false` 返回 Chat Completions 风格 JSON；`stream=true` 返回 SSE，并以 `data: [DONE]` 结束。
+
+项目侧把直答作为 Knowledge Layer 的一种来源，不让 Persona Layer 修改事实基础。
+
+## 7. 本人创作增强能力
+
+以下能力**仅支持 Access Secret 所属账号本人，不接受 OAuth 身份切换**：
+
+```text
+GET /api/v1/user/content_detail
+GET /api/v1/user/content_comments
+GET /api/v1/user/creator_account_stats
+GET /api/v1/user/creator_content_stats
+```
+
+其中：
+
+- `content_detail` 可返回本人创作全文 `Body`；
+- `content_comments` 可读取本人创作下评论；
+- 创作统计可返回阅读、互动、粉丝和部分受众画像。
+
+这些接口不能作为任意谢邀喵用户 Persona 的必需数据源。
+
+## 8. 官方额度
+
+```text
+GET https://developer.zhihu.com/api/v1/quota
+```
+
+该查询不消耗业务额度。
+
+可查询 ID：
+
+```text
+global_search
+zhihu_search
+hot_list
+question_answers
+user_data
+creator
+zhida_openai
+knowledge
+tools
+```
+
+返回：
+
+```text
+TotalQuota
+TotalUsed
+RemainingQuota
+```
+
+**实际额度以当前 Access Secret 查询结果为准。** 不再把“搜索 1000/天”等旧记录硬编码为事实。
+
+已确认固定默认额度只有官方对应页面明确写出的项目：
+
+- `question_answers`：默认 100/自然日，低额度账号 10；
+- `creator`：默认 100/自然日，低额度账号 10。
+
+搜索、热榜、直答、user_data 的真实额度待取得 Access Secret 后通过 `/api/v1/quota` 实测。
+
+## 9. 错误码与重试
+
+常见：
+
+| Code | 含义 | 项目策略 |
+|---:|---|---|
+| 0 | 成功 | 正常处理 |
+| 10001 | 参数错误 | 不重试，修请求 |
+| 20001 | 鉴权/授权失败 | 停止调用，检查凭证/用户授权 |
+| 30001 | 频率、并发或当日额度限制 | 先查 quota，区分短时限制与日额度 |
+| 30002 | 配额/累计成功次数额度耗尽 | 降级或等待额度恢复 |
+| 30003 | 风控拒绝 | 不自动高频重试 |
+| 90001 | 服务内部错误 | 有限退避重试，保留 fallback |
+
+未携带有效 Access Secret 实测 `/api/v1/quota` 已返回 `Code=20001`。
+
+## 10. 项目内部 Gateway
+
+官方响应应隔离在 adapter 后面：
 
 ```ts
 interface ZhihuGateway {
   getAuthorizationUrl(input: AuthorizationRequest): Promise<string>;
   exchangeAuthorizationCode(code: string): Promise<AuthSession>;
-  getCurrentUser(session: AuthSession): Promise<ZhihuUserProfile>;
-  getTrendingQuestions(): Promise<ZhihuQuestion[]>;
-  searchQuestions(query: string): Promise<ZhihuQuestion[]>;
-  getKnowledgeContext(questionId: string): Promise<KnowledgeContext>;
+  getUserContents(session: AuthSession): Promise<ZhihuContent[]>;
+  getUserFollowees(session: AuthSession): Promise<ZhihuFollowee[]>;
+  getUserCollections(session: AuthSession): Promise<ZhihuCollection[]>;
+  getUserFavlists(session: AuthSession): Promise<ZhihuFavlist[]>;
+  getTrendingQuestions(): Promise<ZhihuHotItem[]>;
+  searchZhihu(query: string): Promise<ZhihuSearchItem[]>;
+  getQuestionAnswers(questionUrl: string): Promise<ZhihuAnswerSummary[]>;
+  askZhida(input: ZhidaRequest): Promise<KnowledgeContext>;
+  getQuota(): Promise<ZhihuQuota[]>;
 }
 ```
 
-这些 TypeScript 名称是**本项目内部抽象**，不是知乎官方 SDK 字段。
+以上 TypeScript 名称属于项目内部抽象，不是官方 SDK。
 
-## 4. 推荐调用链路
-
-### OAuth / Persona
+## 11. 推荐 L0 调用链路
 
 ```text
-用户点击登录知乎
-  ↓
-生成知乎授权 URL
-  ↓
-知乎 OAuth
-  ↓
-公网 HTTPS callback
-  ↓
-后端换取授权态
-  ↓
-拉取当前用户可访问数据
-  ↓
-Normalize 为项目内部 UserProfile
-  ↓
-成分分析
-  ↓
-Persona JSON
-```
-
-### 问题回答
-
-```text
-热榜 / 搜索
-  ↓
-Question Normalizer
-  ↓
-Knowledge Layer
-  ├─ 知乎内容
-  ├─ 直答 Agent
-  └─ 必要时自备 LLM fallback
-  ↓
+应用 Access Secret
+   │
+   ├── /quota
+   ├── 热榜 / 搜索 / question_answers / 直答
+   │
+   └── OAuth app_id/app_key
+           ↓
+       用户授权
+           ↓
+       OAuth access_token
+           ↓
+Authorization: Bearer <Access Secret>
+X-OAuth-Token: <user token>
+           ↓
+contents + followees + collections + favlists
+           ↓
+Normalize
+           ↓
+知乎成分
+           ↓
+Persona
+           ↓
+Persona 对热榜/搜索候选问题排序
+           ↓
+question_answers / 直答 → Knowledge Layer
+           ↓
 Persona Layer
-  ↓
+           ↓
 回答卡片
 ```
 
-## 5. 配额与缓存策略
+## 12. 配额与 Demo 稳定性
 
-由于项目记录显示部分接口存在较低日配额，黑客松 Demo 不应把稳定性建立在实时无限调用上。
-
-### 推荐策略
-
-- 热榜结果落盘或进入短期缓存；
-- 搜索结果按 query 缓存；
-- 直答 Agent 结果按 `questionId` 缓存；
-- Demo 题库在开发早期预热；
-- 保留一组已真实请求成功的演示问题作为 fallback；
-- 官方直答不可用时，可切换自备 LLM，但 UI 必须能区分数据来源，避免把自备结果伪装成知乎官方结果。
-
-### 建议缓存键
+缓存建议：
 
 ```text
-zhihu:trending:<date>
+zhihu:quota:<date>
+zhihu:hot:<date-or-window>
 zhihu:search:<normalized-query>
-zhihu:question:<question-id>
+zhihu:question-answers:<question-url>:<offset>
 zhihu:knowledge:<question-id>:<source-version>
 ```
 
-缓存格式属于项目内部设计，不是官方要求。
+黑客松现场保留已真实请求成功的 Demo 题目和 Knowledge Layer 结果作为 fallback，但 UI/日志必须区分真实知乎数据与自备 LLM 降级结果。
 
-## 6. OAuth 与部署
+## 13. Secret 约束
 
-项目当前记录认为 OAuth 需要公网 HTTPS callback，因此开发环境应尽早部署一个可重复访问的测试环境，不要等到前端完成后才验证登录。
-
-当前候选部署环境：**Sealos**。
-
-项目侧建议环境变量：
+服务端建议使用：
 
 ```text
-ZHIHU_APP_ID=
-ZHIHU_APP_KEY=
 ZHIHU_ACCESS_SECRET=
+ZHIHU_OAUTH_APP_ID=
+ZHIHU_OAUTH_APP_KEY=
 ZHIHU_OAUTH_REDIRECT_URI=
 ```
 
-以上变量名是本项目约定，官方真实凭证名称和是否全部需要仍待开发手册确认。
+OAuth 用户 token 应作为用户会话级服务端 Secret 保存，而不是单一全局环境变量。
 
-### 安全要求
+禁止：
 
-- Access Secret 等服务端凭证只能保存在服务端环境变量或 Secret 管理系统；
-- 不写入 Git；
-- 不透传到浏览器；
-- OAuth callback 必须校验项目所采用的防伪状态参数；具体字段名依据官方协议实现；
-- 日志不得输出完整 token、secret 或授权 code。
+- Secret/token 写入 Git；
+- Secret/token 返回浏览器前端；
+- 日志输出完整 Secret、OAuth token、authorization code；
+- 把 Access Secret 与 OAuth app_key 混为同一个凭证。
 
-## 7. Persona 数据最小化
+## 14. 当前未完成项
 
-只有实际用于 Persona 的知乎数据才进入内部结构，避免把完整 API 响应长期保存。
-
-建议内部只保留：
-
-- 兴趣主题分布；
-- 关注对象的类别统计；
-- 创作长度与表达风格统计；
-- 活跃时间段；
-- 收藏行为的聚合特征；
-- 为 Demo 明确需要的公开用户信息。
-
-最终可用字段由 OAuth scope 和官方 API 实际返回决定。
-
-## 8. Windows 初始化问题记录
-
-现有项目记录表明，官方 `init_project.mjs` 在 Windows 曾出现兼容问题：
-
-- 脚本硬编码 `/usr/bin/unzip`；
-- Node `path.join` 在 Windows 产生反斜杠路径；
-- Unix `unzip` 无法识别对应路径。
-
-此前已验证的绕过方式：
-
-1. 手动复制官方模板；
-2. 手动解压官方 skill 到 `.codex/skills/zhihu`；
-3. 手动创建 `hackathon.config.json`。
-
-该记录用于复现环境问题，不代表官方当前版本仍然存在同样缺陷。
-
-## 9. 官方手册补全清单
-
-取得开发手册正文后，至少补齐以下内容：
-
-- [ ] OAuth authorize endpoint；
-- [ ] token endpoint；
-- [ ] scope 列表；
-- [ ] callback 参数；
-- [ ] token 生命周期与刷新机制；
-- [ ] 当前用户接口及可返回字段；
-- [ ] 关注、收藏、创作相关接口与权限；
-- [ ] 热榜 endpoint、响应结构、配额；
-- [ ] 搜索 endpoint、响应结构、配额；
-- [ ] 直答 Agent endpoint、输入输出、配额；
-- [ ] API 错误码与重试策略；
-- [ ] Token 支持的申请和使用方式；
-- [ ] 内容写入、分享、发布权限；
-- [ ] 比赛环境与正式环境是否存在差异；
-- [ ] `hackathon.config.json` 正式 schema；
-- [ ] 官方 Skill 的调用方式；
-- [ ] 提交作品时的 API 使用合规要求。
-
-## 10. 实现门槛
-
-在以下事实得到真实接口验证前，不把 OAuth / API 集成视为完成：
-
-1. 成功获得应用凭证；
-2. 公网 HTTPS callback 能收到真实 OAuth 回调；
-3. 能换取有效授权态；
-4. 能取得至少一个真实用户数据接口响应；
-5. 能取得至少一个真实问题；
-6. 能取得 Knowledge Layer 所需的真实内容或直答结果；
-7. 明确每个关键 endpoint 的配额、错误码和降级路径。
+- [x] Bearer 鉴权方式；
+- [x] OAuth authorize/token 流程；
+- [x] OAuth token 生命周期字段；
+- [x] 用户创作/关注/收藏/收藏夹接口；
+- [x] 热榜接口；
+- [x] 搜索接口；
+- [x] 问题回答接口；
+- [x] 问题推荐边界；
+- [x] 直答 Agent 接口；
+- [x] 官方 quota 查询方式；
+- [x] 主要错误码；
+- [ ] 有效 Access Secret 成功调用 `/api/v1/quota`；
+- [ ] 真实搜索/热榜/直答成功响应；
+- [ ] 真实本人 user_data 响应；
+- [ ] OAuth app_id/app_key 获批；
+- [ ] OAuth callback HTTPS/localhost 限制实测；
+- [ ] 完成一次终端用户 OAuth 并读取 `X-OAuth-Token` 用户数据。
