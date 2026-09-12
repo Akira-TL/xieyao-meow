@@ -5,6 +5,8 @@
 > 官方文档中心：`https://developer.zhihu.com/docs`
 >
 > 调查证据与页面级来源：`docs/research/zhihu-open-platform-2026-09-12.md`
+>
+> 官方接口正文的本地可检索快照：`docs/reference/zhihu-open-platform/README.md`。实现时优先用 `rg` 检索该目录核对字段与错误码。
 
 ## 1. 本项目需要的知乎能力
 
