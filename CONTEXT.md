@@ -8,7 +8,7 @@
 
 - L0 主链路已经真实跑通：知乎数据 → 知乎成分 → Persona → 热榜真实问题 → Knowledge Layer → Persona Layer → 回答卡片。
 - L1 Agent × Agent 社交也已跑通：共同兴趣/风格差异 → 行为 → 好感变化 → 社区动态流。
-- 当前开发前沿进入 Demo hardening 与路演冻结；OAuth 第三方应用审批仍由独立 issue 跟踪，不阻塞开发账号 Demo。
+- Demo hardening 与多轮路演 rehearsal 已完成；当前剩余外部前沿主要是 OAuth 第三方应用审批、部署与提交材料冻结。
 - 产品定义、比赛信息与知乎 API 说明分别维护在 `docs/product/` 与 `docs/reference/`，本文件只保存稳定领域词汇与当前阶段边界。
 
 ## 领域词汇

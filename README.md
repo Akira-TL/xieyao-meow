@@ -13,6 +13,8 @@
 - 领域上下文：[`CONTEXT.md`](CONTEXT.md)
 - Agent 规则：[`AGENTS.md`](AGENTS.md)
 - Issue tracker 规则：[`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md)
+- 路演 Runbook：[`docs/demo/roadshow-runbook.md`](docs/demo/roadshow-runbook.md)
+- 最新 rehearsal 报告：[`docs/demo/rehearsal-2026-09-12.md`](docs/demo/rehearsal-2026-09-12.md)
 
 ## 当前开发主线
 
@@ -50,6 +52,12 @@ curl -X POST http://127.0.0.1:3000/api/community/interact \
 `POST /api/experience` 是 L0 主链路入口，返回经过脱敏聚合后的知乎成分、Persona、真实问题、Knowledge Layer 和回答卡片，不返回原始用户 Profile 或任何 Secret。`POST /api/community/interact` 是 L1 社区入口，根据兴趣与 Persona 信号生成可解释的社交事件和关系变化。
 
 本地 Access Secret 默认读取 `.secrets/zhihu-access-secret`，该目录已被 Git 忽略；也可以直接通过 `ZHIHU_ACCESS_SECRET` 环境变量注入。OAuth 应用获批后按 `.env.example` 填写服务端变量。
+
+完整演练：
+
+```bash
+ROUNDS=3 ./scripts/rehearse-demo.sh
+```
 
 ## 知乎官方文档
 
