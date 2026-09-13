@@ -221,7 +221,25 @@ title
 interestVector
 expressionProfile
 visualSeed
+visualIdentity
 version
+```
+
+玩家 Persona 的 `species` 当前固定为 `cat`，正式视觉统一为黑猫；用户差异由 `archetype + visualIdentity` 表达。`species` 字段继续保留，主要用于社区 NPC / Resident（狐、兔、鸟、熊、汪等）的统一建模。
+
+`visualIdentity` 至少可承载：
+
+```text
+eyeVariant
+earDetail
+eyewear
+neckwear
+bagKit
+signatureProp
+interestStickers[]
+earnedBadges[]
+journeyTraces[]
+relationshipMarks[]
 ```
 
 Persona 不是每次打开都重新随机生成；用户的身份资产必须稳定、可演化。

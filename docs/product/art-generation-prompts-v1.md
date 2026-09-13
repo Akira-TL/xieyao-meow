@@ -4,7 +4,11 @@
 >
 > **用途：** 给外部图像生成工具使用。
 >
-> **核心原则：** 先锁视觉风格，再锁六个角色母版；后续所有角色图都必须基于母版 reference/edit，不允许仅靠文字“重新生成一个类似角色”。
+> **核心原则：** 先锁视觉风格，再锁角色身份；后续所有角色图都必须基于 reference/edit，不允许仅靠文字“重新生成一个类似角色”。
+>
+> **2026-09-13 生产方向调整：** STEP 1–3 已完成，不返工。此前生成的猫/狐/兔/鸟/熊/汪不再作为六种“用户 Persona 物种”：**用户 Persona 从 STEP 4 起统一为不同的黑猫；狐、兔、鸟、熊、汪全部转为社区 NPC / Resident 素材。** 玩家差异改由黑猫的模块化外观、装备、贴纸、称号和经历痕迹表达。
+>
+> **当前进度：STEP 1–3 DONE。下一张素材从 STEP 4 开始。**
 
 ---
 
@@ -311,556 +315,600 @@ Transparent background, same 1600×2000 canvas, same feet baseline.
 - `blacktan`: controlled black-and-tan coat pattern, preserve face identity
 - `cream`: pale cream coat, same markings geometry
 
-## 4. 15 POSE PROMPTS / 每个母版都重复执行
+## 4. STEP 4 — BLACK CAT PLAYER SYSTEM / 黑猫玩家角色系统
 
-> **下面 15 个 Prompt 必须逐一基于当前角色的 CHARACTER MASTER reference/edit。**
-禁止不带母版重新生成。
+> **从这里开始是新的正式生产方向。** STEP 1–3 已完成，不需要返工。
+>
+> 玩家自己的 Persona **只使用黑猫**。不同用户之间的差异不再靠“换物种”，而靠统一黑猫骨架上的受控元素组合。
+>
+> STEP 1–3 已经生成的狐、兔、鸟、熊、汪全部保留，转入后面的 **NPC / Resident** 资产库。
+
+### 4.1 BLACK CAT BASE MASTER / 黑猫基础母版
+
+**输出：** `personas/player-black-cat/base_master.png`
+
+使用已经完成的 STYLE MASTER 与 CAT master 作为双 reference。不要重新发明一个新画风。
+
+**Prompt：**
+
+Use the approved STYLE MASTER and the approved cat master as strict references. Create the canonical PLAYER BLACK CAT base for Xieyao Meow.
+
+This is the shared anatomical and identity base for all user Personas. It must be unmistakably a black cat: deep charcoal-black short fur, clean readable cat silhouette, intelligent expressive eyes, mature editorial mascot proportions, slightly anthropomorphic standing body, simple paws/hands suitable for many gestures, clear tail, no outfit and no permanent personality prop yet.
+
+Preserve the approved world style: contemporary Chinese editorial poster illustration, bold 2D silhouette, restrained screen-print / paper texture, warm-white highlights, subtle Zhihu-blue reflected accents, no 3D fur rendering.
+
+The black cat should feel neutral enough to accept many personality modules later, but distinctive enough to become the product's core player avatar. 3/4 front standing pose, full body, transparent background, 1600×2000, no text, no logo.
+
+**禁止：** white/orange/grey cat as the main coat, breed-specific photorealism, cyber cat, costume, glasses, scarf, bag, weapon, background.
+
+### 4.2 BLACK CAT IDENTITY SHEET / 黑猫身份元素板
+
+**输出：** `personas/player-black-cat/identity-sheet.png`
+
+> 这张不是最终角色，是后续拆分元素的设计板。所有元素必须围绕同一个 `base_master`，禁止画成不同物种或不同画风的猫。
+
+**Prompt：**
+
+Use the exact PLAYER BLACK CAT base master as the identity anchor. Create one clean modular identity design sheet for the same black-cat species. Show controlled alternatives for facial/identity elements without changing the base anatomy or art style.
+
+Include:
+- 6 eye/personality variants: focused, curious, skeptical, sleepy-smart, bright, deadpan;
+- 4 ear-detail variants: standard upright, slightly outward, one subtle folded tip, one tiny harmless notch;
+- 4 tiny forehead/cheek fur-tuft variations;
+- 6 neck-area identity options: none, short Zhihu-blue scarf, blue collar, charcoal bow tie, warm-paper tag collar, tiny vermilion accent collar;
+- 6 eyewear options: none, round glasses, square glasses, thin half-rim, small oval glasses, simple monocle-like editorial lens without steampunk styling.
+
+All options must remain compatible with the same black-cat base. Present as clean isolated component studies on warm-white/transparent-like neutral board, no labels or text baked into the image.
+
+### 4.3 玩家人格 Archetype 不再对应物种
+
+后续玩家仍然保留人格型，但全部是黑猫：
+
+| Archetype | 中文 | 视觉倾向 | 推荐核心元素 |
+| --- | --- | --- | --- |
+| `engineer_brain` | 工程脑 | 理性拆解 | 圆框眼镜 + 蓝围巾 + 工具本 |
+| `system_thinker` | 系统思考者 | 结构、框架 | 方框眼镜 + 文件夹 |
+| `tool_collector` | 工具收藏家 | 爱囤工具 | 小工具包 + 多书签 |
+| `question_chaser` | 追问者 | 反问、追根究底 | 红批注 + 小书 |
+| `evidence_hunter` | 证据猎手 | 数据、验证 | 数据夹板 + 放大镜 |
+| `creative_maker` | 创作派 | 故事、审美 | 速写本 + 粗铅笔 |
+| `life_observer` | 生活观察员 | 细节、体验 | 小相机 + 帆布包 |
+| `curious_roamer` | 好奇漫游者 | 跨界、行动 | 旅行包 + 地图 |
+
+> Archetype 决定**模块组合倾向**，不改变黑猫的物种、骨架或基础画法。
+
+---
+
+## 5. STEP 5 — BLACK CAT POSE BASES / 黑猫动作底板
+
+> 下面所有 Pose 都基于 `player-black-cat/base_master` reference/edit。
+>
+> **动作底板先不要烧入眼镜、围巾、包、徽章等人格元素。** 这些元素在 STEP 6 组合；这样才能真正做到“同一套动作 + 不同黑猫”。
+
+统一要求：1600×2000、透明背景、全身、相同角色比例、相近脚底基线。
 
 ### POSE 01 — `idle_front`
 
-**IDENTITY LOCK**
-Create the canonical display pose of this exact character: relaxed 3/4 front standing pose, balanced feet, arms naturally at the sides or lightly touching the signature accessory, calm intelligent neutral expression. Full body. Preserve the exact master identity. Transparent background, 1600×2000.
+**IDENTITY LOCK** Create the canonical display pose of the exact PLAYER BLACK CAT base: relaxed 3/4 front standing pose, balanced feet, arms naturally at the sides, calm intelligent neutral expression. No accessories, no clothes, transparent background.
 
 ### POSE 02 — `idle_relaxed`
 
-**IDENTITY LOCK**
-Show this exact character in a more relaxed standing moment, slightly shifting body weight to one side, shoulders loose, small confident half-smile, still clearly readable as the same canonical design. Do not add new costume elements. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base shifting body weight slightly to one side, shoulders relaxed, subtle confident half-smile. No accessories or costume. Transparent background.
 
 ### POSE 03 — `home_rest`
 
-**IDENTITY LOCK**
-Show this exact character resting comfortably at home: seated low on the floor or on a simple invisible seating plane, relaxed posture, slightly sleepy or content expression. Keep all signature clothing and identity elements. Do not draw the room or furniture; character only, transparent background.
+**IDENTITY LOCK** Show the exact black-cat base resting comfortably, seated low with relaxed posture and slightly sleepy/content expression. No furniture, no accessory, transparent background.
 
 ### POSE 04 — `home_busy`
 
-**IDENTITY LOCK**
-Show this exact character quietly busy at home, focused on its signature activity. Use one temporary prop appropriate to the character: notebook/laptop for Tool Cat, book/notes for Philosophy Fox, camera/cup for Life Rabbit, data board for Data Bird, sketchbook for Creative Bear, map for Explorer Dog. Preserve identity. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base seated or standing in a quiet focused working posture, paws positioned so a temporary notebook/tablet can be composited later. Do not include the prop. Transparent background.
 
 ### POSE 05 — `prepare_pack`
 
-**IDENTITY LOCK**
-Show this exact character preparing to leave: checking or closing its familiar bag/backpack, slightly leaning forward with purposeful focus. The bag design must be exactly consistent with the canonical reference. No environment. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base leaning slightly forward with hands positioned as if checking a bag that will be composited later. Do not draw a bag. Transparent background.
 
 ### POSE 06 — `walking`
 
-**IDENTITY LOCK**
-Show this exact character mid-walk, carrying its canonical bag, one foot forward, lively but natural motion, curious expression looking slightly ahead. Preserve exact costume and proportions. Do not exaggerate running. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base mid-walk, one foot forward, natural curious motion, arms positioned to allow a bag overlay later. No accessories. Transparent background.
 
 ### POSE 07 — `thinking`
 
-**IDENTITY LOCK**
-Show this exact character thinking deeply: one hand/paw/wing near chin or holding a small note, eyes focused slightly upward or sideways, intelligent contemplative expression. Keep silhouette clean and recognizable. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base thinking deeply, one paw near chin, eyes slightly upward/sideways, intelligent contemplative expression. Transparent background.
 
 ### POSE 08 — `talking`
 
-**IDENTITY LOCK**
-Show this exact character explaining an idea in conversation: one open expressive hand gesture, mouth slightly open, confident but friendly expression. It should feel like making a point, not shouting. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base explaining an idea, one open hand gesture, mouth slightly open, confident and friendly rather than loud. Transparent background.
 
 ### POSE 09 — `debating`
 
-**IDENTITY LOCK**
-Show this exact character in an engaged debate: body leaning slightly forward, one clear argumentative hand gesture, alert eyes, energized expression. Keep it witty and intelligent, not angry or aggressive. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base in an engaged intellectual debate, slight forward lean, one clear argumentative gesture, alert eyes, witty not angry. Transparent background.
 
 ### POSE 10 — `meeting`
 
-**IDENTITY LOCK**
-Show this exact character meeting another Persona for the first time: slight turn toward an unseen character at center, open greeting gesture, curious cautious smile. Character only, no second character, transparent background.
+**IDENTITY LOCK** Show the exact black-cat base turning toward an unseen character at center, open greeting gesture, curious cautious smile. Character only. Transparent background.
 
 ### POSE 11 — `returned`
 
-**IDENTITY LOCK**
-Show this exact character just returning from an outing: canonical bag/backpack slightly fuller, holding one blank paper ticket or small blank postcard, pleasantly tired but excited to share something. Preserve all identity details. No text on the ticket. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base just returning from an outing, pleasantly tired but excited, one paw ready to hold a ticket/postcard overlay later. Do not include the object or bag. Transparent background.
 
 ### POSE 12 — `celebrate`
 
-**IDENTITY LOCK**
-Show this exact character celebrating a small meaningful success: warm smile, one raised paw/hand/wing ready for a high-five or cheerful gesture, restrained confetti-like energy but do not actually add confetti or background. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base celebrating a small meaningful success, warm smile, one raised paw ready for a high-five. No confetti. Transparent background.
 
 ### POSE 13 — `listening`
 
-**IDENTITY LOCK**
-Show this exact character actively listening to someone: body angled slightly toward an unseen speaker, attentive eyes, relaxed mouth, hands quiet, thoughtful receptive posture. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base actively listening, body angled toward an unseen speaker, attentive eyes, receptive posture. Transparent background.
 
 ### POSE 14 — `surprised`
 
-**IDENTITY LOCK**
-Show this exact character having a small intellectual surprise: eyes slightly wider, subtle raised brow, body leaning back just a little, expression says “that is actually interesting,” not cartoon shock. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base having a small intellectual surprise, slightly wider eyes and subtle backward lean; interesting, not cartoon shock. Transparent background.
 
 ### POSE 15 — `argument_peak`
 
-**IDENTITY LOCK**
-Show this exact character at the peak of an energetic intellectual argument: strongest expressive gesture in the set, clear forward body energy, sharp focused eyes, still humorous and non-hostile. No anger symbols, no flames, no fighting pose. Transparent background.
+**IDENTITY LOCK** Show the exact black-cat base at the peak of an energetic intellectual argument, strongest gesture in the set, focused and humorous rather than hostile. Transparent background.
 
-## 5. PAIR POSES / 双人组合方向
+### Pair bases
 
-> **每个 CHARACTER MASTER 各做两张。**
+- `pair_left`: exact black-cat base facing center/right, ready for conversation/high-five.
+- `pair_right`: exact black-cat base facing center/left, ready for conversation/high-five.
 
-### PAIR LEFT
+### Avatar bases
 
-**IDENTITY LOCK**
-Create a composition-ready pose of this exact character positioned conceptually on the left side of a two-character scene, body and gaze turned gently toward the center/right, friendly engaged posture, ready for conversation or high-five. Character only. Transparent background. Keep center-facing gesture within the character canvas.
+- `avatar_neutral`
+- `avatar_happy`
+- `avatar_thinking`
+- `avatar_debate`
 
-### PAIR RIGHT
+全部只保留黑猫基础身份，不烧入用户模块。
 
-**IDENTITY LOCK**
-Create a composition-ready pose of this exact character positioned conceptually on the right side of a two-character scene, body and gaze turned gently toward the center/left, friendly engaged posture, ready for conversation or high-five. Character only. Transparent background. Keep center-facing gesture within the character canvas.
+---
 
-## 6. AVATAR EXPRESSIONS
+## 6. STEP 6 — MODULAR PLAYER ELEMENTS / 玩家模块化元素
 
-> **输出 1024×1024，透明背景，只保留头 + 上半身。**
-仍然使用 CHARACTER MASTER reference。
+### 6.1 模块拆分原则
 
-### AVATAR — `neutral`
+不是所有东西都强行做 runtime overlay。按两类处理：
 
-**IDENTITY LOCK**
-Head-and-upper-torso avatar of the exact same character, neutral intelligent expression, direct or slight 3/4 gaze, clean readable silhouette, transparent background, no text.
+**A. Runtime-safe overlays：**适合直接叠图或用锚点定位。
 
-### AVATAR — `happy`
+- 眼镜；
+- collar / 小领巾；
+- badge；
+- interest sticker；
+- 小型胸针；
+- 票根 / postcard；
+- 轻量头饰。
 
-**IDENTITY LOCK**
-Head-and-upper-torso avatar of the exact same character, warm pleased smile, subtle joy, preserve exact facial construction, transparent background.
+**B. Pose-aware modules：**存在遮挡、透视或肢体接触，按 Pose 生成或在 reference/edit 时烘进角色。
 
-### AVATAR — `thinking`
+- 背包 / 斜挎包；
+- 大围巾；
+- Laptop / 相机 / 书 / 地图等手持物；
+- 复杂外套。
 
-**IDENTITY LOCK**
-Head-and-upper-torso avatar of the exact same character, contemplative skeptical expression, eyes slightly aside, preserve exact identity, transparent background.
+> 目标是“元素拆分 + 可复用”，不是为了模块化而制造穿帮。
 
-### AVATAR — `debate`
+### 6.2 统一锚点
 
-**IDENTITY LOCK**
-Head-and-upper-torso avatar of the exact same character, energetic “I have a counterpoint” expression, confident and witty rather than angry, transparent background.
+全身角色画布统一 1600×2000，并记录这些逻辑锚点：
 
-## 6A. ACCESSORY / TEMPORARY PROP ASSETS
+```text
+HEAD_CENTER
+EYES_CENTER
+NECK_CENTER
+CHEST_CENTER
+HAND_L
+HAND_R
+HIP_L
+HIP_R
+BACK_CENTER
+TAIL_BASE
+```
 
-> **这些素材用于表达用户行为差异和后续成长，不是角色母版的一部分。**
-如果作为独立 overlay 生成：透明背景、1024px 长边、无文字；如果模型很难稳定生成独立 overlay，可以先作为角色 edit 的临时道具使用。
-不要一次给角色堆超过 2–3 个。
+实现层后续只需要保存每个 Pose 的锚点坐标，轻量 overlay 可以跟着锚点移动。
 
-### 通用 Prompt
-Create one clean standalone editorial illustration prop matching the supplied STYLE MASTER and the corresponding canonical character world. Transparent background, simple silhouette, readable at small size, restrained paper-print texture, no text, no logo, no scene. The object should feel like a believable possession of the character, not fantasy loot or game equipment.
+### 6.3 EYE / FACE IDENTITY MODULES
 
-### TOOL CAT / 工具猫
+建议先做 6 组：
 
-- `thick_notebook`: thick dark notebook with a small Zhihu-blue elastic band, no text
-- `mini_laptop`: compact dark laptop with one tiny abstract blue sticker, no logo
-- `wrench_charm`: small simple wrench-shaped bag charm, not industrially detailed
-- `bookmark_bundle`: several warm-paper bookmarks clipped together, blank
-- `blueprint_roll`: short rolled paper plan with blue edge marks, no readable diagram
-- `evidence_clipboard`: small clipboard with blank paper and 2–3 abstract check marks only
+- `eyes_focused`
+- `eyes_curious`
+- `eyes_skeptical`
+- `eyes_sleepy_smart`
+- `eyes_bright`
+- `eyes_deadpan`
 
-### PHILOSOPHY FOX / 哲学狐
+**Prompt：**
 
-- `philosophy_book`: compact worn book with blank cover, dark charcoal + red tab
-- `question_cards`: 3–4 small blank question-note cards with one abstract dot/question-like symbol, no text
-- `fountain_pen`: simple black fountain pen with tiny red accent
-- `coffee_cup`: understated ceramic cup, warm-white, no branding
-- `red_annotation_tabs`: small bundle of vermilion paper annotation tabs
-- `night_lamp_charm`: tiny warm desk-lamp shaped charm, no glow effects around it
+Use the exact PLAYER BLACK CAT face as strict reference. Create a controlled eye/personality variation only. Preserve skull, muzzle, ear position, fur, proportions and illustration style exactly. Change only the eye/brow identity specified. Transparent background or clean isolated face-element sheet, no text.
 
-### LIFE RABBIT / 生活兔
+### 6.4 EYEWEAR
 
-- `compact_camera`: small matte camera, no brand, simple lens
-- `canvas_pouch`: small warm-grey fabric pouch
-- `thermos_cup`: simple cream thermos cup, no text
-- `city_ticket_bundle`: 3 blank transit/event ticket scraps, no readable text
-- `flower_pin`: very small restrained flower-shaped pin, not cute-girly
-- `home_note_stack`: small stack of blank household note papers with blue clip
+- `glasses_round`
+- `glasses_square`
+- `glasses_half_rim`
+- `glasses_oval`
+- `lens_single`
+- `glasses_none`
 
-### DATA BIRD / 数据鸟
+统一：哑光深色、细结构、小尺寸可读，禁止科技 HUD / 蒸汽朋克。
 
-- `data_clipboard`: compact clipboard with abstract chart blocks, no numbers/text
-- `small_tablet`: small dark tablet with simple blue blocks, no UI text
-- `magnifier`: clean small magnifying glass
-- `chart_cards`: 3 tiny paper cards with abstract bar/line shapes only
-- `calculator_token`: simple calculator-like rectangular object with unlabeled keys
-- `evidence_folder`: thin dark folder with blue tab, blank
+### 6.5 NECKWEAR
 
-### CREATIVE BEAR / 创作熊
+- `neck_scarf_blue`
+- `neck_collar_blue`
+- `neck_bow_charcoal`
+- `neck_tag_paper`
+- `neck_accent_red`
+- `neck_none`
 
-- `sketchbook`: warm-paper sketchbook, blank cover
-- `pencil_bundle`: 3 simple pencils tied together, blue/red accents only
-- `camera`: compact creator camera, no brand
-- `poster_roll`: rolled blank poster paper tied with tape
-- `tape_bundle`: two small matte paper-tape rolls, beige and blue
-- `story_cards`: several blank storyboard cards with only abstract frame boxes
+### 6.6 BAG / CARRY KIT
 
-### EXPLORER DOG / 探索汪
+- `bag_tool_satchel`
+- `bag_archive_satchel`
+- `bag_canvas`
+- `bag_travel`
+- `bag_creator`
+- `bag_data_case`
+
+这些优先以 pose-aware 方式制作，至少覆盖：`idle_front / prepare_pack / walking / returned`。
+
+### 6.7 SIGNATURE PROPS
+
+- `prop_notebook`
+- `prop_laptop`
+- `prop_book`
+- `prop_clipboard`
+- `prop_camera`
+- `prop_sketchbook`
+- `prop_map`
+- `prop_magnifier`
 
-- `folding_map`: folded blank map with simple abstract route lines, no labels
-- `compass`: small non-tactical compass, simple graphic design
-- `binoculars`: compact friendly travel binoculars, not military
-- `transit_ticket_bundle`: several blank travel ticket scraps, no text
-- `travel_badges`: 3 small icon-only travel patches, no words/flags
-- `field_notebook`: compact rugged notebook with blue elastic, blank cover
+优先覆盖：`home_busy / thinking / talking / debating / returned`。
 
-## 7. PERSONA EGG / 人格蛋 5 状态
+### 6.8 BADGE / STICKER / TRACE
 
-> **人格蛋必须使用 STEP 1 STYLE MASTER 作为风格 reference。**
-同一枚蛋，只改变状态，不改变形状和花纹体系。
-不要提前透露任何动物物种。
+可以直接复用后面收藏物系统：
 
-### EGG idle
+- 兴趣贴纸；
+- 称号徽章；
+- 旅途印章；
+- 关系徽章；
+- 收藏夹痕迹；
+- 小型问题票根。
 
-A mysterious unhatched personality egg for the Xieyao Meow personality theatre. Large simple egg silhouette, warm bone-white shell, sparse charcoal speckles, one subtle Zhihu-blue mark hidden among the speckles, editorial paper-print texture, intelligent mysterious feeling, not fantasy dragon egg, not 3D. Transparent background, no text.
+它们负责让同一只基础黑猫“越养越像这个用户”。
 
-### EGG scanning
+### 6.9 推荐的黑猫差异组合
 
-Use the idle egg as strict reference. Same exact egg, now with a few subtle blue data-like reflection fragments and faint internal glow visible through the shell, restrained, no sci-fi hologram, no text. Transparent background.
+不要完全随机。用知乎成分映射：
 
-### EGG glowing
+```text
+archetype
++ eyeVariant
++ eyewear
++ neckwear
++ bagKit
++ signatureProp
++ interestStickers[]
++ earnedBadges[]
++ journeyTraces[]
+```
 
-Use the same exact egg. Internal warm-white + Zhihu-blue glow becoming stronger through several hairline cracks, still mostly closed, dramatic but restrained theatrical lighting, transparent background.
+例如：
 
-### EGG cracking
+```text
+工程脑黑猫
+= focused eyes
++ round glasses
++ blue short scarf
++ tool satchel
++ notebook
++ AI / 编程 stickers
+```
 
-Use the same exact egg. Shell now visibly cracking open with several clean pieces lifting, a dark unknown silhouette inside but no identifiable animal species yet, transparent background.
+```text
+生活观察黑猫
+= bright eyes
++ no glasses
++ paper-tag collar
++ canvas bag
++ compact camera
++ 城市 / 生活 stickers
+```
 
-### EGG opened
+两者必须仍然一眼看出是“谢邀喵世界里的黑猫”，而不是两个重新设计的 IP。
 
-Use the same exact egg. Empty opened shell pieces resting around the base, center space open for a Persona character to appear later in compositing. No character inside. Transparent background.
+---
 
-## 7A. PERSONALITY THEATRE BASE / 人格剧场基础场景
+## 7. STEP 7 — NPC / RESIDENT ANIMALS
 
-> **注意：人格剧场不等于所有页面都画红色幕布。**
-舞台感主要来自 black-box theatre 空间、聚光、留白、纸张道具和角色站位。
-先生成一个场景母版，再用母版 reference/edit 派生不同首访页面。
+> STEP 1–3 已生成的狐、兔、鸟、熊、汪**全部保留，不作废**。从现在开始它们的身份改为社区 NPC / Resident。
 
-### THEATRE blackbox base
+NPC 的作用：
 
-Create the canonical environment master for the Xieyao Meow Personality Theatre: a contemporary intimate black-box theatre / editorial exhibition stage, charcoal-black architectural space, matte dark floor, restrained warm overhead practical lights, tiny Zhihu-blue accents in props, warm paper/archive materials at the edges, sophisticated modern Chinese cultural-product feeling. No mandatory red curtains; if fabric appears, keep it minimal and architectural rather than theatrical cliché. No characters, no text, no logo, no UI. Provide clean center stage plus usable left/right character zones. 2400×1350, 16:9, center 45% mobile-safe.
+- 出现在 Match / Encounter；
+- 在旅途中被黑猫遇见；
+- 作为不同兴趣领域的“社区居民”；
+- 给世界增加物种多样性；
+- 不承担“每个用户都可能孵化成这个物种”的逻辑。
 
-### THEATRE activation spotlight
+### NPC 最小动作包
 
-Use theatre_blackbox_base as strict environment reference. Preserve the exact architecture, floor, walls and material system. Change only lighting: one strong warm central spotlight for a personality egg, darker surroundings, maximum suspense, no characters, no text.
+不用给每个 NPC 做完整 15 Pose。第一版每种只做 4 张：
 
-### THEATRE casting
+1. `npc_idle`
+2. `npc_talking`
+3. `npc_meeting`
+4. `npc_reaction`
 
-Use theatre_blackbox_base as strict environment reference. Preserve environment identity. Add only a few suspended blank paper cards / archive sheets around center stage and cooler Zhihu-blue reflected light, suggesting data being assembled. No readable text, no character.
+### NPC 建议语义
 
-### THEATRE reveal
+| NPC | 更适合的社区角色 |
+| --- | --- |
+| 哲学狐 | 观点 / 人文 / 反方辩手 |
+| 生活兔 | 城市 / 生活 / 情绪体验 |
+| 数据鸟 | 数据 / 科学 / 金融证据派 |
+| 创作熊 | 设计 / 影视 / 文学 / 创作 |
+| 探索汪 | 旅行 / 职业 / 跨领域 |
 
-Use theatre_blackbox_base as strict environment reference. Preserve environment identity. Create a confident full reveal lighting state: warm spotlight at center-left character position, subtle second pool for evidence cards, restrained blue accent light, no character, no text.
+工具猫旧资产可以作为特殊 NPC、测试居民或历史素材，但**用户正式 Persona 统一切到黑猫体系**。
 
-### THEATRE encounter
+刘看山继续只使用官方素材，身份是世界向导 NPC。
 
-Use theatre_blackbox_base as strict environment reference. Preserve architecture. Light two opposing character positions left/right with balanced warm pools, central neutral zone for a dynamic question card, no characters, no text.
+---
 
-### THEATRE curtain call
+## 8. STEP 8 — PERSONA EGG / 人格蛋
 
-Use theatre_blackbox_base as strict environment reference. Preserve architecture. Slightly warmer celebratory lighting and a clean central space for two characters / polaroid card, still mature and restrained, no confetti, no characters, no text.
+> 人格蛋最终孵化的是“用户的黑猫 Persona”，但蛋壳阶段不要提前暴露具体外观模块。
 
-## 8. HOME / 我的窝背景
+### `egg_idle`
 
-背景统一要求：16:9 2400×1350，中心 45% 保持 mobile 9:16 裁切安全，不包含角色，不包含 UI，不包含文字。
-风格：same Personality Theatre world, editorial illustration, dark charcoal + warm lamp light + Zhihu-blue micro accents, lived-in but uncluttered.
+A mysterious unhatched personality egg for Xieyao Meow. Warm bone-white shell, sparse charcoal speckles, one subtle Zhihu-blue mark, editorial paper-print texture, mature and mysterious, transparent background, no text, no 3D.
 
-### ROOM home night
+### `egg_scanning`
 
-A cozy nighttime room belonging to an intelligent digital Persona, inside the Xieyao Meow personality theatre world. Dark charcoal room, one warm table lamp, small desk, low sofa or cushion, a few books and blank paper notes, subtle shelves for collected tickets and polaroids, gentle theatrical framing, mature editorial illustration, no character, no readable text, no logo. Leave clean negative space for character placement.
+Use `egg_idle` as strict reference. Same exact egg with subtle blue reflected fragments and faint internal glow. No sci-fi hologram.
 
-### ROOM empty night
+### `egg_glowing`
 
-Use room_home_night as strict environment reference. Exact same room, but clearly empty: bag is missing from its usual place, chair/cushion slightly pushed back, half-open door or side exit, one blank note pressed on the table, warm lamp still on. The emotional focus is absence. No character, no readable text.
+Same exact egg, stronger warm-white + Zhihu-blue internal glow through hairline cracks.
 
-### ROOM home day
+### `egg_cracking`
 
-Same exact room identity as room_home_night, daytime ambient light, restrained, no character.
+Same exact egg cracking open. Only an ambiguous dark cat-like silhouette may be hinted, but do not reveal eyewear/accessories/archetype yet.
 
-### ROOM empty day
+### `egg_opened`
 
-Same exact room as home day, but character absent, bag missing, one blank note left behind.
+Same exact empty opened shell, center space left open for compositing the generated black-cat Persona.
 
-### ROOM returned
+---
 
-Same exact room identity, slightly brighter warm entrance light as if someone just came back, small empty landing space for returned character, no character.
+## 9. STEP 9 — PERSONALITY THEATRE / 人格剧场背景
 
-### ROOM visitor
+### `theatre_blackbox_base`
 
-Same exact room identity prepared for two Persona characters sitting/talking, two clear character placement zones, no characters, no text.
+Create the canonical environment master for Xieyao Meow: contemporary intimate black-box theatre / editorial exhibition stage, charcoal-black architecture, matte dark floor, restrained warm practical lights, tiny Zhihu-blue accents, warm paper/archive materials, sophisticated modern Chinese cultural-product feeling. No characters, no text, no logo, no UI. 2400×1350, 16:9, center 45% mobile-safe.
 
-## 9. JOURNEY / EXPLORE 背景
+基于同一母版派生：
 
-> **统一：不是现实旅游摄影，而是“知乎知识世界被人格化后的空间”。角色后期叠加。**
-无文字、无 UI、无具体知乎问题标题。
+- `theatre_activation_spotlight`
+- `theatre_casting`
+- `theatre_reveal`
+- `theatre_encounter`
+- `theatre_curtain_call`
 
-### `journey_zhihu_gate`
+只改灯光与极少量纸张/站位，不重新设计空间。
 
-A symbolic entrance into a vast knowledge community: contemporary editorial theatre architecture, doorway opening from dark stage into a brighter world of questions, books, blank cards and blue wayfinding shapes, Zhihu-blue accents, warm paper textures, no logo text, no character.
+---
 
-### `journey_tech`
+## 10. STEP 10 — HOME / 我的窝
 
-A stylized knowledge district about technology and tools: workshop-like urban editorial space, abstract laptops/tools/components represented as simple graphic props, blue and charcoal, mature poster aesthetic, no sci-fi neon, no character.
+统一 2400×1350，中心 mobile-safe，不含角色和文字。
 
-### `journey_science`
+- `room_home_night`
+- `room_empty_night`
+- `room_home_day`
+- `room_empty_day`
+- `room_returned`
+- `room_visitor`
 
-A stylized science knowledge district: observatory/lab-library hybrid, paper diagrams without readable text, instruments as editorial props, warm-white and blue, no character.
+### P0 Prompt — `room_home_night`
 
-### `journey_city`
+A cozy nighttime room for a black-cat digital Persona inside the Xieyao Meow world. Dark charcoal room, one warm table lamp, small desk, low cushion, few books and blank paper notes, subtle shelf for tickets/polaroids, editorial theatre framing, mature 2D illustration, no character, no readable text, large clean negative space for character placement.
 
-A thoughtful contemporary city knowledge district: streets, architecture models, transit signs without text, editorial poster composition, mature, no character.
+### P0 Prompt — `room_empty_night`
 
-### `journey_books`
+Use `room_home_night` as strict environment reference. Exact same room but clearly empty: the usual bag/character is absent, cushion slightly moved, side exit slightly open, one blank note on desk, warm lamp still on. Emotional focus is absence. No character, no text.
 
-A library/archive knowledge district with tall shelves, blank notes and layered paper cards, warm theatrical lighting, no character.
+---
 
-### `journey_art`
+## 11. STEP 11 — JOURNEY / EXPLORE BACKGROUNDS
 
-A design/art knowledge district: studio, blank canvases, printmaking papers, poster racks without readable text, restrained color, no character.
+- `journey_zhihu_gate`
+- `journey_tech`
+- `journey_science`
+- `journey_city`
+- `journey_books`
+- `journey_art`
+- `journey_life`
+- `journey_night`
 
-### `journey_life`
+这些是“知识世界的区域”，不是旅游摄影；不含角色、知乎问题标题或 UI。
 
-A warm everyday-life knowledge district: cafe/home/city-life fragments arranged like an editorial collage, no people, no character.
+P0 先做 `journey_zhihu_gate`：
 
-### `journey_night`
+A symbolic entrance into a vast knowledge community: contemporary editorial theatre architecture, doorway opening from dark stage into a brighter world of questions, books, blank cards and blue wayfinding shapes, Zhihu-blue accents, warm paper textures, no literal Zhihu logo, no text, no character.
 
-A late-night knowledge district: dark blue-black city/library hybrid, warm isolated lights, blank paper questions floating like found notes, reflective but not cyberpunk, no character.
+---
 
-## 10. ENCOUNTER / RELATIONSHIP 背景
+## 12. STEP 12 — ENCOUNTER / RELATIONSHIP BACKGROUNDS
 
-### `encounter_stage`
+- `encounter_stage`
+- `encounter_cafe`
+- `encounter_library`
+- `encounter_room`
+- `encounter_rooftop`
 
-A small intimate black-box theatre for two Persona characters to debate a question, two clear pools of warm spotlight left and right, center zone for a blank question card, charcoal background, tiny Zhihu-blue accents, no red velvet curtain requirement, no characters, no text.
+P0 先做 `encounter_stage`：
 
-### `encounter_cafe`
+A small intimate black-box theatre for one player black cat and one NPC Resident to discuss a question, two clear warm spotlight zones left/right, central zone for a blank question card, charcoal background, tiny Zhihu-blue accents, no characters, no text.
 
-A mature quiet cafe scene designed for two Persona characters, two seating positions facing slightly inward, warm lamp, blank note cards, editorial illustration, no people, no text.
+---
 
-### `encounter_library`
+## 13. STEP 13 — COLLECTIBLES / 带回物
 
-A library discussion corner with two character placement zones, books, blank paper notes, warm focused light, no characters, no text.
+统一：透明背景；不烧中文；留白给 HTML/CSS 动态文字。
 
-### `encounter_room`
+- `question_ticket`
+- `thought_note`
+- `journey_postcard`
+- `relationship_ticket`
+- `interest_sticker`
+- `topic_stamp`
+- `city_stamp`
+- `title_badge`
+- `bookmark_card`
+- `quote_scrap`
+- `photo_polaroid`
+- `mystery_item`
 
-A shared living-room discussion scene compatible with room_visitor identity, two-character placement zones, no characters.
+P0 优先：
 
-### `encounter_rooftop`
+- `question_ticket`
+- `relationship_ticket`
+- `photo_polaroid`
+- `interest_sticker`
+- `title_badge`
 
-A calm urban rooftop at night for reflective Persona conversation, distant city silhouettes, subtle warm light and blue accents, no characters, no neon cyberpunk.
+---
 
-## 11. COLLECTIBLES / 带回物模板
+## 14. STEP 14 — PAPER / TAPE / STAMP AUXILIARY ASSETS
 
-> **所有模板：透明背景；不要生成具体中文；必须留出空白区域给 HTML/CSS 写动态文字。**
+- `paper_card_01`
+- `paper_card_02`
+- `paper_torn`
+- `notebook_page`
+- `tape_beige`
+- `tape_blue`
+- `tape_red`
+- `pin_blue`
+- `stamp_round`
+- `stamp_zhihu_journey`
+- `stamp_relation`
+- `polaroid_frame`
+- `ticket_frame`
 
-### `question_ticket`
+保持暖白纸张、轻微印刷误差与编辑档案感。
 
-A collectible paper ticket for a discovered question, warm off-white thick paper, slightly torn edge, one small Zhihu-blue category tab, tiny neutral icon area, blank main text area, editorial archive aesthetic, no readable text.
+---
 
-### `thought_note`
+## 15. STEP 15 — RELATIONSHIP / TITLE BADGES
 
-A small irregular paper scrap for one Persona thought, warm-white paper with one blue hand-drawn underline motif, large blank writing area, no text.
+### Relationship
 
-### `journey_postcard`
+- `relation_stranger`
+- `relation_spark`
+- `relation_familiar`
+- `relation_friend`
+- `relation_rivalfriend`
+- `relation_companion`
 
-A collectible journey postcard frame, warm paper, one large blank image window, small stamp area, restrained blue/red print marks, no text.
+不要手游稀有度发光。
 
-### `relationship_ticket`
-
-A relationship encounter ticket for two Personas, two small blank avatar circles/windows, one connection symbol between them, warm paper + blue accent, blank relationship text area, no text.
-
-### `interest_sticker`
-
-A family of simple die-cut interest stickers in the same editorial system, geometric icon-only labels, blue/black/warm-white, no words.
-
-### `topic_stamp`
-
-A round ink stamp base for knowledge topics, imperfect print texture, blank center icon zone, no letters.
-
-### `city_stamp`
-
-A travel/location ink stamp base, editorial not tourist souvenir kitsch, blank center icon zone, no words.
-
-### `title_badge`
-
-A collectible persona-title badge base, bold simple silhouette, blue + warm-white + tiny red accent, blank central text area, no words.
-
-### `bookmark_card`
-
-A slim collectible bookmark card, paper texture, blue top tab, blank information area, no words.
-
-### `quote_scrap`
-
-A torn quote scrap with one blue quotation-mark-like abstract icon but no actual text, wide blank area.
-
-### `photo_polaroid`
-
-A slightly imperfect warm-white polaroid frame, blank transparent/neutral image window, small blank caption zone, no text.
-
-### `mystery_item`
-
-A small ambiguous found-object collectible from the knowledge world, charming but intellectually themed, like a tiny blank key tag / question token / odd paper charm, not fantasy loot, no text.
-
-## 12. PAPER / TAPE / STAMP AUXILIARY ASSETS
-
-### `paper_card_01`
-
-Warm off-white rectangular paper card, slight fiber and print texture, subtle imperfect edge, blank, transparent background.
-
-### `paper_card_02`
-
-Second paper card variant, slightly darker bone-white, one folded corner, blank.
-
-### `paper_torn`
-
-Irregular torn paper scrap, warm-white, blank.
-
-### `notebook_page`
-
-Single notebook page, faint non-readable ruling/grid, blank center.
-
-### `tape_beige / tape_blue / tape_red`
-
-Short semi-transparent matte paper tape strip, slightly torn ends, no text.
-
-### `pin_blue`
-
-Simple small blue push pin, editorial illustration, transparent background.
-
-### `stamp_round`
-
-Generic imperfect round ink stamp shape, no letters, no words.
-
-### `stamp_zhihu_journey`
-
-Journey stamp graphic using abstract question/path symbols only, Zhihu-blue and small red accent, no literal Zhihu logo and no text.
-
-### `stamp_relation`
-
-Relationship stamp graphic using two simple dots/figures connected by a line or spark, no text.
-
-### `polaroid_frame`
-
-Warm-white polaroid frame, transparent center window, no text.
-
-### `ticket_frame`
-
-Blank paper ticket frame with perforated edge, blue accent, no text.
-
-## 13. RELATIONSHIP BADGES
-
-> **统一生成 6 个只含图形的 badge base，不烧文字。**
-同一套视觉家族，从弱关系到强关系逐渐增加连接程度，但不要手游稀有度发光。
-
-### `relation_stranger`
-
-Two small separated abstract Persona dots/silhouettes, minimal connection, muted blue-grey.
-
-### `relation_spark`
-
-Two dots with one tiny blue spark between them.
-
-### `relation_familiar`
-
-Two simplified Persona marks linked by one clean line.
-
-### `relation_friend`
-
-Two Persona marks closer together with warm small connection shape.
-
-### `relation_rivalfriend`
-
-Two contrasting marks connected by both a blue line and a tiny red zigzag, suggesting “argue but stay friends.”
-
-### `relation_companion`
-
-Two balanced Persona marks moving in the same direction with a stable shared path symbol.
-
-## 14. TITLE BADGE ICON CONCEPTS
-
-> **只生成 icon，不写中文标题。风格统一，适合放进同一个 badge base。**
+### Title icon concepts
 
 | 称号 | Icon concept |
 | --- | --- |
-| 工具猫 | small wrench + question mark abstraction |
-| 问题拆解师 | one complex block split into three clean pieces |
-| 收藏夹考古学家 | bookmark + tiny archaeological brush |
-| 长答工程师 | long paper strip + structural brackets |
-| 深夜追问者 | moon + small question dot |
-| 证据猎手 | magnifier + small data point |
+| 工程脑 | wrench + modular blocks |
+| 问题拆解师 | complex block split into three pieces |
+| 收藏夹考古学家 | bookmark + brush |
+| 长答工程师 | long paper strip + brackets |
+| 深夜追问者 | moon + question dot |
+| 证据猎手 | magnifier + data point |
 | 城市观察员 | building blocks + eye |
-| 生活实验家 | cup + small checklist |
+| 生活实验家 | cup + checklist |
 | 世界漫游者 | path + compass dot |
 | 关系观察员 | two Persona dots + eye |
-| 跨界玩家 | two different shapes connected by bridge |
+| 跨界玩家 | different shapes connected by bridge |
 | 问题收藏家 | stack of question-ticket shapes |
 
-## 15. P0 最先生成顺序
+---
 
-> **不要一次铺开 200 个素材。**
-按照下面顺序做，前一阶段没定就不要进入下一阶段。
+## 16. 从现在开始的实际生成顺序
 
-### A. STYLE
+> STEP 1–3 已完成，所以现在**不要回头补六个用户物种的动作**。
 
-- [ ] 00_style_master_v01
+### A. 玩家黑猫基础
 
-### B. CHARACTER MASTER
+- [ ] `player-black-cat/base_master`
+- [ ] `player-black-cat/identity-sheet`
 
-- [ ] cat/master
-- [ ] fox/master
-- [ ] rabbit/master
-- [ ] bird/master
-- [ ] bear/master
-- [ ] dog/master
+### B. 黑猫 P0 Pose bases
 
-### C. 六个角色 P0 ACTIONS
+- [ ] `idle_front`
+- [ ] `home_rest`
+- [ ] `home_busy`
+- [ ] `prepare_pack`
+- [ ] `walking`
+- [ ] `thinking`
+- [ ] `talking`
+- [ ] `returned`
+- [ ] `avatar_neutral`
 
-**每个角色：**
-- [ ] idle_front
-- [ ] home_rest
-- [ ] home_busy
-- [ ] prepare_pack
-- [ ] walking
-- [ ] thinking
-- [ ] talking
-- [ ] returned
-- [ ] avatars/neutral
+### C. 黑猫 P0 模块
 
-### D. HATCH
+- [ ] 6 eye variants
+- [ ] round / square glasses
+- [ ] blue scarf / blue collar / none
+- [ ] tool / canvas / travel bag
+- [ ] notebook / camera / map / clipboard
+- [ ] 6 个基础 interest stickers
 
-- [ ] egg_idle
-- [ ] egg_scanning
-- [ ] egg_glowing
-- [ ] egg_cracking
-- [ ] egg_opened
+### D. NPC 最小包
 
-### E. WORLD P0
+对 fox / rabbit / bird / bear / dog：
 
-- [ ] room_home_night
-- [ ] room_empty_night
-- [ ] journey_zhihu_gate
-- [ ] encounter_stage
+- [ ] `npc_idle`
+- [ ] `npc_talking`
+- [ ] `npc_meeting`
+- [ ] `npc_reaction`
 
-### F. COLLECTIBLE P0
+### E. HATCH / WORLD / COLLECTIBLE
 
-- [ ] question_ticket
-- [ ] relationship_ticket
-- [ ] photo_polaroid
-- [ ] paper_card_01
-- [ ] tape_beige
-- [ ] tape_blue
+- [ ] 5 个 egg states
+- [ ] `theatre_blackbox_base`
+- [ ] `room_home_night`
+- [ ] `room_empty_night`
+- [ ] `journey_zhihu_gate`
+- [ ] `encounter_stage`
+- [ ] `question_ticket`
+- [ ] `relationship_ticket`
+- [ ] `photo_polaroid`
 
-## 16. 每次生成后的人工一致性验收
+---
 
-> **角色 derivative 如果出现下面任何一条，直接重做，不要因为“这张更好看”就接受：**
+## 17. 一致性验收
 
-- [ ] 和母版不是同一张脸
-- [ ] 五官位置变化
-- [ ] 耳朵 / 尾巴 / 翅膀形状漂移
-- [ ] 头身比变化
-- [ ] 胖瘦变化超过动作需要
-- [ ] 核心衣服版型变化
-- [ ] 眼镜 / 围巾 / 背包重新设计
-- [ ] 毛色花纹未经要求改变
-- [ ] 线条粗细变化
-- [ ] 颗粒质感变化
-- [ ] 2D 变成 3D
-- [ ] 角色变幼
-- [ ] 出现不需要的背景
-- [ ] 出现文字 / logo / watermark
-- [ ] 脚底位置严重漂移
-- [ ] 缩到 96px 高以后认不出物种
+### 玩家黑猫
+
+出现任一情况就重做：
+
+- [ ] 不是黑猫；
+- [ ] 基础脸/骨架明显变成另一只猫；
+- [ ] 同一 Pose 的模块组合出现穿模；
+- [ ] 眼镜/围巾/包破坏角色轮廓；
+- [ ] 通过模块后像“换了一个新 IP”而不是“同一种谢邀喵的不同用户”；
+- [ ] 2D 变 3D；
+- [ ] 角色变幼；
+- [ ] 出现无关背景、文字、logo、水印。
+
+### NPC
+
+NPC 可以跨物种，但必须保持和黑猫完全相同的世界画法、线条、颗粒、光源和成熟度。
 
 ### 最终判断
 
-> **“这是不是同一只角色，只是今天在做不同的事？”**
-
-如果答案不是毫不犹豫的“是”，就不要进入资产库。
+> **玩家：一眼都是谢邀喵的黑猫，但第二眼能看出“这是不同的人”。**
+>
+> **NPC：一眼知道不是玩家本人，而是这个世界里遇到的其他居民。**
