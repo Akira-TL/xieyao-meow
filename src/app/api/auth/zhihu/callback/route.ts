@@ -6,6 +6,16 @@ import { createZhihuGatewayFromEnv } from "@/lib/zhihu/env";
 
 export const dynamic = "force-dynamic";
 
+function externalUrl(request: Request, pathname: string): URL {
+  const forwardedHost = request.headers.get("x-forwarded-host")?.trim();
+  const host = forwardedHost || request.headers.get("host")?.trim();
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.trim();
+  const proto = forwardedProto || new URL(request.url).protocol.replace(":", "") || "https";
+
+  if (host) return new URL(pathname, `${proto}://${host}`);
+  return new URL(pathname, request.url);
+}
+
 function callbackReadyResponse() {
   return new NextResponse(
     `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>谢邀喵 · 知乎 OAuth 回调</title><meta name="robots" content="noindex,nofollow"><style>html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#fff;color:#151515;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}.card{max-width:560px;padding:32px;text-align:center}.mark{width:48px;height:48px;margin:0 auto 18px;border-radius:14px;display:grid;place-items:center;background:#1772f6;color:#fff;font-weight:800;font-size:24px}h1{margin:0;font-size:24px}p{margin:12px 0 0;color:#666;line-height:1.7}.status{margin-top:18px;font-size:13px;color:#1677ff}</style></head><body><main class="card"><div class="mark">喵</div><h1>谢邀喵 OAuth 回调地址已就绪</h1><p>该地址用于接收知乎 OAuth 授权结果。正常授权时，知乎会携带 authorization_code 返回此地址。</p><div class="status">HTTPS · PUBLIC CALLBACK · READY</div></main></body></html>`,
@@ -35,7 +45,7 @@ export async function GET(request: Request) {
 
   if (!authorizationCode) {
     if (oauthError) {
-      return NextResponse.redirect(new URL("/hatch/consent?oauth=denied", request.url));
+      return NextResponse.redirect(externalUrl(request, "/hatch/consent?oauth=denied"));
     }
     return callbackReadyResponse();
   }
@@ -43,7 +53,7 @@ export async function GET(request: Request) {
   try {
     const oauth = await createZhihuGatewayFromEnv().exchangeAuthorizationCode(authorizationCode);
     const session = getOAuthSessionStore().create(oauth.accessToken, oauth.expiresIn);
-    const response = NextResponse.redirect(new URL("/hatch/scanning?oauth=connected", request.url));
+    const response = NextResponse.redirect(externalUrl(request, "/hatch/scanning?oauth=connected"));
     response.cookies.set(OAUTH_SESSION_COOKIE, session.id, {
       httpOnly: true,
       sameSite: "lax",
@@ -57,6 +67,6 @@ export async function GET(request: Request) {
       "[oauth] authorization code exchange failed",
       error instanceof Error ? error.message : "unknown error",
     );
-    return NextResponse.redirect(new URL("/hatch/consent?oauth=error", request.url));
+    return NextResponse.redirect(externalUrl(request, "/hatch/consent?oauth=error"));
   }
 }
