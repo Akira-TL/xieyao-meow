@@ -6,6 +6,12 @@ import { ArtSlot, GrowthStrip, PaperCard } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import { BottomSheet } from "./interaction-client";
 import {
+  type LivePersonaSnapshot,
+  type LiveQuestionSnapshot,
+  useLivePersonaSnapshot,
+  useLiveQuestionSnapshot,
+} from "./live-client";
+import {
   DEMO_OUTING_STORAGE_KEY,
   advanceDemoOuting,
   createDemoOutingState,
@@ -32,6 +38,8 @@ function saveOuting(state: DemoOutingState) {
 export function DemoOutingHome() {
   const [outing, setOuting] = useState<DemoOutingState>(createDemoOutingState());
   const [ready, setReady] = useState(false);
+  const personaSnapshot = useLivePersonaSnapshot();
+  const questionSnapshot = useLiveQuestionSnapshot();
 
   useEffect(() => {
     setOuting(loadOuting());
@@ -51,33 +59,66 @@ export function DemoOutingHome() {
     return () => window.clearTimeout(timer);
   }, [outing.state, ready]);
 
+  useEffect(() => {
+    if (!ready || outing.state !== "AWAY") return;
+    const timer = window.setTimeout(() => {
+      setOuting((current) => advanceDemoOuting(current, { type: "return" }));
+    }, 5200);
+    return () => window.clearTimeout(timer);
+  }, [outing.state, ready]);
+
   if (!ready) {
     return <div className="outing-loading">正在看它在不在家……</div>;
   }
   if (outing.state === "PREPARING") return <PreparingStage routeBias={outing.routeBias} />;
-  if (outing.state === "AWAY") {
+  if (outing.state === "AWAY") return <AwayStage routeBias={outing.routeBias} />;
+  if (outing.state === "RETURNED") {
     return (
-      <AwayStage
-        routeBias={outing.routeBias}
-        onAdvance={() => setOuting((current) => advanceDemoOuting(current, { type: "return" }))}
+      <ReturnedStage
+        personaSnapshot={personaSnapshot}
+        questionSnapshot={questionSnapshot}
+        onArchive={() => setOuting((current) => advanceDemoOuting(current, { type: "archive" }))}
       />
     );
   }
-  if (outing.state === "RETURNED") {
-    return <ReturnedStage onArchive={() => setOuting((current) => advanceDemoOuting(current, { type: "archive" }))} />;
-  }
 
-  return <AtHomeStage onPrepare={(routeBias) => setOuting((current) => advanceDemoOuting(current, { type: "prepare", routeBias }))} />;
+  return (
+    <AtHomeStage
+      personaSnapshot={personaSnapshot}
+      questionSnapshot={questionSnapshot}
+      onPrepare={(routeBias) => setOuting((current) => advanceDemoOuting(current, { type: "prepare", routeBias }))}
+    />
+  );
 }
 
-function AtHomeStage({ onPrepare }: { onPrepare: (routeBias: string) => void }) {
+function AtHomeStage({
+  onPrepare,
+  personaSnapshot,
+  questionSnapshot,
+}: {
+  onPrepare: (routeBias: string) => void;
+  personaSnapshot: LivePersonaSnapshot | null;
+  questionSnapshot: LiveQuestionSnapshot | null;
+}) {
   const fixture = DEMO_FIXTURE;
+  const question = questionSnapshot?.question ?? {
+    title: fixture.encounter.topic.title,
+    url: fixture.encounter.topic.url,
+    summary: "",
+    thumbnailUrl: "",
+  };
+  const composition = personaSnapshot?.composition;
+  const growth = {
+    knowledge: Math.max(1, Math.min(5, composition?.interests.length ?? fixture.home.growth.knowledge)),
+    expression: Math.max(1, Math.min(5, Math.ceil((composition?.sourceCounts.contents ?? 10) / 12))),
+    social: Math.max(1, Math.min(5, Math.ceil((composition?.sourceCounts.followees ?? 12) / 12))),
+  };
   return (
     <div className="home-at-home">
       <div className="home-hero-copy">
         <p className="stage-caption">ACT / AT HOME · 昨晚发生了一点事</p>
         <h1>昨晚，<br /><span>齿轮</span>来过。</h1>
-        <p>我们为了一个 AI 问题吵了很久：「AI 会让人类更自由吗？」不同的视角，让问题变得更有趣。</p>
+        <p>它和齿轮围着一个真实知乎问题聊了很久：「{question.title}」不同的表达方式，把同一个问题照出了不同侧面。</p>
         <a className="theatre-button theatre-button-primary" href={fixture.home.heroEvent.target}>看这一幕 <span>→</span></a>
       </div>
 
@@ -98,7 +139,7 @@ function AtHomeStage({ onPrepare }: { onPrepare: (routeBias: string) => void }) 
       </div>
 
       <div className="home-growth-row">
-        <GrowthStrip knowledge={fixture.home.growth.knowledge} expression={fixture.home.growth.expression} social={fixture.home.growth.social} />
+        <GrowthStrip knowledge={growth.knowledge} expression={growth.expression} social={growth.social} />
       </div>
     </div>
   );
@@ -118,7 +159,7 @@ function PreparingStage({ routeBias }: { routeBias: string | null }) {
   );
 }
 
-function AwayStage({ routeBias, onAdvance }: { routeBias: string | null; onAdvance: () => void }) {
+function AwayStage({ routeBias }: { routeBias: string | null }) {
   return (
     <div className="outing-empty-stage outing-away-stage">
       <p className="stage-caption">ACT / AWAY</p>
@@ -131,14 +172,32 @@ function AwayStage({ routeBias, onAdvance }: { routeBias: string | null; onAdvan
       </PaperCard>
       <div className="outing-away-actions">
         <a href="/explore?mode=app">看看它上次带回来的东西 →</a>
-        <button onClick={onAdvance} type="button">DEMO · 让时间往后走</button>
+        <span>不用催，它逛够了会自己回来。</span>
       </div>
     </div>
   );
 }
 
-function ReturnedStage({ onArchive }: { onArchive: () => void }) {
+function ReturnedStage({
+  onArchive,
+  personaSnapshot,
+  questionSnapshot,
+}: {
+  onArchive: () => void;
+  personaSnapshot: LivePersonaSnapshot | null;
+  questionSnapshot: LiveQuestionSnapshot | null;
+}) {
   const artifact = DEMO_FIXTURE.outing.returnArtifact;
+  const question = questionSnapshot?.question ?? {
+    title: artifact.topic.title,
+    url: artifact.topic.url,
+    summary: "",
+    thumbnailUrl: "",
+  };
+  const interests = personaSnapshot?.persona.interests.slice(0, 2) ?? artifact.places;
+  const thought = question.summary?.trim()
+    ? `${question.summary.replace(/\s+/g, " ").trim().slice(0, 72)}${question.summary.length > 72 ? "…" : ""}`
+    : "这题不一定和你最像，但值得带回来多问一步。";
   return (
     <div className="returned-stage">
       <div className="returned-copy">
@@ -149,9 +208,9 @@ function ReturnedStage({ onArchive }: { onArchive: () => void }) {
       </div>
       <PaperCard className="returned-artifact">
         <span>{artifact.label}</span>
-        <h2>{artifact.topic.title}</h2>
-        <p>今天去了：{artifact.places.join(" / ")}</p>
-        <blockquote>“{artifact.thought}”</blockquote>
+        <h2>{question.title}</h2>
+        <p>今天去了：{interests.join(" / ")}</p>
+        <blockquote>“{thought}”</blockquote>
         <div className="returned-meta">
           <span>同行者 <b>{artifact.companion}</b></span>
           <span>关系变化 <b>{artifact.relationshipDelta}</b></span>

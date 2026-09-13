@@ -21,12 +21,94 @@ export interface LivePersonaSnapshot {
 
 export interface LiveQuestionSnapshot {
   mode: AnswerExperience["mode"];
+  generatedAt: number;
   question: AnswerExperience["question"];
+  questions?: AnswerExperience["question"][];
 }
 
 export const LIVE_PERSONA_STORAGE_KEY = "xieya-live-persona";
 export const LIVE_QUESTION_STORAGE_KEY = "xieya-live-question";
 export const LIVE_EXPERIENCE_STORAGE_KEY = "xieya-live-experience";
+
+export function useLivePersonaSnapshot() {
+  const [snapshot, setSnapshot] = useState<LivePersonaSnapshot | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const cached = window.sessionStorage.getItem(LIVE_PERSONA_STORAGE_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached) as LivePersonaSnapshot;
+        setSnapshot(parsed);
+        if (Date.now() / 1000 - parsed.generatedAt < 300) {
+          return () => {
+            cancelled = true;
+          };
+        }
+      } catch {
+        window.sessionStorage.removeItem(LIVE_PERSONA_STORAGE_KEY);
+      }
+    }
+
+    fetch("/api/persona", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("persona request failed");
+        return (await response.json()) as LivePersonaSnapshot;
+      })
+      .then((next) => {
+        if (cancelled) return;
+        window.sessionStorage.setItem(LIVE_PERSONA_STORAGE_KEY, JSON.stringify(next));
+        setSnapshot(next);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return snapshot;
+}
+
+export function useLiveQuestionSnapshot() {
+  const [snapshot, setSnapshot] = useState<LiveQuestionSnapshot | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const cached = window.sessionStorage.getItem(LIVE_QUESTION_STORAGE_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached) as LiveQuestionSnapshot;
+        setSnapshot(parsed);
+        if (Date.now() / 1000 - parsed.generatedAt < 300) {
+          return () => {
+            cancelled = true;
+          };
+        }
+      } catch {
+        window.sessionStorage.removeItem(LIVE_QUESTION_STORAGE_KEY);
+      }
+    }
+
+    fetch("/api/discovery/question", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("question discovery failed");
+        return (await response.json()) as LiveQuestionSnapshot;
+      })
+      .then((next) => {
+        if (cancelled) return;
+        window.sessionStorage.setItem(LIVE_QUESTION_STORAGE_KEY, JSON.stringify(next));
+        setSnapshot(next);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return snapshot;
+}
 
 function persistActivation(stage: "HATCH_REVEAL") {
   const stored = window.localStorage.getItem(DEMO_STAGE_STORAGE_KEY);

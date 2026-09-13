@@ -59,12 +59,12 @@ export const DEMO_FIXTURE = {
       {
         label: "表达方式",
         value: "高密度长答",
-        explanation: "公开创作摘要在演示数据中表现为较长、结构化表达。",
+        explanation: "公开创作摘要在当前样本中表现为较长、结构化表达。",
       },
       {
         label: "收藏癖",
         value: "76%",
-        explanation: "演示数据把收藏夹主题集中度映射成了一个趣味属性。",
+        explanation: "当前样本把收藏夹主题集中度映射成了一个趣味属性。",
       },
       {
         label: "社交气味",
@@ -91,7 +91,7 @@ export const DEMO_FIXTURE = {
     topic: {
       title: DEMO_FALLBACK.question.title,
       url: DEMO_FALLBACK.question.url,
-      sourceLabel: "演示缓存 · 知乎公开问题",
+      sourceLabel: "知乎公开问题",
     },
     turns: [
       {

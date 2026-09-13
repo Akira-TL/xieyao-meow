@@ -5,7 +5,7 @@ import {
   PersonaEgg,
   PublicHeader,
 } from "@/features/demo/components";
-import { DEMO_FIXTURE } from "@/features/demo/fixtures";
+import { LiveLandingSignal } from "@/features/demo/live/daily-live-client";
 
 export default function LandingPage() {
   return (
@@ -33,7 +33,7 @@ export default function LandingPage() {
 
         <div className="landing-actions">
           <LandingActions />
-          <p>{DEMO_FIXTURE.landing.publicEvent}</p>
+          <LiveLandingSignal />
         </div>
       </section>
     </DemoPage>

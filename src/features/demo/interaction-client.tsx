@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import type { AnswerExperience } from "@/lib/experience";
+import type { SocialEvent } from "@/lib/social";
 
 import {
   DEMO_STAGE_STORAGE_KEY,
@@ -24,6 +25,7 @@ import {
 } from "./live-client";
 
 const SELECTED_RESIDENT_STORAGE_KEY = "xieya-selected-resident";
+const SOCIAL_EVENT_STORAGE_KEY = "xieya-social-event";
 
 function advanceStage(requested: DemoActivationStage) {
   const stored = window.localStorage.getItem(DEMO_STAGE_STORAGE_KEY);
@@ -221,11 +223,11 @@ export function ZhihuConsentActions() {
           }}
           type="button"
         >
-          <VerifiedUserOutlinedIcon fontSize="small" /> {publicDemo ? "用项目演示账号体验" : "用当前知乎开发账号继续"} <ArrowForwardRoundedIcon fontSize="small" />
+          <VerifiedUserOutlinedIcon fontSize="small" /> {publicDemo ? "先用公开数据孵化一只" : "用当前知乎开发账号继续"} <ArrowForwardRoundedIcon fontSize="small" />
         </button>
         <p className="oauth-inline-note">
           {publicDemo
-            ? "OAuth 审核期间先读取项目演示账号的真实公开知乎数据；正式凭证到位后这里会切换为知乎官方登录。"
+            ? "知乎正式授权正在接入；试玩会使用项目测试账号的公开知乎内容，完整体验人格孵化流程。"
             : "本地会读取当前开发账号的真实公开数据；正式 OAuth 凭证与公网回调配置完成后，同一位置切换为知乎官方登录。"}
         </p>
       </div>
@@ -377,6 +379,7 @@ export function EncounterPlayback() {
   const questionSnapshot = useQuestionSnapshot();
   const [residentId, setResidentId] = useState<string>(DEMO_FIXTURE.match.candidate.id);
   const [shown, setShown] = useState(1);
+  const [socialEvent, setSocialEvent] = useState<SocialEvent | null>(null);
 
   useEffect(() => {
     const stored = window.sessionStorage.getItem(SELECTED_RESIDENT_STORAGE_KEY);
@@ -384,6 +387,30 @@ export function EncounterPlayback() {
       setResidentId(stored);
     }
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/community/interact", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ residentId }),
+      cache: "no-store",
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("community interaction failed");
+        return (await response.json()) as { event: SocialEvent };
+      })
+      .then(({ event }) => {
+        if (cancelled) return;
+        setSocialEvent(event);
+        window.sessionStorage.setItem(SOCIAL_EVENT_STORAGE_KEY, JSON.stringify(event));
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [residentId]);
 
   const candidate = DEMO_FIXTURE.residents.find((resident) => resident.id === residentId) ?? DEMO_FIXTURE.residents[0];
   const topic = experience?.question ?? questionSnapshot?.question ?? DEMO_FIXTURE.encounter.topic;
@@ -469,7 +496,13 @@ export function EncounterPlayback() {
       <div className="encounter-explanation">
         <b>为什么会这么聊？</b>
         <span>{sharedInterests.length > 0 ? sharedInterests.join(" / ") : "不同兴趣"} · {selfDescriptor} × {candidate.personality[0]}</span>
-        <p>{experience?.mode === "live" || snapshot?.mode === "live" ? "问题来自当前知乎真实内容；你的这一侧使用刚刚孵化出的 Persona 表达，另一侧使用社区居民 Persona。" : DEMO_FIXTURE.encounter.explanation}</p>
+        <p>
+          {socialEvent
+            ? `${socialEvent.reasons.slice(0, 2).join("；")}。这次互动让关系变成「${socialEvent.relationship}」${socialEvent.affinityDelta >= 0 ? `，关系 +${socialEvent.affinityDelta}` : `，关系 ${socialEvent.affinityDelta}`}。`
+            : experience?.mode === "live" || snapshot?.mode === "live"
+              ? "问题来自当前知乎真实内容；你的这一侧使用刚刚孵化出的 Persona 表达，另一侧使用社区居民 Persona。"
+              : DEMO_FIXTURE.encounter.explanation}
+        </p>
       </div>
 
       <button
@@ -491,10 +524,29 @@ export function EncounterPlayback() {
 }
 
 export function ShareSceneButton() {
+  const snapshot = usePersonaSnapshot();
   const [saved, setSaved] = useState(false);
+  const [residentName, setResidentName] = useState<string>(DEMO_FIXTURE.match.candidate.displayName);
+  const [relationship, setRelationship] = useState<string | null>(null);
+
+  useEffect(() => {
+    const residentId = window.sessionStorage.getItem(SELECTED_RESIDENT_STORAGE_KEY);
+    const resident = DEMO_FIXTURE.residents.find((item) => item.id === residentId);
+    if (resident) setResidentName(resident.displayName);
+
+    const rawEvent = window.sessionStorage.getItem(SOCIAL_EVENT_STORAGE_KEY);
+    if (!rawEvent) return;
+    try {
+      const event = JSON.parse(rawEvent) as SocialEvent;
+      setRelationship(event.relationship);
+    } catch {
+      window.sessionStorage.removeItem(SOCIAL_EVENT_STORAGE_KEY);
+    }
+  }, []);
 
   async function save() {
-    const text = `谢邀喵：第一段关系已经成立。${DEMO_FIXTURE.persona.title} × ${DEMO_FIXTURE.match.candidate.displayName}，${DEMO_FIXTURE.match.score}% 同频。`;
+    const title = snapshot?.persona.certifiedTitle ?? DEMO_FIXTURE.persona.title;
+    const text = `谢邀喵：第一段关系已经成立。${title} × ${residentName}${relationship ? `，现在是「${relationship}」` : ""}。`;
     try {
       await navigator.clipboard?.writeText(text);
       setSaved(true);

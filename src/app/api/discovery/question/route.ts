@@ -8,25 +8,31 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const hotItems = await createZhihuGatewayFromEnv().getHotList(30);
-    const questionItem = hotItems.find((item) => {
-      try {
-        return new URL(item.url).pathname.includes("/question/");
-      } catch {
-        return false;
-      }
-    });
+    const questions = hotItems
+      .filter((item) => {
+        try {
+          return new URL(item.url).pathname.includes("/question/");
+        } catch {
+          return false;
+        }
+      })
+      .slice(0, 6)
+      .map((item) => ({
+        title: item.title,
+        url: item.url,
+        summary: item.summary,
+        thumbnailUrl: item.thumbnailUrl,
+      }));
 
-    if (!questionItem) throw new Error("Zhihu hot list contains no question item");
+    const question = questions[0];
+    if (!question) throw new Error("Zhihu hot list contains no question item");
 
     return NextResponse.json(
       {
         mode: "live" as const,
-        question: {
-          title: questionItem.title,
-          url: questionItem.url,
-          summary: questionItem.summary,
-          thumbnailUrl: questionItem.thumbnailUrl,
-        },
+        generatedAt: Math.floor(Date.now() / 1000),
+        question,
+        questions,
       },
       { headers: { "cache-control": "no-store" } },
     );
@@ -39,7 +45,9 @@ export async function GET() {
     return NextResponse.json(
       {
         mode: "fallback" as const,
+        generatedAt: Math.floor(Date.now() / 1000),
         question: DEMO_FALLBACK.question,
+        questions: [DEMO_FALLBACK.question],
       },
       { headers: { "cache-control": "no-store" } },
     );

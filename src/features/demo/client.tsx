@@ -178,13 +178,13 @@ export function DemoScanningFlow() {
               {source.state === "complete"
                 ? `发现：${source.finding}`
                 : source.state === "loading"
-                  ? "正在读取演示快照……"
+                  ? "正在读取知乎成分……"
                   : "等待上一项完成"}
             </p>
           </div>
         </article>
       ))}
-      <p className="scan-footnote">正在拼出你的社交气味… · DEMO fixture</p>
+      <p className="scan-footnote">正在拼出你的社交气味…</p>
     </div>
   );
 }

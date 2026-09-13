@@ -169,7 +169,6 @@ export function ArtSlot({
       aria-label={`${label ?? name} 图片占位`}
     >
       <ImageOutlinedIcon className="art-slot-placeholder-icon" aria-hidden="true" />
-      {label ? <span className="art-slot-label">{label}</span> : null}
     </div>
   );
 }
@@ -195,7 +194,7 @@ export function PetStage({
       {name ? <p className="pet-stage-name">{name}</p> : null}
       <p className="pet-stage-species">{species}</p>
       {title ? <p className="pet-stage-title">{title}</p> : null}
-      {demoResident ? <span className="demo-resident-badge">演示居民</span> : null}
+      {demoResident ? <span className="demo-resident-badge">社区居民</span> : null}
     </div>
   );
 }
