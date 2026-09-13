@@ -91,6 +91,15 @@ export const collectionsEnvelopeSchema = z.object({
   }).nullable(),
 });
 
+export const favlistContentsEnvelopeSchema = z.object({
+  Code: z.number().int(),
+  Message: z.string(),
+  Data: z.object({
+    Items: z.array(collectionItemSchema),
+    Paging: pagingSchema,
+  }).nullable(),
+});
+
 export const favlistsEnvelopeSchema = z.object({
   Code: z.number().int(),
   Message: z.string(),

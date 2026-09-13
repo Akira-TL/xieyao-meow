@@ -3,7 +3,6 @@ import {
   AppBottomNav,
   AppHeader,
   ArtSlot,
-  DemoBanner,
   DemoPage,
   PaperCard,
 } from "@/features/demo/components";
@@ -14,8 +13,7 @@ export default function RelationshipDetailPage() {
   return (
     <DemoRouteGuard>
       <DemoPage scene="encounter">
-        <DemoBanner />
-        <AppHeader active="encounter" />
+          <AppHeader active="encounter" />
         <section className="relationship-detail-stage">
           <p className="stage-caption">关系详情 · ANOTHER YOU, A KINDER WORLD</p>
           <h1>你们为什么<br />总会聊到<span>深夜</span>？</h1>

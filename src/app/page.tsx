@@ -1,6 +1,5 @@
 import { LandingActions } from "@/features/demo/client";
 import {
-  DemoBanner,
   DemoPage,
   KanshanPlaceholder,
   PersonaEgg,
@@ -11,7 +10,6 @@ import { DEMO_FIXTURE } from "@/features/demo/fixtures";
 export default function LandingPage() {
   return (
     <DemoPage scene="landing">
-      <DemoBanner />
       <PublicHeader right={<span className="public-kicker">知乎 × 谢邀喵 · 人格剧场</span>} />
       <section className="landing-stage">
         <div className="landing-copy">

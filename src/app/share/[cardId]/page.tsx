@@ -1,7 +1,6 @@
 import { DemoFlowButton } from "@/features/demo/client";
 import {
   ArtSlot,
-  DemoBanner,
   DemoPage,
   PublicHeader,
 } from "@/features/demo/components";
@@ -11,7 +10,6 @@ import { ShareSceneButton } from "@/features/demo/interaction-client";
 export default function SharePage() {
   return (
     <DemoPage scene="encounter">
-      <DemoBanner />
       <PublicHeader right={<span className="public-kicker">SCENE 07 · 第一段关系成立</span>} />
       <section className="share-stage">
         <p className="stage-caption">SCENE 07 · 第一次相遇 · 第一段关系成立</p>

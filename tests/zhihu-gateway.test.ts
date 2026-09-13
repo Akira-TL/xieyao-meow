@@ -148,6 +148,47 @@ describe("ZhihuGateway", () => {
     }
   });
 
+  it("reads one public favorite-list page through the official favlist_contents endpoint", async () => {
+    const requests: RecordedRequest[] = [];
+    const fetchImpl: typeof fetch = async (input, init) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      requests.push({ url, init });
+      return jsonResponse({
+        Code: 0,
+        Message: "success",
+        Data: {
+          Items: [
+            {
+              ContentType: "answer",
+              Url: "https://www.zhihu.com/question/2/answer/3",
+              CreatedAt: 1745486539,
+              FavTime: 1746000000,
+              LikeCount: 7,
+              CommentCount: 1,
+              FavoriteCount: 2,
+              Title: "一个收藏里的问题",
+              Summary: "收藏内容摘要",
+              Favlists: [{ UrlToken: 123, Title: "AI", Url: "https://www.zhihu.com/collection/123" }],
+            },
+          ],
+          Paging: { IsEnd: true, Totals: 1 },
+        },
+      });
+    };
+
+    const gateway = createZhihuGateway({
+      accessSecret: "test-access-secret",
+      fetchImpl,
+      now: () => 1_742_822_400_000,
+    });
+
+    const items = await gateway.getUserFavlistContents("123", "oauth-user-token");
+    expect(items[0]?.title).toBe("一个收藏里的问题");
+    expect(new URL(requests[0]!.url).searchParams.get("FavlistUrlToken")).toBe("123");
+    const headers = new Headers(requests[0]?.init?.headers);
+    expect(headers.get("x-oauth-token")).toBe("oauth-user-token");
+  });
+
   it("retries a transient network failure before returning a user profile", async () => {
     let contentAttempts = 0;
     const fetchImpl: typeof fetch = async (input) => {

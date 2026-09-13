@@ -3,7 +3,6 @@ import {
   AppBottomNav,
   AppHeader,
   ArtSlot,
-  DemoBanner,
   DemoPage,
   PaperCard,
 } from "@/features/demo/components";
@@ -13,7 +12,6 @@ export default function AtlasPage() {
   return (
     <DemoRouteGuard>
       <DemoPage scene="archive">
-        <DemoBanner />
         <AppHeader active="atlas" />
         <section className="atlas-stage">
           <div className="atlas-hero-copy">

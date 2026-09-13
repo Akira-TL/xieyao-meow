@@ -5,7 +5,6 @@ import {
   AppBottomNav,
   AppHeader,
   ArtSlot,
-  DemoBanner,
   DemoPage,
   PaperCard,
 } from "@/features/demo/components";
@@ -22,7 +21,6 @@ export default async function EncounterHubPage({
   return (
     <DemoRouteGuard>
       <DemoPage scene="encounter">
-        <DemoBanner />
         <AppHeader active="encounter" />
         <section className="encounter-hub-stage">
           {showFeatured ? <DailyEncounter /> : <EncounterHub />}

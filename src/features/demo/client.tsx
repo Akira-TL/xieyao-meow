@@ -86,6 +86,10 @@ export function DemoRouteGuard({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const requested = `${window.location.pathname}${window.location.search}`;
+    const query = new URLSearchParams(window.location.search);
+    if (window.location.pathname === "/hatch/scanning" && query.get("oauth") === "connected") {
+      persistStage(advanceActivationStage(currentStage(), "PROFILE_SCANNING"));
+    }
     const redirect = resolveRequestedDemoPath(currentStage(), requested);
     if (redirect && redirect !== requested) {
       router.replace(redirect);

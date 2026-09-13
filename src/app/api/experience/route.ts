@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { DEMO_FALLBACK } from "@/data/demo-fallback";
+import { getRequestOAuthIdentity } from "@/lib/auth/request-session";
 import type { AnswerExperience } from "@/lib/experience";
 import { getAnswerExperienceService } from "@/lib/experience/runtime";
 
@@ -15,10 +16,12 @@ export async function POST(request: Request) {
     // Empty or invalid JSON uses the cached/default path.
   }
 
+  const identity = await getRequestOAuthIdentity();
   let experience: AnswerExperience = DEMO_FALLBACK;
   try {
     experience = await getAnswerExperienceService().create({
-      cacheKey: "self-demo",
+      cacheKey: identity ? `oauth:${identity.sessionId}` : "self-demo",
+      oauthAccessToken: identity?.oauthAccessToken,
       forceRefresh,
     });
   } catch (error) {

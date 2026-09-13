@@ -3,6 +3,7 @@ import type { z } from "zod";
 import {
   collectionsEnvelopeSchema,
   contentsEnvelopeSchema,
+  favlistContentsEnvelopeSchema,
   favlistsEnvelopeSchema,
   followeesEnvelopeSchema,
   hotListEnvelopeSchema,
@@ -174,7 +175,7 @@ export class ZhihuGateway {
     };
   }
 
-  private async getUserContents(oauthAccessToken?: string): Promise<ZhihuContent[]> {
+  async getUserContents(oauthAccessToken?: string): Promise<ZhihuContent[]> {
     const payload = await this.getJson(
       "/api/v1/user/contents",
       { ContentType: "all", Limit: "50", Offset: "0" },
@@ -194,7 +195,7 @@ export class ZhihuGateway {
     }));
   }
 
-  private async getUserFollowees(oauthAccessToken?: string): Promise<ZhihuFollowee[]> {
+  async getUserFollowees(oauthAccessToken?: string): Promise<ZhihuFollowee[]> {
     const payload = await this.getJson(
       "/api/v1/user/followees",
       { Limit: "50", Offset: "0" },
@@ -213,7 +214,7 @@ export class ZhihuGateway {
     }));
   }
 
-  private async getUserCollections(oauthAccessToken?: string): Promise<ZhihuCollection[]> {
+  async getUserCollections(oauthAccessToken?: string): Promise<ZhihuCollection[]> {
     const payload = await this.getJson(
       "/api/v1/user/collections",
       { Limit: "20" },
@@ -250,7 +251,7 @@ export class ZhihuGateway {
     }));
   }
 
-  private async getUserFavlists(oauthAccessToken?: string): Promise<ZhihuFavlist[]> {
+  async getUserFavlists(oauthAccessToken?: string): Promise<ZhihuFavlist[]> {
     const payload = await this.getJson(
       "/api/v1/user/favlists",
       { Limit: "20" },
@@ -264,6 +265,47 @@ export class ZhihuGateway {
       title: item.Title,
       description: item.Description,
       isPublic: item.IsPublic,
+    }));
+  }
+
+  async getUserFavlistContents(
+    favlistUrlToken: string,
+    oauthAccessToken?: string,
+  ): Promise<ZhihuCollection[]> {
+    if (!favlistUrlToken.trim()) throw new Error("Favlist URL token is required");
+    const payload = await this.getJson(
+      "/api/v1/user/favlist_contents",
+      { FavlistUrlToken: favlistUrlToken, Limit: "20", Offset: "0" },
+      favlistContentsEnvelopeSchema,
+      oauthAccessToken,
+    );
+    const data = this.requireSuccessData(payload.Code, payload.Message, payload.Data);
+    return data.Items.map((item) => ({
+      contentType: item.ContentType,
+      url: item.Url,
+      createdAt: item.CreatedAt,
+      favTime: item.FavTime,
+      likeCount: item.LikeCount,
+      commentCount: item.CommentCount,
+      favoriteCount: item.FavoriteCount,
+      title: item.Title,
+      summary: item.Summary,
+      favlists: item.Favlists.map((favlist) => ({
+        urlToken: favlist.UrlToken,
+        title: favlist.Title,
+        url: favlist.Url,
+      })),
+      ...(item.Author
+        ? {
+            author: {
+              name: item.Author.Name,
+              urlToken: item.Author.UrlToken,
+              url: item.Author.Url,
+              gender: item.Author.Gender,
+              headline: item.Author.Headline,
+            },
+          }
+        : {}),
     }));
   }
 

@@ -3,7 +3,6 @@ import {
   AppBottomNav,
   AppHeader,
   ArtSlot,
-  DemoBanner,
   DemoPage,
   PaperCard,
   PublicHeader,
@@ -14,7 +13,6 @@ function ExploreContent({ appMode }: { appMode: boolean }) {
   const outing = DEMO_FIXTURE.outing;
   return (
     <DemoPage scene="default">
-      <DemoBanner />
       {appMode ? <AppHeader active="explore" /> : <PublicHeader right={<span className="public-kicker">PUBLIC EXPLORE</span>} />}
       <section className="explore-stage">
         <div className="explore-hero-copy">

@@ -1,18 +1,17 @@
-import { DemoRouteGuard, DemoScanningFlow } from "@/features/demo/client";
+import { DemoRouteGuard } from "@/features/demo/client";
 import {
   ActivationHeader,
   ArtSlot,
-  DemoBanner,
   DemoPage,
   PersonaEgg,
 } from "@/features/demo/components";
+import { LiveScanningFlow } from "@/features/demo/live-client";
 
 export default function ScanningPage() {
   return (
     <DemoRouteGuard>
-      <DemoPage scene="casting">
-        <DemoBanner />
-        <ActivationHeader current={3} />
+      <DemoPage scene="casting" activation>
+          <ActivationHeader current={3} />
         <section className="scanning-layout">
           <div className="scanning-hero">
             <p className="stage-caption">ACT 02 · CASTING · 正在扫描你的知乎宇宙</p>
@@ -24,7 +23,7 @@ export default function ScanningPage() {
             </div>
           </div>
           <div className="scanning-cues-panel">
-            <DemoScanningFlow />
+            <LiveScanningFlow />
           </div>
         </section>
       </DemoPage>

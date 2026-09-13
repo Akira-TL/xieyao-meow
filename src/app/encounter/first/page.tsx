@@ -1,5 +1,5 @@
 import { DemoRouteGuard } from "@/features/demo/client";
-import { ActivationHeader, DemoBanner, DemoPage } from "@/features/demo/components";
+import { ActivationHeader, DemoPage } from "@/features/demo/components";
 import { EncounterPlayback, FirstMatchInteraction } from "@/features/demo/interaction-client";
 
 export default async function FirstEncounterPage({ searchParams }: { searchParams: Promise<{ phase?: string }> }) {
@@ -8,8 +8,7 @@ export default async function FirstEncounterPage({ searchParams }: { searchParam
 
   return (
     <DemoRouteGuard>
-      <DemoPage scene="encounter">
-        <DemoBanner />
+      <DemoPage scene="encounter" activation>
         <ActivationHeader current={isEncounter ? 6 : 5} />
         <section className="first-encounter-stage">
           {isEncounter ? (

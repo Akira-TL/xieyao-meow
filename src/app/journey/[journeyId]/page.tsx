@@ -3,7 +3,6 @@ import {
   AppBottomNav,
   AppHeader,
   ArtSlot,
-  DemoBanner,
   DemoPage,
   PaperCard,
 } from "@/features/demo/components";
@@ -14,8 +13,7 @@ export default function JourneyDetailPage() {
   return (
     <DemoRouteGuard>
       <DemoPage scene="archive">
-        <DemoBanner />
-        <AppHeader active="explore" />
+          <AppHeader active="explore" />
         <section className="journey-detail-stage">
           <aside className="journey-side-nav">
             <a href="/explore?mode=app">⌂ 探索首页</a>

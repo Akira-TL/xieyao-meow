@@ -1,3 +1,10 @@
+import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
+import AutoStoriesRoundedIcon from "@mui/icons-material/AutoStoriesRounded";
+import Diversity3RoundedIcon from "@mui/icons-material/Diversity3Rounded";
+import ExploreRoundedIcon from "@mui/icons-material/ExploreRounded";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -23,26 +30,18 @@ export function DemoPage({
   children,
   width = "max-w-[1200px]",
   scene = "default",
+  activation = false,
 }: {
   children: ReactNode;
   width?: string;
   scene?: "default" | "landing" | "casting" | "reveal" | "encounter" | "archive";
+  activation?: boolean;
 }) {
   return (
-    <main className={`theatre-page theatre-page--${scene}`}>
+    <main className={`theatre-page theatre-page--${scene}${activation ? " theatre-page--activation" : ""}`}>
       <div className="theatre-grain" aria-hidden="true" />
-      <div className="theatre-curtain theatre-curtain-left" aria-hidden="true" />
-      <div className="theatre-curtain theatre-curtain-right" aria-hidden="true" />
       <div className={`relative z-10 mx-auto w-full ${width}`}>{children}</div>
     </main>
-  );
-}
-
-export function DemoBanner() {
-  return (
-    <div className="demo-provenance" role="status">
-      DEMO FIXTURE · 交互骨架 · 图片位待替换
-    </div>
   );
 }
 
@@ -85,11 +84,15 @@ export function AppHeader({ active, right }: { active: AppSection; right?: React
             {desktopLabel}
           </Link>
         ))}
-        <Link href="/privacy">关于</Link>
+        <Link href="/about">关于</Link>
       </nav>
       <div className="app-header-right">
-        <span className="app-curiosity-dot" aria-hidden="true">?</span>
-        <span className="app-curiosity-copy">今天也在好奇<br />继续看世界吧</span>
+        <Link className="header-icon-link" href="/explore?mode=app" aria-label="探索">
+          <SearchRoundedIcon fontSize="small" />
+        </Link>
+        <Link className="header-icon-link" href="/atlas" aria-label="我的人格档案">
+          <AccountCircleRoundedIcon fontSize="small" />
+        </Link>
         {right}
       </div>
     </header>
@@ -102,22 +105,32 @@ export function PublicHeader({ right }: { right?: ReactNode }) {
       <BrandMark />
       <nav className="app-top-nav" aria-label="公开导航">
         <Link href="/explore?mode=public">公开试看</Link>
-        <Link href="/privacy">关于谢邀喵</Link>
+        <Link href="/about">关于谢邀喵</Link>
       </nav>
       <div className="app-header-right">{right}</div>
     </header>
   );
 }
 
+const APP_ICONS = {
+  home: HomeRoundedIcon,
+  explore: ExploreRoundedIcon,
+  encounter: Diversity3RoundedIcon,
+  atlas: AutoStoriesRoundedIcon,
+} as const;
+
 export function AppBottomNav({ active }: { active: AppSection }) {
   return (
     <nav className="app-bottom-nav" aria-label="移动端主导航">
-      {APP_ITEMS.map(([key, href, mobileLabel]) => (
-        <Link className={active === key ? "is-active" : ""} href={href} key={key}>
-          <span className="app-bottom-icon" aria-hidden="true">{key === "home" ? "⌂" : key === "explore" ? "⌁" : key === "encounter" ? "∞" : "▤"}</span>
-          <span>{mobileLabel}</span>
-        </Link>
-      ))}
+      {APP_ITEMS.map(([key, href, mobileLabel]) => {
+        const Icon = APP_ICONS[key];
+        return (
+          <Link className={active === key ? "is-active" : ""} href={href} key={key}>
+            <span className="app-bottom-icon" aria-hidden="true"><Icon fontSize="small" /></span>
+            <span>{mobileLabel}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }
@@ -155,9 +168,8 @@ export function ArtSlot({
       data-art-slot={name}
       aria-label={`${label ?? name} 图片占位`}
     >
-      <span className="art-slot-kicker">ART SLOT</span>
-      <strong>{label ?? name}</strong>
-      <small>{name}</small>
+      <ImageOutlinedIcon className="art-slot-placeholder-icon" aria-hidden="true" />
+      {label ? <span className="art-slot-label">{label}</span> : null}
     </div>
   );
 }

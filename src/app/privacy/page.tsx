@@ -1,6 +1,5 @@
 import {
   ArtSlot,
-  DemoBanner,
   DemoPage,
   PublicHeader,
 } from "@/features/demo/components";
@@ -35,7 +34,6 @@ const cards = [
 export default function PrivacyPage() {
   return (
     <DemoPage scene="archive">
-      <DemoBanner />
       <PublicHeader right={<a className="public-kicker" href="/">返回序幕</a>} />
       <section className="privacy-stage">
         <div className="privacy-hero-copy">

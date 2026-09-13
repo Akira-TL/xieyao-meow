@@ -1,5 +1,8 @@
 "use client";
 
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
+import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
@@ -15,6 +18,105 @@ function advanceStage(requested: DemoActivationStage) {
   const stored = window.localStorage.getItem(DEMO_STAGE_STORAGE_KEY);
   const current = isDemoActivationStage(stored) ? stored : "VISITOR";
   window.localStorage.setItem(DEMO_STAGE_STORAGE_KEY, advanceActivationStage(current, requested));
+}
+
+interface ZhihuOAuthStatus {
+  oauthConfigured: boolean;
+  oauthPartiallyConfigured: boolean;
+  connected: boolean;
+  developmentIdentityAvailable: boolean;
+  callbackRequiresPublicHttps: boolean;
+  protocolNote: string;
+}
+
+export function ZhihuConsentActions() {
+  const router = useRouter();
+  const [status, setStatus] = useState<ZhihuOAuthStatus | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/zhihu/status", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("无法读取知乎登录状态");
+        return (await response.json()) as ZhihuOAuthStatus;
+      })
+      .then((next) => {
+        if (!cancelled) setStatus(next);
+      })
+      .catch((reason: unknown) => {
+        if (!cancelled) setError(reason instanceof Error ? reason.message : "无法读取知乎登录状态");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!status) {
+    return (
+      <div className="oauth-actions">
+        <button className="theatre-button theatre-button-primary" disabled type="button">
+          <LoginRoundedIcon fontSize="small" /> 正在检查知乎登录…
+        </button>
+        {error ? <p className="oauth-inline-note is-error">{error}</p> : null}
+      </div>
+    );
+  }
+
+  if (status.connected) {
+    return (
+      <div className="oauth-actions">
+        <button
+          className="theatre-button theatre-button-primary"
+          onClick={() => {
+            advanceStage("PROFILE_SCANNING");
+            router.push("/hatch/scanning");
+          }}
+          type="button"
+        >
+          <VerifiedUserOutlinedIcon fontSize="small" /> 已连接知乎，继续孵化 <ArrowForwardRoundedIcon fontSize="small" />
+        </button>
+      </div>
+    );
+  }
+
+  if (status.oauthConfigured) {
+    return (
+      <div className="oauth-actions">
+        <a className="theatre-button theatre-button-primary" href="/api/auth/zhihu/start">
+          <LoginRoundedIcon fontSize="small" /> 用知乎登录并开始孵化 <ArrowForwardRoundedIcon fontSize="small" />
+        </a>
+        <p className="oauth-inline-note">授权确认发生在知乎官方页面；授权码和访问令牌只由服务端处理。</p>
+      </div>
+    );
+  }
+
+  if (status.developmentIdentityAvailable) {
+    return (
+      <div className="oauth-actions">
+        <button
+          className="theatre-button theatre-button-primary"
+          onClick={() => {
+            advanceStage("PROFILE_SCANNING");
+            router.push("/hatch/scanning?identity=developer");
+          }}
+          type="button"
+        >
+          <VerifiedUserOutlinedIcon fontSize="small" /> 用当前知乎开发账号继续 <ArrowForwardRoundedIcon fontSize="small" />
+        </button>
+        <p className="oauth-inline-note">本地会读取当前开发账号的真实公开数据；正式 OAuth 凭证与公网回调配置完成后，同一位置切换为知乎官方登录。</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="oauth-actions">
+      <button className="theatre-button theatre-button-primary" disabled type="button">
+        <LoginRoundedIcon fontSize="small" /> 知乎登录尚未配置
+      </button>
+      <p className="oauth-inline-note is-error">需要先配置知乎 OAuth 应用与平台登记的公网 HTTPS 回调地址。</p>
+    </div>
+  );
 }
 
 export function BottomSheet({
@@ -82,7 +184,7 @@ export function FirstMatchInteraction() {
 
       <div className="match-stage-grid">
         <div className="match-persona">
-          <div className="match-art-slot" data-art-slot="persona/self-match">本喵<br /><small>persona/self-match</small></div>
+          <div className="match-art-slot" data-art-slot="persona/self-match">本喵</div>
           <strong>工具猫</strong>
           <span>长答工程脑</span>
           <q>把复杂的问题，拆成可执行的步骤。</q>
@@ -97,7 +199,7 @@ export function FirstMatchInteraction() {
           </div>
         </div>
         <div className="match-persona">
-          <div className="match-art-slot" data-art-slot={`persona/${candidate.id}`}>{candidate.displayName}<br /><small>persona/{candidate.id}</small></div>
+          <div className="match-art-slot" data-art-slot={`persona/${candidate.id}`}>{candidate.displayName}</div>
           <strong>{candidate.displayName}</strong>
           <span>{candidate.title}</span>
           <q>重要的不是答案，而是更好的问题。</q>
