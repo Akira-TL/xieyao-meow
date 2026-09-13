@@ -13,7 +13,7 @@
 - 长期留存采用**自主出门循环**：宠物会自己离开、浏览真实知乎内容、可选遇见其他 Persona，并在回来时带回旅途札记、问题票根、关系票根、观点碎片等人格资产；用户只提供弱路线引导，不完全控制结果。
 - 首访目标是 60–90 秒完成：OAuth → 人格化验 → 宠物孵化 → 第一次可解释匹配 → Agent × Agent 短互动 → 分享/连接意愿。
 - 激活后的产品壳固定为四个入口：`窝 / 逛 / 遇见 / 图鉴`；其中「窝」由 `AT_HOME / PREPARING / AWAY / RETURNED` 的 outing 状态决定。
-- 低保真首访与自主 outing 产品壳已经可点击跑通；下一实施边界是按 `docs/product/responsive-attention-spec-v1.md` 做双端视觉与交互收敛：每屏只保留一个注意力中心和一个主动作，Mobile Web 与 Desktop Web 共享信息架构但分别重排，不把桌面端做成放大的手机页面。
+- 首访、OAuth callback、真实开发账号数据、日常 outing、Explore / Encounter / Atlas 等主链已可运行；当前进入**真实视觉资产接入阶段**。双端 UX 继续遵守 `docs/product/responsive-attention-spec-v1.md`，角色资产严格遵守 `docs/product/persona-art-system-v1.md`：先锁视觉风格，再锁六个角色母版，之后所有动作只允许基于母版做受控修改，禁止大范围重构。
 - 公开比赛环境已上线：`https://xieyao-meow.babelbeast.com`，Nginx 反向代理到本机 `127.0.0.1:8082`，Let's Encrypt 已签发并通过续期 dry-run；OAuth callback 固定为 `https://xieyao-meow.babelbeast.com/api/auth/zhihu/callback`。当前等待知乎下发 OAuth `app_id/app_key`，Access Secret 真实开发账号数据链路已可在公网运行。
 - 产品体验、系统架构、比赛信息与知乎 API 说明分别维护在 `docs/product/`、`docs/architecture/` 与 `docs/reference/`；本文件只保存稳定领域词汇与当前阶段边界。
 
@@ -21,7 +21,7 @@
 
 ### 谢邀喵
 
-由用户知乎行为数据孵化出的 AI 数字人格。猫是主要视觉与叙事载体，但产品内核是可行动、可表达、可社交的知乎人格 Agent。
+产品品牌名。用户实际孵化的是统一世界观中的「谢邀人格」；第一版冻结六个物种：工具猫、哲学狐、生活兔、数据鸟、创作熊、探索汪。它们都是可行动、可表达、可社交的知乎人格 Agent。刘看山只作为官方向导 NPC，不属于用户 Persona。
 
 ### 知乎成分
 
@@ -29,7 +29,7 @@
 
 ### Persona
 
-由知乎成分映射得到的结构化人格，包括外观、性格、口头禅、回答长度与密度、作息、兴趣标签及其他彩蛋属性。
+由知乎成分映射得到的结构化人格，包括 `species + archetype + appearanceVariant + accessories + traits + interests` 等稳定身份，以及口头禅、回答长度与密度、作息、称号、旅途痕迹和关系资产。视觉身份一旦孵化，后续页面必须保持同一角色母版，不重新随机设计。
 
 ### Knowledge Layer
 
