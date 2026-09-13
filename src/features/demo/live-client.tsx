@@ -12,6 +12,20 @@ import { DemoFlowButton, EvidenceList } from "./client";
 import { PetStage } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 
+export interface LivePersonaSnapshot {
+  mode: AnswerExperience["mode"];
+  generatedAt: number;
+  composition: AnswerExperience["composition"];
+  persona: AnswerExperience["persona"];
+}
+
+export interface LiveQuestionSnapshot {
+  mode: AnswerExperience["mode"];
+  question: AnswerExperience["question"];
+}
+
+export const LIVE_PERSONA_STORAGE_KEY = "xieya-live-persona";
+export const LIVE_QUESTION_STORAGE_KEY = "xieya-live-question";
 export const LIVE_EXPERIENCE_STORAGE_KEY = "xieya-live-experience";
 
 function persistActivation(stage: "HATCH_REVEAL") {
@@ -20,8 +34,8 @@ function persistActivation(stage: "HATCH_REVEAL") {
   window.localStorage.setItem(DEMO_STAGE_STORAGE_KEY, advanceActivationStage(current, stage));
 }
 
-function scanRows(experience: AnswerExperience | null) {
-  if (!experience) {
+function scanRows(snapshot: LivePersonaSnapshot | null) {
+  if (!snapshot) {
     return [
       { key: "contents", question: "写过什么？", value: "读取公开创作", finding: "分析表达长度与结构" },
       { key: "followees", question: "关注谁？", value: "读取关注关系", finding: "分析长期兴趣方向" },
@@ -29,7 +43,7 @@ function scanRows(experience: AnswerExperience | null) {
     ];
   }
 
-  const { composition } = experience;
+  const { composition } = snapshot;
   return [
     {
       key: "contents",
@@ -54,13 +68,43 @@ function scanRows(experience: AnswerExperience | null) {
 
 export function LiveScanningFlow() {
   const router = useRouter();
-  const [experience, setExperience] = useState<AnswerExperience | null>(null);
+  const [snapshot, setSnapshot] = useState<LivePersonaSnapshot | null>(null);
   const [dataReady, setDataReady] = useState(false);
   const [completed, setCompleted] = useState(0);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+
+    fetch("/api/persona", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("persona request failed");
+        return (await response.json()) as LivePersonaSnapshot;
+      })
+      .then((next) => {
+        if (cancelled) return;
+        setSnapshot(next);
+        window.sessionStorage.setItem(LIVE_PERSONA_STORAGE_KEY, JSON.stringify(next));
+        setDataReady(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setError(true);
+        setDataReady(true);
+      });
+
+    fetch("/api/discovery/question", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("question discovery failed");
+        return (await response.json()) as LiveQuestionSnapshot;
+      })
+      .then((next) => {
+        window.sessionStorage.setItem(LIVE_QUESTION_STORAGE_KEY, JSON.stringify(next));
+      })
+      .catch(() => {
+        // A deterministic question fallback remains available if discovery fails.
+      });
+
     fetch("/api/experience", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -72,22 +116,18 @@ export function LiveScanningFlow() {
         return (await response.json()) as AnswerExperience;
       })
       .then((next) => {
-        if (cancelled) return;
-        setExperience(next);
         window.sessionStorage.setItem(LIVE_EXPERIENCE_STORAGE_KEY, JSON.stringify(next));
-        setDataReady(true);
       })
       .catch(() => {
-        if (cancelled) return;
-        setError(true);
-        setDataReady(true);
+        // Full question/knowledge generation is prefetched for later scenes and does not block reveal.
       });
+
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const rows = useMemo(() => scanRows(experience), [experience]);
+  const rows = useMemo(() => scanRows(snapshot), [snapshot]);
 
   useEffect(() => {
     if (!dataReady) return;
@@ -121,7 +161,7 @@ export function LiveScanningFlow() {
         );
       })}
       <p className={`scan-footnote ${error ? "is-fallback" : "is-live"}`}>
-        {error || experience?.mode === "fallback" ? (
+        {error || snapshot?.mode === "fallback" ? (
           <>上游暂时不可用 · 本轮使用备用人格数据</>
         ) : (
           <><CloudDoneOutlinedIcon fontSize="inherit" /> 知乎公开数据已读取 · 正在拼出你的社交气味</>
@@ -131,8 +171,8 @@ export function LiveScanningFlow() {
   );
 }
 
-function buildLiveHighlights(experience: AnswerExperience) {
-  const { composition } = experience;
+function buildLiveHighlights(snapshot: LivePersonaSnapshot) {
+  const { composition } = snapshot;
   const topInterest = composition.interests[0];
   return [
     {
@@ -159,26 +199,28 @@ function buildLiveHighlights(experience: AnswerExperience) {
 }
 
 export function LiveRevealPanel() {
-  const [experience, setExperience] = useState<AnswerExperience | null>(null);
+  const [snapshot, setSnapshot] = useState<LivePersonaSnapshot | null>(null);
 
   useEffect(() => {
-    const raw = window.sessionStorage.getItem(LIVE_EXPERIENCE_STORAGE_KEY);
+    const raw =
+      window.sessionStorage.getItem(LIVE_PERSONA_STORAGE_KEY) ??
+      window.sessionStorage.getItem(LIVE_EXPERIENCE_STORAGE_KEY);
     if (!raw) return;
     try {
-      setExperience(JSON.parse(raw) as AnswerExperience);
+      setSnapshot(JSON.parse(raw) as LivePersonaSnapshot);
     } catch {
-      window.sessionStorage.removeItem(LIVE_EXPERIENCE_STORAGE_KEY);
+      window.sessionStorage.removeItem(LIVE_PERSONA_STORAGE_KEY);
     }
   }, []);
 
   const fallback = DEMO_FIXTURE.persona;
-  const species = experience?.persona.species ?? fallback.species;
-  const personaTitle = experience?.persona.certifiedTitle ?? fallback.title;
-  const catchphrase = experience?.persona.catchphrase ?? fallback.catchphrase;
-  const descriptor = experience?.persona.personality[0] ?? fallback.archetype;
-  const secondary = experience?.composition.primaryInterest ?? fallback.archetype;
-  const highlights = experience ? buildLiveHighlights(experience) : fallback.highlights;
-  const live = experience?.mode === "live";
+  const species = snapshot?.persona.species ?? fallback.species;
+  const personaTitle = snapshot?.persona.certifiedTitle ?? fallback.title;
+  const catchphrase = snapshot?.persona.catchphrase ?? fallback.catchphrase;
+  const descriptor = snapshot?.persona.personality[0] ?? fallback.archetype;
+  const secondary = snapshot?.composition.primaryInterest ?? fallback.archetype;
+  const highlights = snapshot ? buildLiveHighlights(snapshot) : fallback.highlights;
+  const live = snapshot?.mode === "live";
 
   return (
     <section className="reveal-layout">

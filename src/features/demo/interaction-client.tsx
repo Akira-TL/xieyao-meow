@@ -6,6 +6,8 @@ import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
+import type { AnswerExperience } from "@/lib/experience";
+
 import {
   DEMO_STAGE_STORAGE_KEY,
   advanceActivationStage,
@@ -13,6 +15,15 @@ import {
   type DemoActivationStage,
 } from "./activation";
 import { DEMO_FIXTURE } from "./fixtures";
+import {
+  LIVE_EXPERIENCE_STORAGE_KEY,
+  LIVE_PERSONA_STORAGE_KEY,
+  LIVE_QUESTION_STORAGE_KEY,
+  type LivePersonaSnapshot,
+  type LiveQuestionSnapshot,
+} from "./live-client";
+
+const SELECTED_RESIDENT_STORAGE_KEY = "xieya-selected-resident";
 
 function advanceStage(requested: DemoActivationStage) {
   const stored = window.localStorage.getItem(DEMO_STAGE_STORAGE_KEY);
@@ -20,11 +31,118 @@ function advanceStage(requested: DemoActivationStage) {
   window.localStorage.setItem(DEMO_STAGE_STORAGE_KEY, advanceActivationStage(current, requested));
 }
 
+function useLiveExperience() {
+  const [experience, setExperience] = useState<AnswerExperience | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const raw = window.sessionStorage.getItem(LIVE_EXPERIENCE_STORAGE_KEY);
+    if (raw) {
+      try {
+        setExperience(JSON.parse(raw) as AnswerExperience);
+        return () => {
+          cancelled = true;
+        };
+      } catch {
+        window.sessionStorage.removeItem(LIVE_EXPERIENCE_STORAGE_KEY);
+      }
+    }
+
+    fetch("/api/experience", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({}),
+      cache: "no-store",
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("experience request failed");
+        return (await response.json()) as AnswerExperience;
+      })
+      .then((next) => {
+        if (cancelled) return;
+        window.sessionStorage.setItem(LIVE_EXPERIENCE_STORAGE_KEY, JSON.stringify(next));
+        setExperience(next);
+      })
+      .catch(() => {
+        // Later scenes can keep the deterministic fallback if the live experience is unavailable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return experience;
+}
+
+function usePersonaSnapshot() {
+  const [snapshot, setSnapshot] = useState<LivePersonaSnapshot | null>(null);
+
+  useEffect(() => {
+    const raw =
+      window.sessionStorage.getItem(LIVE_PERSONA_STORAGE_KEY) ??
+      window.sessionStorage.getItem(LIVE_EXPERIENCE_STORAGE_KEY);
+    if (!raw) return;
+    try {
+      setSnapshot(JSON.parse(raw) as LivePersonaSnapshot);
+    } catch {
+      window.sessionStorage.removeItem(LIVE_PERSONA_STORAGE_KEY);
+    }
+  }, []);
+
+  return snapshot;
+}
+
+function useQuestionSnapshot() {
+  const [snapshot, setSnapshot] = useState<LiveQuestionSnapshot | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const raw = window.sessionStorage.getItem(LIVE_QUESTION_STORAGE_KEY);
+    if (raw) {
+      try {
+        setSnapshot(JSON.parse(raw) as LiveQuestionSnapshot);
+        return () => {
+          cancelled = true;
+        };
+      } catch {
+        window.sessionStorage.removeItem(LIVE_QUESTION_STORAGE_KEY);
+      }
+    }
+
+    fetch("/api/discovery/question", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("question discovery failed");
+        return (await response.json()) as LiveQuestionSnapshot;
+      })
+      .then((next) => {
+        if (cancelled) return;
+        window.sessionStorage.setItem(LIVE_QUESTION_STORAGE_KEY, JSON.stringify(next));
+        setSnapshot(next);
+      })
+      .catch(() => {
+        // Encounter keeps the deterministic fallback if discovery is unavailable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return snapshot;
+}
+
+function excerpt(value: string, max = 86) {
+  const normalized = value.replace(/[#*_`>\n\r]+/g, " ").replace(/\s+/g, " ").trim();
+  return normalized.length > max ? `${normalized.slice(0, max).trim()}…` : normalized;
+}
+
 interface ZhihuOAuthStatus {
   oauthConfigured: boolean;
   oauthPartiallyConfigured: boolean;
   connected: boolean;
   developmentIdentityAvailable: boolean;
+  demoIdentityAvailable: boolean;
   callbackRequiresPublicHttps: boolean;
   protocolNote: string;
 }
@@ -91,20 +209,25 @@ export function ZhihuConsentActions() {
     );
   }
 
-  if (status.developmentIdentityAvailable) {
+  if (status.developmentIdentityAvailable || status.demoIdentityAvailable) {
+    const publicDemo = status.demoIdentityAvailable && !status.developmentIdentityAvailable;
     return (
       <div className="oauth-actions">
         <button
           className="theatre-button theatre-button-primary"
           onClick={() => {
             advanceStage("PROFILE_SCANNING");
-            router.push("/hatch/scanning?identity=developer");
+            router.push(publicDemo ? "/hatch/scanning?identity=demo" : "/hatch/scanning?identity=developer");
           }}
           type="button"
         >
-          <VerifiedUserOutlinedIcon fontSize="small" /> 用当前知乎开发账号继续 <ArrowForwardRoundedIcon fontSize="small" />
+          <VerifiedUserOutlinedIcon fontSize="small" /> {publicDemo ? "用项目演示账号体验" : "用当前知乎开发账号继续"} <ArrowForwardRoundedIcon fontSize="small" />
         </button>
-        <p className="oauth-inline-note">本地会读取当前开发账号的真实公开数据；正式 OAuth 凭证与公网回调配置完成后，同一位置切换为知乎官方登录。</p>
+        <p className="oauth-inline-note">
+          {publicDemo
+            ? "OAuth 审核期间先读取项目演示账号的真实公开知乎数据；正式凭证到位后这里会切换为知乎官方登录。"
+            : "本地会读取当前开发账号的真实公开数据；正式 OAuth 凭证与公网回调配置完成后，同一位置切换为知乎官方登录。"}
+        </p>
       </div>
     );
   }
@@ -167,14 +290,26 @@ export function BottomSheet({
 
 export function FirstMatchInteraction() {
   const router = useRouter();
-  const candidates = useMemo(() => {
-    const primary = DEMO_FIXTURE.match.candidate;
-    const alternatives = DEMO_FIXTURE.residents.filter((resident) => resident.id !== primary.id);
-    return [primary, ...alternatives];
-  }, []);
+  const snapshot = usePersonaSnapshot();
+  const candidates = useMemo(() => DEMO_FIXTURE.residents, []);
   const [index, setIndex] = useState(0);
   const candidate = candidates[index % candidates.length];
-  const score = Math.max(68, DEMO_FIXTURE.match.score - index * 7);
+  const selfPersona = snapshot?.persona;
+  const selfInterests = selfPersona?.interests ?? DEMO_FIXTURE.persona.interests;
+  const candidateInterestSet = new Set<string>(candidate.interests);
+  const sharedInterests = selfInterests.filter((interest: string) => candidateInterestSet.has(interest));
+  const score = Math.min(95, 72 + sharedInterests.length * 8 + (index === 0 ? 3 : 0));
+  const selfStyle = snapshot?.composition.writingLength === "long"
+    ? "长答工程脑"
+    : snapshot?.composition.writingLength === "short"
+      ? "短句直给型"
+      : "结构化表达型";
+  const primaryInterest = snapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.archetype;
+  const prediction = sharedInterests.length > 0
+    ? candidate.answerStyle.length === "short" && snapshot?.composition.writingLength === "long"
+      ? "很可能边吵边加好友"
+      : "很可能聊着聊着就互相关注"
+    : "暂时陌生，但值得再碰一次";
 
   return (
     <div className="first-match-shell">
@@ -185,37 +320,38 @@ export function FirstMatchInteraction() {
       <div className="match-stage-grid">
         <div className="match-persona">
           <div className="match-art-slot" data-art-slot="persona/self-match">本喵</div>
-          <strong>工具猫</strong>
-          <span>长答工程脑</span>
-          <q>把复杂的问题，拆成可执行的步骤。</q>
+          <strong>{selfPersona?.certifiedTitle ?? DEMO_FIXTURE.persona.title}</strong>
+          <span>{selfStyle}</span>
+          <q>{selfPersona?.catchphrase ?? DEMO_FIXTURE.persona.catchphrase}</q>
         </div>
         <div className="match-score-block">
           <span>谢邀喵匹配度</span>
           <strong>{score}%</strong>
           <div className="match-common-grid">
-            <div><b>共同兴趣</b><em>AI</em><small>人工智能</small></div>
+            <div><b>共同兴趣</b><em>{sharedInterests[0] ?? primaryInterest}</em><small>你的长期偏好</small></div>
             <i>♥</i>
-            <div><b>共同兴趣</b><em>科学</em><small>探索未知</small></div>
+            <div><b>{sharedInterests[1] ? "共同兴趣" : "对方气味"}</b><em>{sharedInterests[1] ?? candidate.interests[0]}</em><small>决定第一场对手戏</small></div>
           </div>
         </div>
         <div className="match-persona">
           <div className="match-art-slot" data-art-slot={`persona/${candidate.id}`}>{candidate.displayName}</div>
           <strong>{candidate.displayName}</strong>
           <span>{candidate.title}</span>
-          <q>重要的不是答案，而是更好的问题。</q>
+          <q>{candidate.catchphrase}</q>
         </div>
       </div>
 
       <div className="match-contrast-row">
-        <span>长答工程脑 <small>系统 · 工具 · 结构</small></span>
+        <span>{selfStyle} <small>{primaryInterest} · {selfPersona?.answerStyle.tone ?? "理性玩梗"}</small></span>
         <b>↔</b>
-        <span>短句直球型 <small>灵感 · 追问 · 人文</small></span>
+        <span>{candidate.personality[0]} <small>{candidate.interests.join(" · ")}</small></span>
       </div>
-      <p className="match-prediction">关系预测：{DEMO_FIXTURE.match.relationPrediction}</p>
+      <p className="match-prediction">关系预测：{prediction}</p>
 
       <button
         className="theatre-button theatre-button-primary match-main-cta"
         onClick={() => {
+          window.sessionStorage.setItem(SELECTED_RESIDENT_STORAGE_KEY, candidate.id);
           advanceStage("FIRST_ENCOUNTER");
           router.push("/encounter/first?phase=encounter");
         }}
@@ -236,8 +372,61 @@ export function FirstMatchInteraction() {
 
 export function EncounterPlayback() {
   const router = useRouter();
-  const turns = DEMO_FIXTURE.encounter.turns;
+  const experience = useLiveExperience();
+  const snapshot = usePersonaSnapshot();
+  const questionSnapshot = useQuestionSnapshot();
+  const [residentId, setResidentId] = useState<string>(DEMO_FIXTURE.match.candidate.id);
   const [shown, setShown] = useState(1);
+
+  useEffect(() => {
+    const stored = window.sessionStorage.getItem(SELECTED_RESIDENT_STORAGE_KEY);
+    if (stored && DEMO_FIXTURE.residents.some((resident) => resident.id === stored)) {
+      setResidentId(stored);
+    }
+  }, []);
+
+  const candidate = DEMO_FIXTURE.residents.find((resident) => resident.id === residentId) ?? DEMO_FIXTURE.residents[0];
+  const topic = experience?.question ?? questionSnapshot?.question ?? DEMO_FIXTURE.encounter.topic;
+  const selfPersona = snapshot?.persona ?? experience?.persona;
+  const selfTitle = selfPersona?.certifiedTitle ?? DEMO_FIXTURE.persona.title;
+  const selfDescriptor = selfPersona?.personality[0] ?? DEMO_FIXTURE.persona.archetype;
+  const selfInterests = selfPersona?.interests ?? DEMO_FIXTURE.persona.interests;
+  const sharedInterests = selfInterests.filter((interest) => new Set<string>(candidate.interests).has(interest));
+  const turns = useMemo(() => {
+    if (experience?.mode === "live") {
+      return [
+        {
+          speaker: "self" as const,
+          text: excerpt(experience.card.answer),
+        },
+        {
+          speaker: "other" as const,
+          text: `${candidate.catchphrase} 我先不接你的结论：如果把人的体验放在前面，你这套拆法还成立吗？`,
+        },
+        {
+          speaker: "self" as const,
+          text: "行，那就从人的体验往回推，再看技术应该替人做到哪一步。",
+        },
+      ];
+    }
+    if (snapshot?.mode === "live") {
+      return [
+        {
+          speaker: "self" as const,
+          text: `${snapshot.persona.catchphrase} 这题我先不急着下结论，先把谁在做决定、谁在承担代价拆开。`,
+        },
+        {
+          speaker: "other" as const,
+          text: `${candidate.catchphrase} 你负责拆结构，我先替普通人问一句：这么做到底让人更轻松了吗？`,
+        },
+        {
+          speaker: "self" as const,
+          text: "那就对了。先把人的体验放在前面，再看技术应该走到哪一步。",
+        },
+      ];
+    }
+    return [...DEMO_FIXTURE.encounter.turns];
+  }, [candidate.catchphrase, experience, snapshot]);
 
   useEffect(() => {
     if (shown >= turns.length) return;
@@ -247,28 +436,31 @@ export function EncounterPlayback() {
 
   return (
     <div className="encounter-playback">
+      <h1 className="encounter-headline">{topic.title}</h1>
+      <p className="encounter-subtitle">一场从真实知乎问题长出来的第一次对手戏</p>
+
       <div className="encounter-actors">
         <div className="encounter-actor">
-          <div className="encounter-art" data-art-slot="persona/self-encounter">工具猫</div>
-          <strong>工具猫</strong>
-          <span>AI 提问派</span>
+          <div className="encounter-art" data-art-slot="persona/self-encounter">本喵</div>
+          <strong>{selfTitle}</strong>
+          <span>{selfDescriptor}</span>
         </div>
         <article className="encounter-topic-card">
-          <span>知乎 · 热议话题</span>
-          <h2>{DEMO_FIXTURE.encounter.topic.title}</h2>
-          <a href={DEMO_FIXTURE.encounter.topic.url} rel="noreferrer" target="_blank">查看原问题 ↗</a>
+          <span>知乎 · 真实问题</span>
+          <h2>{topic.title}</h2>
+          <a href={topic.url} rel="noreferrer" target="_blank">查看原问题 ↗</a>
         </article>
         <div className="encounter-actor">
-          <div className="encounter-art" data-art-slot="persona/other-encounter">{DEMO_FIXTURE.match.candidate.displayName}</div>
-          <strong>{DEMO_FIXTURE.match.candidate.displayName}</strong>
-          <span>人文思考者</span>
+          <div className="encounter-art" data-art-slot={`persona/${candidate.id}`}>{candidate.displayName}</div>
+          <strong>{candidate.displayName}</strong>
+          <span>{candidate.personality[0]}</span>
         </div>
       </div>
 
       <div className="encounter-lines" aria-live="polite">
         {turns.slice(0, shown).map((turn, index) => (
           <p className={turn.speaker === "other" ? "is-other" : "is-self"} key={`${turn.speaker}-${index}`}>
-            <b>{turn.speaker === "other" ? DEMO_FIXTURE.match.candidate.displayName : "工具猫"}：</b>
+            <b>{turn.speaker === "other" ? candidate.displayName : "本喵"}：</b>
             「{turn.text}」
           </p>
         ))}
@@ -276,8 +468,8 @@ export function EncounterPlayback() {
 
       <div className="encounter-explanation">
         <b>为什么会这么聊？</b>
-        <span>AI / 结构化长答 × 短句直球</span>
-        <p>{DEMO_FIXTURE.encounter.explanation}</p>
+        <span>{sharedInterests.length > 0 ? sharedInterests.join(" / ") : "不同兴趣"} · {selfDescriptor} × {candidate.personality[0]}</span>
+        <p>{experience?.mode === "live" || snapshot?.mode === "live" ? "问题来自当前知乎真实内容；你的这一侧使用刚刚孵化出的 Persona 表达，另一侧使用社区居民 Persona。" : DEMO_FIXTURE.encounter.explanation}</p>
       </div>
 
       <button

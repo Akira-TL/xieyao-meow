@@ -21,6 +21,9 @@ export const DEMO_FIXTURE = {
     species: agent.persona.species,
     title: agent.persona.certifiedTitle,
     interests: [...agent.persona.interests],
+    personality: [...agent.persona.personality],
+    catchphrase: agent.persona.catchphrase,
+    answerStyle: { ...agent.persona.answerStyle },
     kind: "demo_resident" as const,
   })),
   landing: {

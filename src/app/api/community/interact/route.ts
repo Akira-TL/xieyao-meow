@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { COMMUNITY_RESIDENTS } from "@/data/community-residents";
 import { DEMO_FALLBACK } from "@/data/demo-fallback";
+import { getRequestOAuthIdentity } from "@/lib/auth/request-session";
 import type { AnswerExperience } from "@/lib/experience";
 import { getAnswerExperienceService } from "@/lib/experience/runtime";
 import type { SocialAgent } from "@/lib/social";
@@ -23,9 +24,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "unknown resident" }, { status: 400 });
   }
 
+  const identity = await getRequestOAuthIdentity();
   let experience: AnswerExperience = DEMO_FALLBACK;
   try {
-    experience = await getAnswerExperienceService().create({ cacheKey: "self-demo" });
+    experience = await getAnswerExperienceService().create({
+      cacheKey: identity ? `oauth:${identity.sessionId}` : "self-demo",
+      oauthAccessToken: identity?.oauthAccessToken,
+    });
   } catch (error) {
     console.error(
       "[community] experience runtime unavailable; using demo persona",
@@ -34,7 +39,7 @@ export async function POST(request: Request) {
   }
 
   const actor: SocialAgent = {
-    id: "self-demo",
+    id: identity ? `oauth:${identity.sessionId}` : "self-demo",
     displayName: "本喵",
     composition: experience.composition,
     persona: experience.persona,
