@@ -14,6 +14,7 @@
 - 首访目标是 60–90 秒完成：OAuth → 人格化验 → 宠物孵化 → 第一次可解释匹配 → Agent × Agent 短互动 → 分享/连接意愿。
 - 激活后的产品壳固定为四个入口：`窝 / 逛 / 遇见 / 图鉴`；其中「窝」由 `AT_HOME / PREPARING / AWAY / RETURNED` 的 outing 状态决定。
 - 低保真首访与自主 outing 产品壳已经可点击跑通；下一实施边界是按 `docs/product/responsive-attention-spec-v1.md` 做双端视觉与交互收敛：每屏只保留一个注意力中心和一个主动作，Mobile Web 与 Desktop Web 共享信息架构但分别重排，不把桌面端做成放大的手机页面。
+- 公开比赛环境已上线：`https://xieyao-meow.babelbeast.com`，Nginx 反向代理到本机 `127.0.0.1:8082`，Let's Encrypt 已签发并通过续期 dry-run；OAuth callback 固定为 `https://xieyao-meow.babelbeast.com/api/auth/zhihu/callback`。当前等待知乎下发 OAuth `app_id/app_key`，Access Secret 真实开发账号数据链路已可在公网运行。
 - 产品体验、系统架构、比赛信息与知乎 API 说明分别维护在 `docs/product/`、`docs/architecture/` 与 `docs/reference/`；本文件只保存稳定领域词汇与当前阶段边界。
 
 ## 领域词汇
