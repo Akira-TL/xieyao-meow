@@ -383,6 +383,29 @@ export function LiveAtlasSection() {
         </div>
       </PaperCard>
 
+      <div className="atlas-mobile-index" aria-label="移动端图鉴索引">
+        <details open>
+          <summary><b>最近变化</b><span>{observations[0]}</span></summary>
+          <div className="atlas-mobile-detail">
+            {observations.map((item, index) => <p key={item}>{String(index + 1).padStart(2, "0")}　{item}</p>)}
+          </div>
+        </details>
+        <details>
+          <summary><b>知乎成分</b><span>{counts?.contents ?? 0} 创作 · {counts?.followees ?? 0} 关注</span></summary>
+          <div className="atlas-mobile-stats">
+            <span><b>{counts?.contents ?? 0}</b>公开创作</span>
+            <span><b>{counts?.followees ?? 0}</b>关注</span>
+            <span><b>{counts?.collections ?? 0}</b>近期收藏</span>
+            <span><b>{counts?.favlists ?? 0}</b>收藏夹</span>
+          </div>
+        </details>
+        <Link href="/encounter"><b>关系图鉴</b><span>{DEMO_FIXTURE.atlas.relationships.length} 个关系 · 去看看它遇见了谁</span></Link>
+        <details>
+          <summary><b>人格轨迹</b><span>{primaryInterest} → {title}</span></summary>
+          <p className="atlas-mobile-trace">知乎成分「{primaryInterest}」正在把它推向「{title}」。人格会随之后的旅途继续变化。</p>
+        </details>
+      </div>
+
       <div className="atlas-grid">
         <PaperCard>
           <div className="section-heading-row"><h2>最近变化</h2><span>{snapshot?.mode === "live" ? "当前知乎成分" : "备用成分"}</span></div>

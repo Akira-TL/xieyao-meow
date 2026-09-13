@@ -3,7 +3,6 @@ import AutoStoriesRoundedIcon from "@mui/icons-material/AutoStoriesRounded";
 import Diversity3RoundedIcon from "@mui/icons-material/Diversity3Rounded";
 import ExploreRoundedIcon from "@mui/icons-material/ExploreRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -166,10 +165,8 @@ export function ArtSlot({
     <div
       className={`art-slot art-slot--${aspect} ${className}`}
       data-art-slot={name}
-      aria-label={`${label ?? name} 图片占位`}
-    >
-      <ImageOutlinedIcon className="art-slot-placeholder-icon" aria-hidden="true" />
-    </div>
+      aria-label={`${label ?? name} 图片位置`}
+    />
   );
 }
 
