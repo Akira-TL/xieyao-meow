@@ -110,9 +110,10 @@ export const DEMO_FIXTURE = {
     ],
     explanation: "共同兴趣是工程与 AI；你的表达偏结构化，齿轮偏证据直给，所以它们会在同一事实基础上用不同方式说话。",
     relationship: {
-      status: "同频路人",
-      affinity: 4,
-      controversy: 7,
+      status: "同频猫友",
+      familiarity: 1,
+      chemistry: 2,
+      encounterCount: 1,
     },
   },
   home: {

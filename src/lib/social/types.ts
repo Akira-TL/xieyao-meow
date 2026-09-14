@@ -2,7 +2,16 @@ import type { Persona, ZhihuComposition } from "@/lib/persona";
 import type { InterestName } from "@/lib/persona/types";
 
 export type SocialAction = "visit" | "comment" | "debate";
-export type RelationshipState = "初识" | "同频路人" | "互关搭子" | "灵魂猫友" | "对线冤家";
+export type RelationshipState = "初见" | "同频猫友" | "熟悉的杠精" | "灵魂猫友" | "对线冤家";
+
+export interface PersonaRelationship {
+  userAId: string;
+  userBId: string;
+  familiarity: number;
+  chemistry: number;
+  encounterCount: number;
+  lastEncounterAt: number | null;
+}
 
 export interface SocialAgent {
   id: string;
@@ -29,8 +38,8 @@ export interface SocialEvent {
   comment: string;
   reasons: string[];
   signals: SocialSignals;
-  affinityBefore: number;
-  affinityDelta: number;
-  affinityAfter: number;
+  familiarity: number;
+  chemistry: number;
+  encounterCount: number;
   relationship: RelationshipState;
 }

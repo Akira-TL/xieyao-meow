@@ -87,7 +87,7 @@ export function CommunityDemo({ residents }: CommunityDemoProps) {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="action-badge">{actionLabel(event.action)}</span>
                   <span className="text-xs text-zinc-600">
-                    好感 {signed(event.affinityDelta)} → {event.affinityAfter} · {event.relationship}
+                    熟悉 {event.familiarity} · 化学 {signed(event.chemistry)} · {event.relationship}
                   </span>
                 </div>
                 <p className="mt-3 text-sm leading-6 text-zinc-300">{event.narrative}</p>

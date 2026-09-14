@@ -69,25 +69,25 @@ function chooseAction(signals: SocialSignals): SocialAction {
   return "comment";
 }
 
-function affinityDelta(action: SocialAction, signals: SocialSignals): number {
+function chemistryDelta(action: SocialAction, signals: SocialSignals): number {
   const commonGround = signals.sharedInterests.length * 2;
-  const familiarity = (signals.chronotypeMatch ? 1 : 0) + Math.min(signals.sharedTraits.length, 1);
+  const resonance = (signals.chronotypeMatch ? 1 : 0) + Math.min(signals.sharedTraits.length, 1);
 
   if (action === "debate") {
-    return commonGround + familiarity - signals.styleContrast;
+    return commonGround + resonance - signals.styleContrast;
   }
   if (action === "comment") {
-    return commonGround + familiarity + 1;
+    return commonGround + resonance + 1;
   }
-  return 1;
+  return 0;
 }
 
-function relationshipFor(affinity: number): RelationshipState {
-  if (affinity <= -3) return "对线冤家";
-  if (affinity <= 1) return "初识";
-  if (affinity <= 4) return "同频路人";
-  if (affinity <= 8) return "互关搭子";
-  return "灵魂猫友";
+function relationshipFor(familiarity: number, chemistry: number): RelationshipState {
+  if (chemistry <= -4 && familiarity >= 3) return "对线冤家";
+  if (chemistry < 0 && familiarity >= 2) return "熟悉的杠精";
+  if (chemistry >= 6 && familiarity >= 3) return "灵魂猫友";
+  if (familiarity >= 2 || chemistry >= 2) return "同频猫友";
+  return "初见";
 }
 
 function explain(signals: SocialSignals, action: SocialAction): string[] {
@@ -134,8 +134,14 @@ function renderEvent(
   };
 }
 
+interface CommunityRelationship {
+  familiarity: number;
+  chemistry: number;
+  encounterCount: number;
+}
+
 export class SocialCommunity {
-  private readonly affinities = new Map<string, number>();
+  private readonly relationships = new Map<string, CommunityRelationship>();
   private readonly feed: SocialEvent[] = [];
   private sequence = 0;
 
@@ -145,12 +151,19 @@ export class SocialCommunity {
     }
 
     const key = pairKey(actor.id, target.id);
-    const affinityBefore = this.affinities.get(key) ?? 0;
+    const before = this.relationships.get(key) ?? {
+      familiarity: 0,
+      chemistry: 0,
+      encounterCount: 0,
+    };
     const signals = buildSocialSignals(actor, target);
     const action = chooseAction(signals);
-    const delta = affinityDelta(action, signals);
-    const affinityAfter = affinityBefore + delta;
-    this.affinities.set(key, affinityAfter);
+    const after: CommunityRelationship = {
+      familiarity: before.familiarity + 1,
+      chemistry: before.chemistry + chemistryDelta(action, signals),
+      encounterCount: before.encounterCount + 1,
+    };
+    this.relationships.set(key, after);
 
     const rendered = renderEvent(actor, target, action, signals);
     this.sequence += 1;
@@ -165,10 +178,10 @@ export class SocialCommunity {
       comment: rendered.comment,
       reasons: explain(signals, action),
       signals,
-      affinityBefore,
-      affinityDelta: delta,
-      affinityAfter,
-      relationship: relationshipFor(affinityAfter),
+      familiarity: after.familiarity,
+      chemistry: after.chemistry,
+      encounterCount: after.encounterCount,
+      relationship: relationshipFor(after.familiarity, after.chemistry),
     };
 
     this.feed.unshift(event);
@@ -180,7 +193,13 @@ export class SocialCommunity {
     return [...this.feed];
   }
 
-  getAffinity(leftId: string, rightId: string): number {
-    return this.affinities.get(pairKey(leftId, rightId)) ?? 0;
+  getRelationship(leftId: string, rightId: string): CommunityRelationship {
+    return {
+      ...(this.relationships.get(pairKey(leftId, rightId)) ?? {
+        familiarity: 0,
+        chemistry: 0,
+        encounterCount: 0,
+      }),
+    };
   }
 }

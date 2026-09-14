@@ -1,6 +1,7 @@
 import { DemoRouteGuard } from "@/features/demo/client";
 import { AppBottomNav, AppHeader, DemoPage } from "@/features/demo/components";
 import { LiveEncounterSection } from "@/features/demo/live/daily-live-client";
+import { SharedEncounterPanel } from "@/features/demo/live/shared-encounter-client";
 
 export default async function EncounterHubPage({
   searchParams,
@@ -15,6 +16,7 @@ export default async function EncounterHubPage({
       <DemoPage scene="encounter">
         <AppHeader active="encounter" />
         <section className="encounter-hub-stage">
+          <SharedEncounterPanel />
           <LiveEncounterSection showFeatured={showFeatured} />
         </section>
         <AppBottomNav active="encounter" />

@@ -17,6 +17,7 @@ export type {
   SocialMatchMode,
 } from "./match";
 export type {
+  PersonaRelationship,
   RelationshipState,
   SocialAction,
   SocialAgent,
