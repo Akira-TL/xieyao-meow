@@ -157,12 +157,26 @@ export class ZhihuGateway {
   }
 
   async getUserProfile(input: GetUserProfileInput = {}): Promise<UserProfile> {
-    const [contents, followees, collections, favlists] = await Promise.all([
-      this.getUserContents(input.oauthAccessToken),
-      this.getUserFollowees(input.oauthAccessToken),
-      this.getUserCollections(input.oauthAccessToken),
-      this.getUserFavlists(input.oauthAccessToken),
-    ]);
+    const readSignal = async <T>(load: () => Promise<T[]>): Promise<T[]> => {
+      try {
+        return await load();
+      } catch (error) {
+        console.warn(
+          "[zhihu-profile] signal unavailable",
+          error instanceof Error ? error.message : "unknown error",
+        );
+        return [];
+      }
+    };
+    const pause = () => new Promise((resolve) => setTimeout(resolve, 1_050));
+
+    const contents = await readSignal(() => this.getUserContents(input.oauthAccessToken));
+    await pause();
+    const followees = await readSignal(() => this.getUserFollowees(input.oauthAccessToken));
+    await pause();
+    const collections = await readSignal(() => this.getUserCollections(input.oauthAccessToken));
+    await pause();
+    const favlists = await readSignal(() => this.getUserFavlists(input.oauthAccessToken));
 
     return {
       fetchedAt: Math.floor(this.now() / 1000),
