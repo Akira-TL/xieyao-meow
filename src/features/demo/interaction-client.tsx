@@ -152,10 +152,13 @@ interface ZhihuOAuthStatus {
 
 export function ZhihuConsentActions() {
   const router = useRouter();
+  const developmentBypass = process.env.NODE_ENV === "development";
   const [status, setStatus] = useState<ZhihuOAuthStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (developmentBypass) return;
+
     let cancelled = false;
     fetch("/api/auth/zhihu/status", { cache: "no-store" })
       .then(async (response) => {
@@ -171,7 +174,22 @@ export function ZhihuConsentActions() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [developmentBypass]);
+
+  if (developmentBypass) {
+    return (
+      <div className="oauth-actions">
+        <a
+          className="theatre-button theatre-button-primary"
+          href="/hatch/scanning"
+          onClick={() => advanceStage("PROFILE_SCANNING")}
+        >
+          <VerifiedUserOutlinedIcon fontSize="small" /> 开发模式：直接孵化 <ArrowForwardRoundedIcon fontSize="small" />
+        </a>
+        <p className="oauth-inline-note">仅本地开发环境跳过注册 / OAuth，方便连续验收后续页面；生产环境仍走正式知乎授权。</p>
+      </div>
+    );
+  }
 
   if (!status) {
     return (

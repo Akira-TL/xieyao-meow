@@ -49,45 +49,99 @@ a { color: inherit; text-decoration: none; }
     radial-gradient(circle at 50% 55%, rgba(22,119,255,.04), transparent 42%);
 }
 .theatre-scene-art {
+  --scene-opacity: .34;
   position: fixed;
   inset: 0;
   z-index: 0;
+  display: grid;
+  place-items: center;
   pointer-events: none;
-  opacity: .34;
+  overflow: visible;
+  opacity: 1;
+}
+.theatre-scene-wing {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  width: max(0px, calc((100vw - min(100vw, calc(100dvh * 1122 / 1402))) / 2 + clamp(36px, 4vw, 76px)));
+  pointer-events: none;
+  opacity: calc(var(--scene-opacity) * .88);
+}
+.theatre-scene-wing--left {
+  left: 0;
+  background:
+    repeating-linear-gradient(92deg, rgba(43,3,5,.78) 0 9%, rgba(92,8,10,.52) 12% 19%, rgba(36,2,4,.75) 23% 31%),
+    linear-gradient(90deg, rgba(61,4,7,.94), rgba(74,6,9,.78) 64%, rgba(65,4,7,.56));
+}
+.theatre-scene-wing--right {
+  right: 0;
+  background:
+    repeating-linear-gradient(88deg, rgba(36,2,4,.75) 0 9%, rgba(92,8,10,.52) 12% 19%, rgba(43,3,5,.78) 23% 31%),
+    linear-gradient(270deg, rgba(61,4,7,.94), rgba(74,6,9,.78) 64%, rgba(65,4,7,.56));
+}
+.theatre-scene-canvas {
+  position: relative;
+  width: min(100vw, calc(100dvh * 1122 / 1402));
+  aspect-ratio: 1122 / 1402;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+.theatre-scene-curtain,
+.theatre-scene-spotlight,
+.theatre-scene-floor,
+.theatre-scene-overlay {
+  position: absolute;
+  pointer-events: none;
+}
+.theatre-scene-curtain {
+  inset: 0;
+  z-index: 1;
   background-image: url("/art/world/theatre/curtain-frame.png");
   background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
+  background-position: center;
+  background-size: contain;
+  opacity: var(--scene-opacity);
   filter: saturate(.82) contrast(1.02);
 }
-.theatre-scene-art::before {
-  content: "";
-  position: absolute;
-  inset: 7vh 12vw auto;
-  height: 72vh;
+.theatre-scene-spotlight {
+  z-index: 2;
+  top: 4.5%;
+  left: 12%;
+  width: 76%;
+  height: 73%;
   background-image: url("/art/world/theatre/spotlight.png");
   background-repeat: no-repeat;
   background-position: center top;
   background-size: contain;
-  opacity: .28;
+  opacity: calc(var(--scene-opacity) * .82);
 }
-.theatre-scene-art::after {
-  content: "";
-  position: absolute;
-  inset: auto -4vw -17vh;
-  height: min(48vh, 460px);
+.theatre-scene-floor {
+  z-index: 3;
+  left: 50%;
+  bottom: -4%;
+  width: 110%;
+  aspect-ratio: 1448 / 1086;
+  transform: translateX(-50%);
   background-image: url("/art/world/theatre/stage-floor.png");
   background-repeat: no-repeat;
   background-position: center bottom;
-  background-size: 100% auto;
-  opacity: .58;
+  background-size: contain;
+  opacity: calc(var(--scene-opacity) * 1.65);
+  filter: saturate(.86) contrast(1.02);
+}
+.theatre-scene-overlay {
+  z-index: 4;
+  inset: 0;
+  opacity: 1;
+  filter: none;
 }
 .theatre-page--default .theatre-scene-art,
 .theatre-page--archive .theatre-scene-art { display: none; }
-.theatre-page--landing .theatre-scene-art { opacity: .28; }
-.theatre-page--casting .theatre-scene-art { opacity: .36; }
-.theatre-page--reveal .theatre-scene-art { opacity: .38; }
-.theatre-page--encounter .theatre-scene-art { opacity: .32; }
+.theatre-page--landing .theatre-scene-art { --scene-opacity: .28; }
+.theatre-page--casting .theatre-scene-art { --scene-opacity: .36; }
+.theatre-page--reveal .theatre-scene-art { --scene-opacity: .38; }
+.theatre-page--encounter .theatre-scene-art { --scene-opacity: .32; }
 .theatre-grain {
   pointer-events: none;
   position: fixed;
@@ -705,15 +759,14 @@ a { color: inherit; text-decoration: none; }
 
 .public-kicker { color: #8d939b; font-size: 9px; letter-spacing: .14em; }
 .theatre-page--landing {
-  height: 100dvh;
   min-height: 100dvh;
-  overflow: hidden;
+  overflow: visible;
 }
 .landing-stage {
   position: relative;
   height: calc(100dvh - 116px);
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   padding: clamp(26px, 4vw, 56px);
   border: 1px solid rgba(255,255,255,.1);
   background: radial-gradient(ellipse at 50% 18%, rgba(255,235,190,.12), transparent 34%);
@@ -722,7 +775,7 @@ a { color: inherit; text-decoration: none; }
   position: absolute;
   z-index: 4;
   top: clamp(18px, 2.2vh, 34px);
-  left: clamp(36px, 5.3vw, 82px);
+  left: calc(50% - min(50vw, calc(50dvh * 1122 / 1402)) + 24px);
   width: min(58vw, 700px);
 }
 .landing-copy .stage-caption { text-align: left; }
@@ -737,30 +790,56 @@ a { color: inherit; text-decoration: none; }
 .landing-copy h1 span { color: var(--blue); }
 .landing-handwriting { margin: 16px 0 0; color: #d8d9da; font-size: clamp(17px, 1.75vw, 26px); font-style: italic; transform: rotate(-2deg); }
 .landing-detail { max-width: 42ch; margin: 12px 0 0; color: #90959d; font-size: 12px; line-height: 1.75; }
-.landing-visual {
+.landing-visual--scene {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   inset: 0;
   pointer-events: none;
 }
-.landing-visual .persona-egg {
+.landing-stage-cast {
   position: absolute;
-  top: 28%;
-  left: 52%;
-  width: clamp(240px, 28vw, 360px);
-  transform: translate(-50%, -10%);
+  inset: 0;
 }
-.landing-guide {
+.landing-stage-cast .persona-egg {
   position: absolute;
-  top: 62%;
-  left: 74%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  transform: translate(-50%, -50%);
+  left: 50%;
+  bottom: 23%;
+  width: 48%;
+  transform: translateX(-50%);
 }
-.landing-guide .kanshan-art { width: 118px; height: 118px; }
+.landing-stage-cast .landing-guide {
+  position: absolute;
+  left: 68%;
+  bottom: 27%;
+  width: 32%;
+  aspect-ratio: 1;
+}
+.landing-stage-cast .landing-guide .landing-bubble {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 100%;
+  white-space: nowrap;
+  transform: translate(-50%, -8px);
+}
+.landing-stage-cast .landing-guide .kanshan-art {
+  width: 100%;
+  height: 100%;
+}
+.landing-stage-cast .landing-guide .kanshan-art-image {
+  transform: scaleX(-1);
+  transform-origin: center;
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .landing-copy {
+    left: 32px;
+    width: 320px;
+  }
+  .landing-copy h1 {
+    max-width: 8.5ch;
+    font-size: 42px;
+  }
+}
 .landing-bubble { border-radius: 999px; background: #f2eee5; color: #15181b; padding: 10px 14px; font-size: 12px; font-weight: 800; }
 .landing-actions {
   position: absolute;
@@ -777,6 +856,9 @@ a { color: inherit; text-decoration: none; }
 .landing-actions > div { width: 100%; justify-content: center; }
 .landing-actions .theatre-button-primary { min-width: 280px; font-size: 24px; min-height: 70px; }
 .landing-actions p { margin: 0; color: #7c828a; font-size: 10px; text-align: center; }
+@media (min-width: 761px) and (max-height: 920px) {
+  .landing-actions { bottom: 0; }
+}
 @media (max-width: 760px) {
   .public-kicker { display: none; }
   .theatre-page--landing {
@@ -787,48 +869,29 @@ a { color: inherit; text-decoration: none; }
   .landing-stage {
     height: calc(100dvh - 94px);
     min-height: 0;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-areas: "copy" "visual" "actions";
-    gap: 18px;
-    overflow: hidden;
+    overflow: visible;
     border-left: 0;
     border-right: 0;
     padding: 18px 20px 28px;
   }
   .landing-copy {
-    position: static;
-    grid-area: copy;
+    position: absolute;
+    top: 18px;
+    left: 20px;
+    right: 20px;
     width: auto;
   }
   .landing-copy .stage-caption { text-align: center; font-size: 8px; }
   .landing-copy h1 { margin-top: 16px; max-width: 100%; font-size: clamp(42px, 13vw, 60px); text-align: left; }
   .landing-handwriting { font-size: 17px; }
   .landing-detail { display: none; }
-  .landing-visual {
-    position: static;
-    grid-area: visual;
-    display: flex;
-    min-height: 260px;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
-  }
-  .landing-visual .persona-egg {
-    position: relative;
-    top: auto;
-    left: auto;
-    width: min(46vw, 190px);
-    transform: none;
-  }
-  .landing-guide {
-    position: static;
-    transform: none;
-  }
-  .landing-guide .kanshan-art { width: 96px; height: 96px; }
+  .landing-stage-cast .persona-egg { width: 50%; }
+  .landing-bubble { padding: 7px 10px; font-size: 10px; }
   .landing-actions {
-    position: static;
-    grid-area: actions;
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 14px;
     width: auto;
     padding-top: 0;
     transform: none;

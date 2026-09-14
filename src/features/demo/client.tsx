@@ -60,31 +60,29 @@ export function DemoFlowButton({
   children: ReactNode;
   variant?: "primary" | "secondary";
 }) {
-  const router = useRouter();
-
-  function go() {
-    if (stage) {
-      persistStage(advanceActivationStage(currentStage(), stage));
-    }
-    router.push(href);
-  }
-
   return (
-    <button
+    <a
       className={`theatre-button ${variant === "primary" ? "theatre-button-primary" : "theatre-button-secondary"}`}
-      onClick={go}
-      type="button"
+      href={href}
+      onClick={() => {
+        if (stage) {
+          persistStage(advanceActivationStage(currentStage(), stage));
+        }
+      }}
     >
       {children}<span aria-hidden="true">→</span>
-    </button>
+    </a>
   );
 }
 
 export function DemoRouteGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [ready, setReady] = useState(false);
+  const developmentBypass = process.env.NODE_ENV === "development";
+  const [ready, setReady] = useState(developmentBypass);
 
   useEffect(() => {
+    if (developmentBypass) return;
+
     const requested = `${window.location.pathname}${window.location.search}`;
     const query = new URLSearchParams(window.location.search);
     if (window.location.pathname === "/hatch/scanning" && query.get("oauth") === "connected") {
@@ -96,7 +94,7 @@ export function DemoRouteGuard({ children }: { children: ReactNode }) {
       return;
     }
     setReady(true);
-  }, [router]);
+  }, [developmentBypass, router]);
 
   if (!ready) {
     return (

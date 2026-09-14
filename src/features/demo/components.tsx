@@ -29,22 +29,39 @@ const ACTIVATION_STEPS = [
   ["06", "对手戏"],
 ] as const;
 
+function TheatreSceneArt({ overlay }: { overlay?: ReactNode }) {
+  return (
+    <div className="theatre-scene-art" aria-hidden="true">
+      <div className="theatre-scene-wing theatre-scene-wing--left" />
+      <div className="theatre-scene-wing theatre-scene-wing--right" />
+      <div className="theatre-scene-canvas">
+        <div className="theatre-scene-curtain" />
+        <div className="theatre-scene-spotlight" />
+        <div className="theatre-scene-floor" />
+        {overlay ? <div className="theatre-scene-overlay">{overlay}</div> : null}
+      </div>
+    </div>
+  );
+}
+
 export function DemoPage({
   children,
   width = "max-w-[1200px]",
   scene = "default",
   activation = false,
+  sceneOverlay,
 }: {
   children: ReactNode;
   width?: string;
   scene?: "default" | "landing" | "casting" | "reveal" | "encounter" | "archive";
   activation?: boolean;
+  sceneOverlay?: ReactNode;
 }) {
   const usesTheatreScenery = scene === "landing" || scene === "casting" || scene === "reveal" || scene === "encounter";
 
   return (
     <main className={`theatre-page theatre-page--${scene}${activation ? " theatre-page--activation" : ""}`}>
-      {usesTheatreScenery ? <div className="theatre-scene-art" aria-hidden="true" /> : null}
+      {usesTheatreScenery ? <TheatreSceneArt overlay={sceneOverlay} /> : null}
       <div className="theatre-grain" aria-hidden="true" />
       <div className={`relative z-10 mx-auto w-full ${width}`}>{children}</div>
     </main>
