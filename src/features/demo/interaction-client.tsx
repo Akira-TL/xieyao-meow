@@ -322,21 +322,15 @@ export function FirstMatchInteraction() {
   const selfInterests = selfPersona?.interests ?? DEMO_FIXTURE.persona.interests;
   const candidateInterestSet = new Set<string>(candidate.interests);
   const sharedInterests = selfInterests.filter((interest: string) => candidateInterestSet.has(interest));
-  const fallbackScore = Math.min(95, 72 + sharedInterests.length * 8 + (index === 0 ? 3 : 0));
-  const score = matchInsight?.score ?? fallbackScore;
+  const score = matchInsight?.score;
   const selfStyle = snapshot?.composition.writingLength === "long"
     ? "长答工程脑"
     : snapshot?.composition.writingLength === "short"
       ? "短句直给型"
       : "结构化表达型";
   const primaryInterest = snapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.archetype;
-  const fallbackPrediction = sharedInterests.length > 0
-    ? candidate.answerStyle.length === "short" && snapshot?.composition.writingLength === "long"
-      ? "很可能边吵边加好友"
-      : "很可能聊着聊着就互相关注"
-    : "暂时陌生，但值得再碰一次";
-  const prediction = matchInsight?.prediction ?? fallbackPrediction;
-  const bridge = matchInsight?.bridge ?? sharedInterests[1] ?? candidate.interests[0];
+  const prediction = matchInsight?.prediction ?? (matchLoading ? "正在比较两种思考方式…" : "匹配结果暂时不可用");
+  const bridge = matchInsight?.bridge ?? (matchLoading ? "寻找连接点…" : candidate.interests[0]);
 
   useEffect(() => {
     let cancelled = false;
@@ -380,7 +374,7 @@ export function FirstMatchInteraction() {
         </div>
         <div className="match-score-block">
           <span>谢邀喵匹配度</span>
-          <strong>{score}%</strong>
+          <strong>{score === undefined ? "…" : `${score}%`}</strong>
           <div className="match-common-grid">
             <div><b>共同兴趣</b><em>{sharedInterests[0] ?? primaryInterest}</em><small>你的长期偏好</small></div>
             <i>♥</i>
@@ -410,11 +404,7 @@ export function FirstMatchInteraction() {
       <p className="match-reason">
         {matchLoading ? "正在比较两种思考方式…" : matchInsight?.reason ?? "先从共同兴趣和表达差异建立第一条连接。"}
         <span className={matchInsight?.mode === "zhida" ? "is-live" : ""}>
-          {matchLoading
-            ? "匹配中"
-            : matchInsight?.mode === "zhida"
-              ? "知乎直答 + 谢邀喵匹配规则"
-              : "谢邀喵匹配规则"}
+          {matchLoading ? "匹配中" : matchInsight?.sourceLabel ?? "匹配暂不可用"}
         </span>
       </p>
 
