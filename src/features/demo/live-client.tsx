@@ -9,7 +9,7 @@ import type { AnswerExperience } from "@/lib/experience";
 
 import { DEMO_STAGE_STORAGE_KEY, advanceActivationStage, isDemoActivationStage } from "./activation";
 import { DemoFlowButton, EvidenceList } from "./client";
-import { PersonaEgg, PetStage } from "./components";
+import { KanshanPlaceholder, PersonaEgg, PetStage } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 
 export interface LivePersonaSnapshot {
@@ -148,19 +148,40 @@ function scanRows(snapshot: LivePersonaSnapshot | null) {
   ];
 }
 
-export function ScanningEggSequence() {
+const SCANNING_GLOW_MS = 900;
+const SCANNING_CRACK_MS = 1850;
+const SCANNING_OPEN_MS = 2800;
+const SCANNING_RESULTS_MS = 3150;
+
+export function ScanningStageVisual() {
   const [state, setState] = useState<"scanning" | "glowing" | "cracking" | "opened">("scanning");
 
   useEffect(() => {
     const steps = [
-      window.setTimeout(() => setState("glowing"), 900),
-      window.setTimeout(() => setState("cracking"), 1850),
-      window.setTimeout(() => setState("opened"), 2800),
+      window.setTimeout(() => setState("glowing"), SCANNING_GLOW_MS),
+      window.setTimeout(() => setState("cracking"), SCANNING_CRACK_MS),
+      window.setTimeout(() => setState("opened"), SCANNING_OPEN_MS),
     ];
     return () => steps.forEach(window.clearTimeout);
   }, []);
 
-  return <PersonaEgg state={state} />;
+  const status = state === "scanning"
+    ? "正在闻你的知乎轨迹"
+    : state === "glowing"
+      ? "有东西开始发光了"
+      : state === "cracking"
+        ? "壳正在裂开"
+        : "它出来了";
+
+  return (
+    <div className={`scanning-stage-cast scanning-stage-cast--${state}`}>
+      <div className="scanning-stage-egg-anchor">
+        <PersonaEgg state={state} />
+      </div>
+      <KanshanPlaceholder action="computer" className="kanshan-art--casting" />
+      <p className="scanning-stage-status">{status}</p>
+    </div>
+  );
 }
 
 export function LiveScanningFlow() {
@@ -169,6 +190,12 @@ export function LiveScanningFlow() {
   const [dataReady, setDataReady] = useState(false);
   const [completed, setCompleted] = useState(0);
   const [error, setError] = useState(false);
+  const [born, setBorn] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setBorn(true), SCANNING_RESULTS_MS);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -227,23 +254,25 @@ export function LiveScanningFlow() {
   const rows = useMemo(() => scanRows(snapshot), [snapshot]);
 
   useEffect(() => {
-    if (!dataReady) return;
+    if (!dataReady || !born) return;
     const timers = rows.map((_, index) =>
-      window.setTimeout(() => setCompleted(index + 1), 250 + index * 650),
+      window.setTimeout(() => setCompleted(index + 1), 220 + index * 560),
     );
     const finish = window.setTimeout(() => {
       persistActivation("HATCH_REVEAL");
       router.replace("/hatch/reveal");
-    }, 250 + rows.length * 650 + 900);
+    }, 220 + rows.length * 560 + 1500);
 
     return () => {
       timers.forEach(window.clearTimeout);
       window.clearTimeout(finish);
     };
-  }, [dataReady, router, rows]);
+  }, [born, dataReady, router, rows]);
+
+  if (!born) return null;
 
   return (
-    <div className="scan-cues" aria-live="polite">
+    <div className="scan-cues scan-cues--revealed" aria-live="polite">
       {rows.map((row, index) => {
         const state = !dataReady ? "loading" : index < completed ? "complete" : index === completed ? "loading" : "waiting";
         return (
