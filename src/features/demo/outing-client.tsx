@@ -153,6 +153,7 @@ function AtHomeStage({
           aspect="portrait"
           className="home-persona-art"
           persona={playerPersona}
+          priority
           state="thinking"
         />
         <span className="home-resting-note">吵完了。<br />但还是好朋友。</span>
