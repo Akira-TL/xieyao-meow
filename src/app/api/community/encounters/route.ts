@@ -15,9 +15,7 @@ import { createZhihuGatewayFromEnv } from "@/lib/zhihu/env";
 
 export const dynamic = "force-dynamic";
 
-const requestSchema = z.object({
-  otherUserId: z.string().trim().min(1).max(128).optional(),
-});
+const requestSchema = z.object({}).strict();
 
 function isCanonicalZhihuQuestion(url: string): boolean {
   try {
@@ -50,10 +48,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "authentication required" }, { status: 401 });
   }
 
-  let parsed: z.infer<typeof requestSchema>;
   try {
     const raw = await request.text();
-    parsed = requestSchema.parse(raw.trim() ? JSON.parse(raw) : {});
+    requestSchema.parse(raw.trim() ? JSON.parse(raw) : {});
   } catch {
     return NextResponse.json({ error: "invalid encounter request" }, { status: 400 });
   }
@@ -76,9 +73,7 @@ export async function POST(request: Request) {
   };
   store.savePersonaSnapshot(identity.userId, actor, experience.mode);
 
-  const targetSnapshot = parsed.otherUserId
-    ? store.getPersonaSnapshot(parsed.otherUserId)
-    : store.findPersonaCandidate(identity.userId);
+  const targetSnapshot = store.findPersonaCandidate(identity.userId);
   if (!targetSnapshot || targetSnapshot.userId === identity.userId) {
     return NextResponse.json(
       { error: "another activated User Persona is required" },

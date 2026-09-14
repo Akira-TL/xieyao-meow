@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import type { JourneyAtlasView } from "@/lib/journey/types";
+import type { SharedEncounterView } from "@/lib/social/shared-encounter";
 
 import { PaperCard } from "../components";
 import { LiveAtlasSection } from "../live/daily-live-client";
@@ -18,16 +19,25 @@ function formatJourneyTime(value: number) {
 
 export function JourneyAtlasPageContent() {
   const [atlas, setAtlas] = useState<JourneyAtlasView | null>(null);
+  const [encounter, setEncounter] = useState<SharedEncounterView | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/atlas", { cache: "no-store" })
-      .then(async (response) => {
+    Promise.all([
+      fetch("/api/atlas", { cache: "no-store" }).then(async (response) => {
         if (!response.ok) throw new Error(`atlas HTTP ${response.status}`);
         return (await response.json()) as JourneyAtlasView;
-      })
-      .then((next) => {
-        if (!cancelled) setAtlas(next);
+      }),
+      fetch("/api/community/encounters", { cache: "no-store" }).then(async (response) => {
+        if (!response.ok) return null;
+        return ((await response.json()) as { encounter: SharedEncounterView | null }).encounter;
+      }),
+    ])
+      .then(([nextAtlas, nextEncounter]) => {
+        if (!cancelled) {
+          setAtlas(nextAtlas);
+          setEncounter(nextEncounter);
+        }
       })
       .catch(() => {
         if (!cancelled) setAtlas({ journeys: [], memories: [] });
@@ -79,6 +89,12 @@ export function JourneyAtlasPageContent() {
               </p>
             ))}
           </div>
+          {encounter?.relationship ? (
+            <div className="atlas-change-list">
+              <p><b>最近关系痕迹</b>　{encounter.relationship.label} · 已相遇 {encounter.relationship.encounterCount} 次</p>
+              <p>围绕「{encounter.topic.title}」留下共同历史。<a href="/encounter">查看这段关系 →</a></p>
+            </div>
+          ) : null}
         </PaperCard>
       </section>
     </>
