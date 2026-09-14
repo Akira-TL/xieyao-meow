@@ -30,7 +30,7 @@ const DATA_BASE_URL = "https://developer.zhihu.com";
 const OAUTH_BASE_URL = "https://openapi.zhihu.com";
 
 export interface ZhihuGatewayOptions {
-  accessSecret: string;
+  accessSecret?: string;
   fetchImpl?: typeof fetch;
   now?: () => number;
   oauth?: ZhihuOAuthConfig;
@@ -55,9 +55,6 @@ export class ZhihuGateway {
   private readonly now: () => number;
 
   constructor(private readonly options: ZhihuGatewayOptions) {
-    if (!options.accessSecret.trim()) {
-      throw new Error("Zhihu Access Secret is required");
-    }
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.now = options.now ?? Date.now;
   }
@@ -347,8 +344,12 @@ export class ZhihuGateway {
   }
 
   private createDataHeaders(oauthAccessToken?: string): Headers {
+    const accessSecret = this.options.accessSecret?.trim();
+    if (!accessSecret) {
+      throw new Error("ZHIHU_ACCESS_SECRET is required for Zhihu data API requests");
+    }
     const headers = new Headers({
-      authorization: `Bearer ${this.options.accessSecret}`,
+      authorization: `Bearer ${accessSecret}`,
       "content-type": "application/json",
       "x-request-timestamp": String(Math.floor(this.now() / 1000)),
     });

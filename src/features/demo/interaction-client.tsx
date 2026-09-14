@@ -205,9 +205,9 @@ export function ZhihuConsentActions() {
     return (
       <div className="oauth-actions">
         <a className="theatre-button theatre-button-primary" href="/api/auth/zhihu/start">
-          <LoginRoundedIcon fontSize="small" /> 用知乎登录并开始孵化 <ArrowForwardRoundedIcon fontSize="small" />
+          <LoginRoundedIcon fontSize="small" /> 登录知乎并授权 <ArrowForwardRoundedIcon fontSize="small" />
         </a>
-        <p className="oauth-inline-note">授权确认发生在知乎官方页面；授权码和访问令牌只由服务端处理。</p>
+        <p className="oauth-inline-note">将跳转到知乎官方授权页；完成授权后自动回到谢邀喵继续孵化。</p>
       </div>
     );
   }

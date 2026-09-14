@@ -126,7 +126,7 @@ function AtHomeStage({
       <div className="home-hero-art">
         <PersonaArt
           alt="本喵在窝里回想昨晚的对话"
-          aspect="wide"
+          aspect="portrait"
           className="home-persona-art"
           persona={playerPersona}
           state="thinking"

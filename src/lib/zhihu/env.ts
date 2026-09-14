@@ -39,12 +39,9 @@ export function getZhihuRuntimeStatus() {
 
 export function createZhihuGatewayFromEnv() {
   const accessSecret = process.env.ZHIHU_ACCESS_SECRET?.trim();
-  if (!accessSecret) {
-    throw new Error("ZHIHU_ACCESS_SECRET is required on the server");
-  }
 
   return createZhihuGateway({
-    accessSecret,
+    ...(accessSecret ? { accessSecret } : {}),
     oauth: getOptionalOAuthConfig(),
   });
 }

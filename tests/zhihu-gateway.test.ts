@@ -250,7 +250,6 @@ describe("ZhihuGateway", () => {
     };
 
     const gateway = createZhihuGateway({
-      accessSecret: "test-access-secret",
       fetchImpl,
       oauth: {
         appId: "12345",
