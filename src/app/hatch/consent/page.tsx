@@ -22,7 +22,7 @@ const permissions = [
 export default function ConsentPage() {
   return (
     <DemoRouteGuard>
-      <DemoPage scene="default" activation>
+      <DemoPage scene="consent" activation>
         <ActivationHeader current={2} />
         <section className="consent-layout">
           <div className="consent-intro">

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { resolveP0Art } from "@/lib/art/p0";
 import type { JourneyProjection, JourneyView } from "@/lib/journey/types";
-import type { PlayerPersona } from "@/lib/persona";
+import type { PlayerPersona, ZhihuComposition } from "@/lib/persona";
 
 import { PaperCard, PersonaArt } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
@@ -106,6 +106,7 @@ export function DemoOutingHome() {
       catName={catName}
       playerPersona={playerPersona}
       questionSnapshot={questionSnapshot}
+      composition={personaSnapshot?.composition ?? null}
       resting={projection.resting}
       queuedRouteBias={projection.queuedRouteBias}
       journeyNotice={journeyError}
@@ -119,6 +120,7 @@ function AtHomeStage({
   onPrepare,
   playerPersona,
   questionSnapshot,
+  composition,
   resting,
   queuedRouteBias,
   journeyNotice,
@@ -127,6 +129,7 @@ function AtHomeStage({
   onPrepare: (routeBias: string) => void;
   playerPersona: PlayerPersona;
   questionSnapshot: LiveQuestionSnapshot | null;
+  composition: ZhihuComposition | null;
   resting: boolean;
   queuedRouteBias: string | null;
   journeyNotice: string | null;
@@ -143,15 +146,18 @@ function AtHomeStage({
     <div className="home-at-home home-room-stage">
       <RoomBackdrop />
       <div className="home-hero-copy">
-        <p className="stage-caption">{resting ? "REST / AT HOME · 刚回来，先歇会儿" : "ACT / AT HOME · 今天还没急着出门"}</p>
-        <h1><span>{catName}</span>，<br />{resting ? "刚回窝。" : "还在窝里。"}</h1>
-        <p>{resting ? (queuedRouteBias ? `下一趟的纸条已经压好了：「${queuedRouteBias}」。它歇够了会自己出门。` : "上一趟已经结算，明信片也收好了。歇够以后，它会自己再出门。") : "这是它自己的窝。你可以留一个大概方向，也可以什么都不写；第一趟会自己去看真实的知乎问题。"}</p>
-        {journeyNotice ? (
-          <p role="status" style={{ marginTop: 10, fontSize: 12, opacity: 0.62 }}>
-            {journeyNotice}
-          </p>
-        ) : null}
+        <p className="stage-caption">{resting ? "LIGHTS DOWN · 刚回来，先歇会儿" : "ACT / AT HOME · 第一趟马上开场"}</p>
+        <h1><span>{resting ? "刚刚" : "今晚"}</span>，<br />{resting ? "它回窝了。" : "第一趟要开场。"}</h1>
+        <p>{resting ? (queuedRouteBias ? `下一趟的纸条已经压好了：「${queuedRouteBias}」。它歇够了会自己出门。` : "上一趟已经结算，明信片也收好了。歇够以后，它会自己再出门。") : "它会从你的真实知乎兴趣出发，自己挑问题、自己决定停在哪里，再把这一趟带回家。"}</p>
+        {journeyNotice ? <p className="home-status-note" role="status">{journeyNotice}</p> : null}
       </div>
+
+      <PaperCard className="home-story-polaroid">
+        <span>知乎现在 · REAL QUESTION</span>
+        <strong>{previewTitle}</strong>
+        <p>这一题正在真实知乎世界里发生。它可能会路过，也可能完全不理。</p>
+        <a href={question.url} rel="noreferrer" target="_blank">先看这一题 →</a>
+      </PaperCard>
 
       <div className="home-hero-art">
         <PersonaArt
@@ -162,11 +168,11 @@ function AtHomeStage({
           priority
           state="thinking"
         />
-        <span className="home-resting-note">{resting ? <>刚回来。<br />先歇会儿。</> : <>等一会儿。<br />它会自己出门。</>}</span>
+        <span className="home-resting-note">{resting ? <>刚回来。<br />先歇会儿。</> : <>好奇心已经<br />开始转了。</>}</span>
       </div>
 
       <div className="home-event-actions">
-        <BottomSheet trigger={<span className="home-outing-trigger home-outing-primary">{resting ? "给下一趟留纸条" : "留张出门纸条"} <b>→</b></span>} title="留张出门纸条">
+        <BottomSheet trigger={<span className="home-outing-trigger home-outing-primary">{resting ? "给下一趟留纸条" : "带它出去闻闻"} <b>→</b></span>} title="留张出门纸条">
           <p>给它一个大概方向就行。最后看什么、遇见谁，让它自己决定。</p>
           <div className="route-bias-list">
             {fixture.outing.routeBiases.map((bias) => (
@@ -177,9 +183,11 @@ function AtHomeStage({
         <a className="home-last-night-link" href="/explore?mode=public">先看看知乎现在有什么 →</a>
       </div>
 
-      <div className="home-context-strip">
-        <span><small>现在</small><b>{resting ? "刚回到窝里" : "准备第一次出门"}</b><em>{resting ? "歇够以后，它会继续自己的旅途。" : "不用下 Prompt，它会自己决定去哪。"}</em></span>
-        <a href="/explore?mode=public"><small>知乎现在</small><b>{previewTitle}</b><em>先看看公开世界 →</em></a>
+      <div className="home-context-strip home-context-strip--stats">
+        <span><small>公开创作</small><b>{composition?.sourceCounts.contents ?? "—"}</b><em>表达线索</em></span>
+        <span><small>关注</small><b>{composition?.sourceCounts.followees ?? "—"}</b><em>长期兴趣</em></span>
+        <span><small>近期收藏</small><b>{composition?.sourceCounts.collections ?? "—"}</b><em>真正留下</em></span>
+        <span><small>人格方向</small><b>{composition?.primaryInterest ?? playerPersona.interests[0] ?? "综合"}</b><em>{playerPersona.certifiedTitle}</em></span>
       </div>
     </div>
   );

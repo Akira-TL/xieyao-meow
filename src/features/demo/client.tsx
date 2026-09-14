@@ -63,8 +63,8 @@ export function LandingActions() {
 
     return (
       <div className="flex flex-col gap-3 sm:flex-row">
-        <DemoFlowButton href="/hatch/consent">用知乎登录，孵化我的谢邀喵</DemoFlowButton>
-        <DemoFlowButton href="/explore?mode=public" variant="secondary">先看看它会怎么生活</DemoFlowButton>
+        <DemoFlowButton href="/hatch/consent">开幕</DemoFlowButton>
+        <DemoFlowButton href="/explore?mode=public" variant="secondary">先看看这个世界</DemoFlowButton>
       </div>
     );
   }

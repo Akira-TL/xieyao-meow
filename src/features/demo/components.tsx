@@ -35,10 +35,10 @@ const PRODUCT_ACTIVATION_STEPS = [
   ["04", "孵化人格"],
 ] as const;
 
-type DemoScene = "default" | "landing" | "casting" | "reveal" | "encounter" | "archive";
+type DemoScene = "default" | "landing" | "consent" | "casting" | "reveal" | "encounter" | "archive";
 
 function resolveSceneBackdrop(scene: DemoScene): string | null {
-  if (scene === "landing" || scene === "reveal") return resolveP0Art("stage-spotlight-empty");
+  if (scene === "landing" || scene === "consent" || scene === "reveal") return resolveP0Art("stage-spotlight-empty");
   if (scene === "casting") return resolveP0Art("stage-industrial-empty");
   if (scene === "encounter") return resolveP0Art("stage-shadow-empty");
   if (scene === "archive") return resolveP0Art("stage-paper-archive");

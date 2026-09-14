@@ -10,6 +10,7 @@ export default async function EncounterHubPage({
 }) {
   const { view, demo } = await searchParams;
   const showFeatured = view === "featured" || demo === "relationship";
+  const production = process.env.NODE_ENV === "production";
 
   return (
     <DemoRouteGuard>
@@ -17,7 +18,7 @@ export default async function EncounterHubPage({
         <AppHeader active="encounter" />
         <section className="encounter-hub-stage">
           <SharedEncounterPanel />
-          <LiveEncounterSection showFeatured={showFeatured} />
+          {!production ? <LiveEncounterSection showFeatured={showFeatured} /> : null}
         </section>
         <AppBottomNav active="encounter" />
       </DemoPage>

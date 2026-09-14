@@ -422,6 +422,7 @@ export function LiveAtlasSection() {
   const primaryInterest = composition?.primaryInterest ?? fallback.interests[0];
   const interests = composition?.interests.slice(0, 4).map((item) => item.name) ?? fallback.interests;
   const counts = composition?.sourceCounts;
+  const production = process.env.NODE_ENV === "production";
 
   const observations = composition
     ? [
@@ -468,7 +469,7 @@ export function LiveAtlasSection() {
             <span><b>{counts?.favlists ?? 0}</b>收藏夹</span>
           </div>
         </details>
-        <Link href="/encounter"><b>关系图鉴</b><span>{DEMO_FIXTURE.atlas.relationships.length} 个关系 · 去看看它遇见了谁</span></Link>
+        <Link href="/encounter"><b>关系图鉴</b><span>{production ? "真实相遇发生后，会在这里留下关系" : `${DEMO_FIXTURE.atlas.relationships.length} 个关系 · 去看看它遇见了谁`}</span></Link>
         <details>
           <summary><b>人格轨迹</b><span>{primaryInterest} → {title}</span></summary>
           <p className="atlas-mobile-trace">知乎成分「{primaryInterest}」正在把它推向「{title}」。人格会随之后的旅途继续变化。</p>
@@ -490,25 +491,35 @@ export function LiveAtlasSection() {
             <b>{counts?.collections ?? 0}<small><BookmarkBorderRoundedIcon fontSize="inherit" /> 近期收藏</small></b>
             <b>{counts?.favlists ?? 0}<small><AutoAwesomeRoundedIcon fontSize="inherit" /> 收藏夹</small></b>
           </div>
-          <div className="atlas-collection-strip" aria-label="旅途收藏摘要">
-            <span><b>14</b><small>幕间札记</small></span>
-            <span><b>9</b><small>问题票根</small></span>
-            <span><b>{DEMO_FIXTURE.atlas.relationships.length}</b><small>关系票根</small></span>
-          </div>
+          {!production ? (
+            <div className="atlas-collection-strip" aria-label="旅途收藏摘要">
+              <span><b>14</b><small>幕间札记</small></span>
+              <span><b>9</b><small>问题票根</small></span>
+              <span><b>{DEMO_FIXTURE.atlas.relationships.length}</b><small>关系票根</small></span>
+            </div>
+          ) : null}
         </PaperCard>
       </div>
 
       <div className="atlas-grid atlas-grid-bottom">
         <PaperCard>
           <div className="section-heading-row"><h2>关系图鉴</h2><a href="/encounter">查看全部 →</a></div>
-          <div className="atlas-relationship-polaroids">
-            {DEMO_FIXTURE.atlas.relationships.map((item) => (
-              <a href={`/relationship/${relationshipSlug(item.id)}`} key={item.name}>
-                <ArtSlot name={`npc/${item.id}/idle`} label={item.name} aspect="polaroid" fit="contain" />
-                <span>{item.status}</span>
-              </a>
-            ))}
-          </div>
+          {production ? (
+            <div className="atlas-real-relationship-empty">
+              <strong>真实关系从 Shared Encounter 开始。</strong>
+              <p>不会用预置 NPC 填满这里。等你的猫真正遇见另一只 Persona，这张纸才会留下名字。</p>
+              <a href="/encounter">去遇见页看看 →</a>
+            </div>
+          ) : (
+            <div className="atlas-relationship-polaroids">
+              {DEMO_FIXTURE.atlas.relationships.map((item) => (
+                <a href={`/relationship/${relationshipSlug(item.id)}`} key={item.name}>
+                  <ArtSlot name={`npc/${item.id}/idle`} label={item.name} aspect="polaroid" fit="contain" />
+                  <span>{item.status}</span>
+                </a>
+              ))}
+            </div>
+          )}
         </PaperCard>
         <PaperCard id="history">
           <div className="section-heading-row"><h2>人格轨迹</h2><span>PERSONA TRACE</span></div>

@@ -29,12 +29,12 @@ export default function LandingPage() {
         <div className="landing-copy">
           <p className="stage-caption">知乎 × 谢邀喵 · AI 数字人格</p>
           <h1>
-            你在<span>知乎</span>留下的足迹，<br />
-            会长成一只<br />
-            <span>继续生活</span>的猫。
+            你在<span>知乎</span>这些年，<br />
+            其实已经偷偷<br />
+            养出了一只<span>东西</span>。
           </h1>
-          <p className="landing-handwriting">它会替你逛知乎，也会认识别人的猫。</p>
-          <p className="landing-detail">用你的公开创作、关注与收藏孵化一个有长期兴趣和表达方式的 AI 数字人格。它会自主出门，围绕真实知乎问题形成经历，把新的问题、观点和关系带回家。</p>
+          <p className="landing-handwriting">每一个认真提问的人，都值得被看见。</p>
+          <p className="landing-detail">它由你的公开创作、关注与收藏长出来。不是复制你，而是把长期留下的兴趣与表达方式，孵化成一只会继续逛知乎、带回问题、也会认识别人的 AI 数字人格。</p>
         </div>
 
         <div className="landing-actions">

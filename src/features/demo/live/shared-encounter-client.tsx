@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 
+import type { PersonaVisualVariant } from "@/lib/persona/types";
 import type { SharedEncounterView } from "@/lib/social/shared-encounter";
+
+import { PaperCard, PersonaArt } from "../components";
 
 type EncounterResponse = {
   encounter: SharedEncounterView | null;
@@ -17,6 +20,12 @@ function formatTime(value: number | null): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+}
+
+function participantPersona(participant: SharedEncounterView["participants"][number]) {
+  return {
+    visualVariant: (participant.capsule.visualVariant as PersonaVisualVariant | undefined) ?? "observer-canvas",
+  };
 }
 
 export function SharedEncounterPanel() {
@@ -72,7 +81,7 @@ export function SharedEncounterPanel() {
       }
       setAuthRequired(false);
       setEncounter(body.encounter);
-      if (response.status === 202) setMessage("两只猫正在把同一次相遇写进共同历史。刷新后仍会读取这一场。 ");
+      if (response.status === 202) setMessage("两只猫正在把这一幕写进共同历史。刷新后仍然会读到同一场。 ");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "创建 Shared Encounter 失败");
     } finally {
@@ -86,100 +95,80 @@ export function SharedEncounterPanel() {
   if (authRequired && !encounter) return null;
 
   return (
-    <section
-      aria-label="Shared Encounter"
-      style={{
-        margin: "0 auto 24px",
-        maxWidth: 920,
-        padding: "20px",
-        border: "1px solid rgba(23, 114, 246, 0.24)",
-        borderRadius: 18,
-        background: "rgba(255,255,255,0.92)",
-        color: "#11161d",
-      }}
-    >
-      <div style={{ display: "flex", gap: 16, justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
-        <div>
-          <p style={{ margin: 0, fontSize: 12, letterSpacing: "0.08em", opacity: 0.65 }}>REAL USER · SHARED ENCOUNTER</p>
-          <h2 style={{ margin: "6px 0 4px", fontSize: 24 }}>两只真实 Persona，共用同一段相遇历史</h2>
-          <p style={{ margin: 0, opacity: 0.72 }}>对话只生成一次；双方刷新、换设备或晚点回来，读到的仍是这一次。</p>
-        </div>
-        <button
-          disabled={creating}
-          onClick={createEncounter}
-          type="button"
-          style={{ padding: "10px 16px", borderRadius: 999, cursor: creating ? "wait" : "pointer" }}
-        >
-          {creating ? "正在相遇…" : encounter ? "遇见另一只猫" : "开始真实相遇"}
-        </button>
+    <section className="shared-encounter-stage" aria-label="真实 Shared Encounter">
+      <div className="shared-encounter-hero">
+        <p className="stage-caption">REAL USER · SHARED ENCOUNTER</p>
+        <h1>最近，<br />它<span>遇见</span>了<br />{encounter ? "另一个真实灵魂。" : "一个空位。"}</h1>
+        <p>{encounter ? "同一个真实知乎问题，让两只 Persona 留下同一段、不会被刷新改写的共同历史。" : "这里不会塞预置 NPC。等第二个真实 Persona 出现，第一场相遇才会开始。"}</p>
       </div>
 
-      {loading ? <p style={{ marginTop: 18 }}>正在读取共同历史…</p> : null}
-      {message ? <p style={{ marginTop: 18 }}>{message}</p> : null}
+      {loading ? <div className="shared-encounter-loading">正在翻共同历史……</div> : null}
+      {message ? <p className="shared-encounter-message">{message}</p> : null}
 
-      {!loading && encounter ? (
-        <div style={{ marginTop: 20, display: "grid", gap: 16 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
-            {[self, other].map((participant, index) => participant ? (
-              <article key={participant.slot} style={{ padding: 14, borderRadius: 14, background: "rgba(23,114,246,0.06)" }}>
-                <strong>{participant.isSelf ? "本喵" : participant.capsule.displayName}</strong>
-                <div style={{ marginTop: 5 }}>{participant.capsule.certifiedTitle}</div>
-                <div style={{ marginTop: 7, fontSize: 13, opacity: 0.72 }}>
-                  Persona v{participant.personaVersion} · {participant.capsule.interests.join(" / ") || "综合"}
-                </div>
-                <div style={{ marginTop: 4, fontSize: 13, opacity: 0.72 }}>
-                  {participant.capsule.personality.join(" · ")}
-                </div>
-              </article>
-            ) : <span key={index} />)}
+      {!loading && !encounter ? (
+        <PaperCard className="shared-encounter-empty">
+          <span>SCENE 05 · FIRST REAL ENCOUNTER</span>
+          <h2>舞台已经亮了，<br />还差另一只真实的猫。</h2>
+          <p>匹配只会从已完成知乎授权、已经生成 Persona 的真实用户里选；不会让你点名，也不会用测试居民补位。</p>
+          <button className="theatre-button theatre-button-primary" disabled={creating} onClick={createEncounter} type="button">
+            {creating ? "正在找另一只猫…" : "让它去遇见谁"} <b>→</b>
+          </button>
+        </PaperCard>
+      ) : null}
+
+      {!loading && encounter && self && other ? (
+        <div className="shared-encounter-content">
+          <div className="shared-encounter-cast">
+            <div className="shared-encounter-actor is-self">
+              <PersonaArt alt="本喵" className="shared-encounter-persona" persona={participantPersona(self)} state="talking" />
+              <strong>本喵</strong>
+              <span>{self.capsule.certifiedTitle}</span>
+              <small>{self.capsule.interests.join(" / ") || "综合"}</small>
+            </div>
+            <div className="shared-encounter-match-mark">↔</div>
+            <div className="shared-encounter-actor is-other">
+              <PersonaArt alt={other.capsule.displayName} className="shared-encounter-persona" persona={participantPersona(other)} state="talking" />
+              <strong>{other.capsule.displayName}</strong>
+              <span>{other.capsule.certifiedTitle}</span>
+              <small>{other.capsule.interests.join(" / ") || "综合"}</small>
+            </div>
           </div>
 
-          <article style={{ padding: 14, borderRadius: 14, background: "rgba(0,0,0,0.035)" }}>
-            <div style={{ fontSize: 12, opacity: 0.62 }}>同一真实知乎问题 · {encounter.provenance.contentSource} / {encounter.provenance.knowledgeSource}</div>
-            <a href={encounter.topic.url} rel="noreferrer" target="_blank" style={{ display: "inline-block", marginTop: 6, fontWeight: 700 }}>
-              {encounter.topic.title}
-            </a>
-            <div style={{ marginTop: 8, fontSize: 13, opacity: 0.68 }}>
-              {Math.floor(encounter.turns.length / 2)} 轮 · 完成于 {formatTime(encounter.completedAt)}
-            </div>
-          </article>
+          <PaperCard className="shared-encounter-topic">
+            <span>同一个真实知乎问题 · {encounter.provenance.contentSource}</span>
+            <h2>{encounter.topic.title}</h2>
+            <a href={encounter.topic.url} rel="noreferrer" target="_blank">在知乎看看原问题 →</a>
+          </PaperCard>
 
-          <div style={{ display: "grid", gap: 10 }}>
+          <div className="shared-encounter-turns">
             {encounter.turns.map((turn, index) => {
               const speaker = encounter.participants.find((item) => item.slot === turn.speakerSlot);
               return (
-                <div
-                  key={`${turn.speakerSlot}-${index}`}
-                  style={{
-                    justifySelf: speaker?.isSelf ? "end" : "start",
-                    maxWidth: "78%",
-                    padding: "10px 12px",
-                    borderRadius: 14,
-                    background: speaker?.isSelf ? "rgba(23,114,246,0.11)" : "rgba(0,0,0,0.055)",
-                  }}
-                >
-                  <div style={{ marginBottom: 4, fontSize: 11, opacity: 0.58 }}>
-                    {speaker?.isSelf ? "本喵" : speaker?.capsule.displayName ?? "对方 Persona"}
-                  </div>
+                <p className={speaker?.isSelf ? "is-self" : "is-other"} key={`${turn.speakerSlot}-${index}`}>
+                  <b>{speaker?.isSelf ? "本喵" : speaker?.capsule.displayName ?? "对方 Persona"}</b>
                   {turn.text}
-                </div>
+                </p>
               );
             })}
           </div>
 
-          <div style={{ paddingTop: 4, fontSize: 14 }}>
-            <strong>共同摘要：</strong>{encounter.summary}
+          <PaperCard className="shared-encounter-summary">
+            <span>第一段共同历史 · {Math.floor(encounter.turns.length / 2)} 轮 · {formatTime(encounter.completedAt)}</span>
+            <h2>{encounter.relationship?.label ?? "初见"}</h2>
+            <p>{encounter.summary}</p>
             {encounter.relationship ? (
-              <span style={{ display: "block", marginTop: 6, opacity: 0.72 }}>
-                猫关系：{encounter.relationship.label} · 熟悉度 {encounter.relationship.familiarity} · 化学反应 {encounter.relationship.chemistry >= 0 ? "+" : ""}{encounter.relationship.chemistry} · 已相遇 {encounter.relationship.encounterCount} 次
-              </span>
+              <div className="shared-encounter-metrics">
+                <b>熟悉度 {encounter.relationship.familiarity}</b>
+                <b>化学反应 {encounter.relationship.chemistry >= 0 ? "+" : ""}{encounter.relationship.chemistry}</b>
+                <b>已相遇 {encounter.relationship.encounterCount} 次</b>
+              </div>
             ) : null}
-          </div>
-        </div>
-      ) : null}
+          </PaperCard>
 
-      {!loading && !encounter && !message ? (
-        <p style={{ marginTop: 18, opacity: 0.72 }}>还没有真实双用户相遇。另一名已激活用户出现后，就可以生成第一场共同历史。</p>
+          <button className="theatre-button theatre-button-primary shared-encounter-again" disabled={creating} onClick={createEncounter} type="button">
+            {creating ? "正在找下一场…" : "去见更多真实灵魂"} <b>→</b>
+          </button>
+        </div>
       ) : null}
     </section>
   );
