@@ -120,19 +120,35 @@ export class ZhihuGateway {
       throw new Error("Zhihu OAuth user response is not an object");
     }
     const envelope = payload as Record<string, unknown>;
+    const toRecord = (candidate: unknown): Record<string, unknown> | null => {
+      if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+        return candidate as Record<string, unknown>;
+      }
+      if (typeof candidate === "string" && candidate.trim()) {
+        try {
+          const parsed = JSON.parse(candidate) as unknown;
+          return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+            ? parsed as Record<string, unknown>
+            : null;
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    };
     const objectCandidates = [envelope.data, envelope.Data, envelope.user, envelope]
-      .filter((candidate): candidate is Record<string, unknown> => (
-        Boolean(candidate) && typeof candidate === "object" && !Array.isArray(candidate)
-      ));
+      .map(toRecord)
+      .filter((candidate): candidate is Record<string, unknown> => Boolean(candidate));
     const source = objectCandidates.find((candidate) => (
       candidate.id !== undefined || candidate.Id !== undefined || candidate.ID !== undefined
     ));
     if (!source) {
-      const shape = Object.entries(envelope)
-        .map(([key, value]) => `${key}:${Array.isArray(value) ? "array" : typeof value}`)
-        .sort()
-        .join(", ");
-      throw new Error(`Zhihu OAuth user response has no stable user object; shape=[${shape}]`);
+      const rawData = envelope.data ?? envelope.Data;
+      const dataLength = typeof rawData === "string" ? rawData.length : null;
+      const dataLooksJson = typeof rawData === "string" && /^[\s]*[\[{]/.test(rawData);
+      throw new Error(
+        `Zhihu OAuth user response has no stable user object; code=${String(envelope.code ?? envelope.Code ?? "unknown")}; dataLength=${String(dataLength)}; dataLooksJson=${String(dataLooksJson)}`,
+      );
     }
     const rawSubject = source.id ?? source.Id ?? source.ID;
     const providerSubject =
