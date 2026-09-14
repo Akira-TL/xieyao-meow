@@ -22,9 +22,9 @@ function compact(value: string, max = 112) {
 }
 
 function questionReason(index: number, primaryInterest: string) {
-  if (index === 0) return `它把当前最值得看的问题先叼了回来；你的主兴趣是「${primaryInterest}」，所以它会优先寻找能激起追问的内容。`;
-  if (index === 1) return `这题和「${primaryInterest}」不完全重合，但有足够的分歧感，适合让人格离开舒适区。`;
-  return "这是一张陌生领域票根：不是因为完全同频，而是因为它觉得你可能会因此多问一个问题。";
+  if (index === 0) return `它先在这题前停了下来。你常看「${primaryInterest}」，这题又刚好留了个能继续追问的口子。`;
+  if (index === 1) return `和「${primaryInterest}」不完全同路，所以它反而多看了一会儿。`;
+  return "完全是顺路拐进去的陌生地方。它觉得这张票根值得带回来。";
 }
 
 export function LiveExploreSection({ appMode }: { appMode: boolean }) {
@@ -50,7 +50,7 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
     .slice(0, 3);
 
   return (
-    <section className="explore-stage">
+    <section className={`explore-stage ${appMode ? "explore-stage--app" : "explore-stage--public"}`}>
       <div className="explore-hero-copy">
         <p className="stage-caption">{appMode ? "JOURNEY LOG · 它今天去了哪里" : "PUBLIC EXPLORE · 看看别人养出了什么"}</p>
         <h1>{appMode ? <>它今天去了<br /><span>知乎</span>。</> : <>在这个世界里，<br />问题会让<span>灵魂</span>相遇。</>}</h1>
@@ -82,7 +82,7 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
         {questions.map((item, index) => (
           <PaperCard className={index === 0 ? "explore-card is-featured" : "explore-card"} key={`${item.url}-${index}`}>
             <div className="explore-card-number">{String(index + 1).padStart(2, "0")}</div>
-            <span className="explore-card-badge">{index === 0 ? "今天先看" : index === 1 ? "顺路闻到" : "陌生领域"}</span>
+            <span className="explore-card-badge">{appMode ? (index === 0 ? "最近带回" : "旧票根") : (index === 0 ? "今天先看" : index === 1 ? "顺路闻到" : "陌生领域")}</span>
             <h2>{item.title}</h2>
             <p>{compact(item.summary)}</p>
             <ArtSlot
@@ -92,7 +92,7 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
               src={item.thumbnailUrl || undefined}
             />
             <div className="explore-why">
-              <b>为什么带回来：</b>{appMode ? questionReason(index, primaryInterest) : "来自当前知乎公开内容，用来展示不同问题如何触发不同 Persona 的注意。"}
+              <b>{appMode ? "它为什么停下：" : "为什么带回来："}</b>{appMode ? questionReason(index, primaryInterest) : "来自当前知乎公开内容，用来展示不同问题如何触发不同 Persona 的注意。"}
             </div>
             <a className="explore-card-link" href={item.url} rel="noreferrer" target="_blank">
               查看知乎原问题 <OpenInNewRoundedIcon fontSize="inherit" />
