@@ -66,7 +66,7 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
             <PersonaArt alt={`${catName}背着包走进知乎知识世界`} aspect="portrait" className="explore-persona-art" persona={playerPersona} state="walking" />
           ) : (
             <div className="public-world-ensemble" aria-label="社区居民群像">
-              {DEMO_FIXTURE.residents.slice(0, 3).map((resident, index) => (
+              {DEMO_FIXTURE.residents.slice(0, 4).map((resident, index) => (
                 <div className={`public-world-resident public-world-resident--${index + 1}`} key={resident.id}>
                   <ArtSlot name={`npc/${resident.id}/idle`} label={resident.displayName} aspect="portrait" fit="contain" />
                   <span>{resident.displayName}</span>
@@ -336,29 +336,33 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
   return (
     <section className="relationship-detail-stage">
       <p className="stage-caption">关系详情 · PERSONA RELATIONSHIP</p>
-      <h1>为什么同一个问题，<br />你们总能聊出<br className="relationship-mobile-break" /><span>两个方向</span>？</h1>
-      <p className="relationship-subtitle">关系不是一个抽象百分比，而是共同兴趣和表达差异叠出来的结果。</p>
+      <h1 className="target-lock-title">
+        <span className="target-title-line">你们为什么</span>
+        <span className="target-title-line">总会聊到<em>深夜</em>？</span>
+      </h1>
+      <p className="relationship-subtitle">不同的视角，刚好拼出更大的世界。</p>
 
       <div className="relationship-pair-stage">
         <div>
+          <q className="relationship-speech">我觉得，问题可以再想深一点。</q>
           <PersonaArt alt={`${catName} · ${selfTitle}`} className="relationship-self-art" persona={playerPersona} state="thinking" />
           <strong>{catName}</strong><span>{basePersona.species} · {selfDescriptor} · {selfInterests.slice(0, 2).join(" × ")}</span>
         </div>
         <i>♡</i>
         <div>
+          <q className="relationship-speech">但也别忘了，生活本身也很重要啊。</q>
           <ArtSlot name={`npc/${candidate.id}/meeting`} label={candidate.displayName} aspect="portrait" fit="contain" />
           <strong>{candidate.displayName}</strong><span>{candidate.personality[0]} · {candidate.interests.join(" × ")}</span>
         </div>
       </div>
 
-      <PaperCard className="relationship-status-card">
-        <h2>当前关系</h2>
-        <strong>{relationshipStatus}</strong>
-        <blockquote>“共同点决定愿不愿意停下，差异决定还有没有下一句话。”</blockquote>
-        <p>{relationshipMetrics ? `熟悉度 ${relationshipMetrics.familiarity} · 化学反应 ${relationshipMetrics.chemistry >= 0 ? "+" : ""}${relationshipMetrics.chemistry} · 已相遇 ${relationshipMetrics.encounterCount} 次。` : "关系仍在初见阶段。"}{shared.length ? ` 共同兴趣是 ${shared.join("、")}。` : " 暂时没有明显的兴趣重合，关系主要由好奇心驱动。"}</p>
-      </PaperCard>
-
       <div className="relationship-detail-grid">
+        <PaperCard className="relationship-status-card">
+          <h2>我们的关系</h2>
+          <strong>{relationshipStatus}</strong>
+          <blockquote>“不同，但刚好合拍。”</blockquote>
+          <p>{relationshipMetrics ? `熟悉度 ${relationshipMetrics.familiarity} · 化学反应 ${relationshipMetrics.chemistry >= 0 ? "+" : ""}${relationshipMetrics.chemistry} · 已相遇 ${relationshipMetrics.encounterCount} 次。` : "关系仍在初见阶段。"}</p>
+        </PaperCard>
         <PaperCard>
           <h2>关系时间线</h2>
           <ol className="relationship-timeline">
@@ -436,10 +440,9 @@ export function LiveAtlasSection() {
     <section className="atlas-stage">
       <div className="atlas-hero-copy">
         <p className="stage-caption">ARCHIVE · PERSONA HISTORY</p>
-        <h1 className="target-lock-title">
+        <h1 className="target-lock-title atlas-target-title">
           <span className="target-title-line">它的故事，</span>
-          <span className="target-title-line">也是<em>你的</em></span>
-          <span className="target-title-line">另一种履历。</span>
+          <span className="target-title-line atlas-target-title-second">也是<em>你的</em>另一种履历。</span>
         </h1>
         <p>这里收着它从你的知乎成分里长出来的性格、兴趣和关系痕迹。</p>
       </div>

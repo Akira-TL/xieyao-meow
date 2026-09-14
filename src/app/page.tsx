@@ -1,7 +1,7 @@
 import { LandingActions } from "@/features/demo/client";
 import {
   DemoPage,
-  PersonaArt,
+  KanshanPlaceholder,
   PersonaEgg,
   PublicHeader,
 } from "@/features/demo/components";
@@ -14,12 +14,7 @@ function LandingVisual() {
         <PersonaEgg />
         <div className="landing-guide">
           <span className="landing-bubble">要开幕吗？</span>
-          <PersonaArt
-            alt="人格蛋旁的谢邀喵向导"
-            className="landing-guide-persona"
-            persona={{ visualVariant: "analyst-black" }}
-            state="thinking"
-          />
+          <KanshanPlaceholder action="wave" className="landing-guide-persona" />
         </div>
       </div>
     </div>
