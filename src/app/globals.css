@@ -475,7 +475,7 @@ a { color: inherit; text-decoration: none; }
 .app-bottom-nav { display: none; }
 
 @media (max-width: 760px) {
-  .theatre-page { padding: 0 0 82px; }
+  .theatre-page { padding: 0 0 calc(72px + env(safe-area-inset-bottom)); }
   .theatre-page--activation { padding: 0; }
   .activation-header, .app-header, .public-header {
     min-height: 94px;
@@ -484,6 +484,16 @@ a { color: inherit; text-decoration: none; }
     border-bottom: 0;
     padding: 18px 20px 12px;
   }
+  .app-header {
+    min-height: 72px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    background: rgba(7,9,12,.9);
+    padding: 10px 14px 8px;
+  }
+  .app-header .theatre-brand-name { font-size: 20px; }
+  .app-header .theatre-brand-tagline { display: none; }
+  .app-header-right .header-icon-link:first-child { display: none; }
+  .app-header .header-icon-link { width: 40px; height: 40px; }
   .activation-header {
     top: 0;
     left: 0;
@@ -524,18 +534,20 @@ a { color: inherit; text-decoration: none; }
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     border-top: 1px solid rgba(255,255,255,.14);
-    background: rgba(5,7,10,.94);
+    background: rgba(5,7,10,.96);
     backdrop-filter: blur(18px);
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
   }
   .app-bottom-nav a {
+    min-height: 52px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 2px;
     color: #7b8087;
     font-size: 10px;
-    padding: 5px 0;
+    padding: 3px 0;
   }
   .app-bottom-nav a.is-active { color: #2f8cff; }
   .app-bottom-icon { display: grid; place-items: center; min-height: 24px; line-height: 1; }
@@ -1462,13 +1474,13 @@ a { color: inherit; text-decoration: none; }
 .returned-meta b { display: block; margin-top: 2px; font-size: 14px; }
 .returned-artifact .theatre-button { width: 100%; margin-top: 16px; }
 @media (max-width: 760px) {
-  .app-stage-shell { min-height: calc(100dvh - 176px); align-items: start; border-left: 0; border-right: 0; padding: 12px 18px; }
-  .home-at-home { min-height: 0; grid-template-columns: 1fr; grid-template-areas: "copy" "art" "control"; gap: 9px; align-content: start; }
-  .home-hero-copy .stage-caption { margin: 0; font-size: 8px; letter-spacing: .18em; }
-  .home-hero-copy h1 { margin-top: 8px; font-size: 46px; }
-  .home-hero-copy > p:not(.stage-caption) { display: -webkit-box; margin-top: 8px; overflow: hidden; font-size: 11px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
-  .home-hero-copy .theatre-button { width: 100%; min-width: 0; min-height: 52px; margin-top: 10px; font-size: 16px; }
-  .home-hero-art .art-slot, .home-persona-art { width: min(58vw, 210px); min-height: 210px; }
+  .app-stage-shell { min-height: calc(100dvh - 144px); align-items: start; border: 0; padding: 10px 14px 18px; }
+  .home-at-home { min-height: 0; grid-template-columns: 1fr; grid-template-areas: "copy" "art" "control"; gap: 8px; align-content: start; }
+  .home-hero-copy .stage-caption { margin: 0; font-size: 8px; letter-spacing: .14em; }
+  .home-hero-copy h1 { margin-top: 7px; font-size: 40px; line-height: .92; }
+  .home-hero-copy > p:not(.stage-caption) { display: -webkit-box; margin-top: 7px; overflow: hidden; font-size: 10.5px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  .home-hero-copy .theatre-button { width: 100%; min-width: 0; min-height: 50px; margin-top: 9px; font-size: 15px; }
+  .home-hero-art .art-slot, .home-persona-art { width: min(52vw, 195px); min-height: 195px; }
   .home-resting-note { bottom: 10px; right: 12px; font-size: 11px; }
   .home-growth-row { display: none; }
   .home-outing-control { margin-top: 0; }
@@ -1564,12 +1576,12 @@ a { color: inherit; text-decoration: none; }
 .public-explore-action { grid-area: log; max-width: 440px; width: 100%; margin: 0 auto; }
 .public-explore-action .theatre-button { width: 100%; }
 @media (max-width: 760px) {
-  .explore-stage { min-height: auto; display: grid; grid-template-columns: 1fr; grid-template-areas: "hero-copy" "hero-art" "cards" "log"; gap: 12px; padding: 14px 18px 24px; }
+  .explore-stage { min-height: auto; display: grid; grid-template-columns: 1fr; grid-template-areas: "hero-copy" "hero-art" "cards" "log"; gap: 10px; padding: 10px 14px 28px; }
   .explore-hero-copy .stage-caption { margin: 0; font-size: 8px; text-align: left; }
-  .explore-hero-copy h1 { margin-top: 8px; font-size: 46px; }
+  .explore-hero-copy h1 { margin-top: 7px; font-size: 40px; line-height: .92; }
   .explore-hero-copy > p:not(.stage-caption) { margin-top: 8px; font-size: 11px; line-height: 1.55; }
   .explore-hero-art .art-slot, .explore-persona-art { min-height: 170px; }
-  .journey-gate-scene { min-height: 205px; }
+  .journey-gate-scene { min-height: 185px; }
   .journey-gate-scene.is-app .explore-persona-art { width: 52%; min-height: 88%; }
   .public-world-ensemble { min-height: 100%; }
   .public-world-resident .art-slot { min-height: 150px; }
@@ -1656,14 +1668,14 @@ a { color: inherit; text-decoration: none; }
 .daily-dialogue-lines p.is-other { border-color: rgba(22,119,255,.3); }
 .daily-relationship-link { display: flex; width: min(100%, 420px); margin: 22px auto 0; }
 @media (max-width: 760px) {
-  .encounter-hub-stage { min-height: auto; padding: 14px 18px 24px; }
+  .encounter-hub-stage { min-height: auto; padding: 10px 14px 28px; }
   .encounter-hub-hero { grid-template-columns: 1fr; grid-template-areas: "eyebrow" "copy" "detail" "art"; grid-template-rows: auto; gap: 8px; }
   .encounter-hub-hero .stage-caption { margin: 0; font-size: 8px; }
-  .encounter-hub-hero h1 { margin-top: 8px; max-width: 100%; font-size: 44px; }
+  .encounter-hub-hero h1 { margin-top: 7px; max-width: 100%; font-size: 40px; line-height: .92; }
   .encounter-hub-hero > p:not(.stage-caption) { margin: 0; font-size: 11px; line-height: 1.55; }
-  .encounter-hub-hero > .art-slot, .encounter-audience-persona { min-height: 170px; }
-  .latest-encounter-card { margin-top: 12px; grid-template-columns: 92px minmax(0,1fr); gap: 12px; padding: 12px; align-items: start; }
-  .latest-encounter-art .art-slot { min-height: 92px; aspect-ratio: 1; }
+  .encounter-hub-hero > .art-slot, .encounter-audience-persona { min-height: 150px; }
+  .latest-encounter-card { margin-top: 10px; grid-template-columns: 78px minmax(0,1fr); gap: 10px; padding: 11px; align-items: start; }
+  .latest-encounter-art .art-slot { min-height: 78px; aspect-ratio: 1; }
   .latest-encounter-copy h2 { margin-top: 4px; font-size: 21px; }
   .latest-encounter-copy > b { font-size: 17px; }
   .latest-encounter-copy > p { display: -webkit-box; margin-top: 6px; overflow: hidden; font-size: 10px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
@@ -1737,14 +1749,14 @@ a { color: inherit; text-decoration: none; }
 .persona-history-flow span { display: block; margin-top: 4px; color: #6a655e; font-size: 9px; }
 .persona-history-flow i { color: #176fd2; font-style: normal; }
 @media (max-width: 760px) {
-  .atlas-stage { min-height: auto; padding: 14px 18px 24px; }
+  .atlas-stage { min-height: auto; padding: 10px 14px 28px; }
   .atlas-hero-copy .stage-caption { margin: 0; font-size: 8px; text-align: left; }
-  .atlas-hero-copy h1 { margin-top: 8px; max-width: 100%; font-size: 44px; }
+  .atlas-hero-copy h1 { margin-top: 7px; max-width: 100%; font-size: 40px; line-height: .92; }
   .atlas-hero-copy > p:not(.stage-caption) { margin: 8px 0 0; font-size: 11px; line-height: 1.55; }
-  .atlas-persona-card { margin-top: 14px; grid-template-columns: 132px minmax(0,1fr); grid-template-areas: "eyebrow eyebrow" "art title" "art subtitle" "art quote" "tags tags"; gap: 5px 12px; padding: 14px; align-items: center; }
-  .atlas-persona-card > .art-slot, .atlas-current-persona-art { max-width: 132px; min-height: 150px; margin: 0; }
-  .atlas-persona-card h2 { font-size: 35px; }
-  .atlas-persona-card h3 { font-size: 16px; line-height: 1.1; }
+  .atlas-persona-card { margin-top: 12px; grid-template-columns: 112px minmax(0,1fr); grid-template-areas: "eyebrow eyebrow" "art title" "art subtitle" "art quote" "tags tags"; gap: 5px 10px; padding: 12px; align-items: center; }
+  .atlas-persona-card > .art-slot, .atlas-current-persona-art { max-width: 112px; min-height: 132px; margin: 0; }
+  .atlas-persona-card h2 { font-size: 30px; }
+  .atlas-persona-card h3 { font-size: 14px; line-height: 1.18; }
   .atlas-persona-card blockquote { display: -webkit-box; margin-top: 4px; overflow: hidden; font-size: 12px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
   .atlas-tags { margin-top: 5px; gap: 5px; }
   .atlas-tags span { padding: 4px 7px; font-size: 9px; }
