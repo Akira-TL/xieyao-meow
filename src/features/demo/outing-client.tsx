@@ -147,7 +147,7 @@ function AtHomeStage({
       <RoomBackdrop />
       <div className="home-hero-copy">
         <p className="stage-caption">{resting ? "LIGHTS DOWN · 刚回来，先歇会儿" : "ACT / AT HOME · 第一趟马上开场"}</p>
-        <h1><span>{resting ? "刚刚" : "今晚"}</span>，<br />{resting ? "它回窝了。" : "第一趟要开场。"}</h1>
+        <h1><span>{resting ? "刚刚" : "今晚"}</span>，<br />{resting ? "它回窝了。" : "它要出门。"}</h1>
         <p>{resting ? (queuedRouteBias ? `下一趟的纸条已经压好了：「${queuedRouteBias}」。它歇够了会自己出门。` : "上一趟已经结算，明信片也收好了。歇够以后，它会自己再出门。") : "它会从你的真实知乎兴趣出发，自己挑问题、自己决定停在哪里，再把这一趟带回家。"}</p>
         {journeyNotice ? <p className="home-status-note" role="status">{journeyNotice}</p> : null}
       </div>

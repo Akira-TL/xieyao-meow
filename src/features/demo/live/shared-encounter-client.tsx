@@ -96,10 +96,22 @@ export function SharedEncounterPanel() {
 
   return (
     <section className="shared-encounter-stage" aria-label="真实 Shared Encounter">
+      <aside className="encounter-side-rail" aria-label="遇见侧栏">
+        <a href="/home">⌂<span>首页</span></a>
+        <a href="/explore?mode=app">⌕<span>探索</span></a>
+        <strong>◉<span>遇见</span><small>关系簿</small></strong>
+        <a href="/atlas">▤<span>档案</span></a>
+      </aside>
+      <PersonaArt
+        alt="观众席里的谢邀喵剪影"
+        className="encounter-audience-silhouette"
+        persona={{ visualVariant: "analyst-black" }}
+        state="thinking"
+      />
       <div className="shared-encounter-hero">
         <p className="stage-caption">REAL USER · SHARED ENCOUNTER</p>
-        <h1>最近，<br />它<span>遇见</span>了<br />{encounter ? "另一个真实灵魂。" : "一个空位。"}</h1>
-        <p>{encounter ? "同一个真实知乎问题，让两只 Persona 留下同一段、不会被刷新改写的共同历史。" : "这里不会塞预置 NPC。等第二个真实 Persona 出现，第一场相遇才会开始。"}</p>
+        <h1>最近，<br />它<span>遇见</span>了<br />{encounter ? "一个有趣的灵魂。" : "一张空椅子。"}</h1>
+        <p>{encounter ? "不同的问题，让不同的灵魂在这里相遇。每一次对话，都会留下同一段真实历史。" : "这里不塞预置 NPC。第二个真实 Persona 出现后，第一场相遇才会真正开演。"}</p>
       </div>
 
       {loading ? <div className="shared-encounter-loading">正在翻共同历史……</div> : null}

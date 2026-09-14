@@ -1,6 +1,6 @@
 import {
   DemoPage,
-  KanshanPlaceholder,
+  PersonaArt,
   PublicHeader,
 } from "@/features/demo/components";
 
@@ -42,7 +42,12 @@ export default function PrivacyPage() {
           <p>我们尊重你的隐私，只在你授权的范围内，用公开的内容，帮助你孵化另一个更像你的自己。</p>
         </div>
         <div className="privacy-hero-art">
-          <KanshanPlaceholder action="wander" className="kanshan-art--privacy" />
+          <PersonaArt
+            alt="谢邀喵隐私向导"
+            className="privacy-guide-persona"
+            persona={{ visualVariant: "analyst-black" }}
+            state="thinking"
+          />
         </div>
         <div className="privacy-card-grid">
           {cards.map((card) => (

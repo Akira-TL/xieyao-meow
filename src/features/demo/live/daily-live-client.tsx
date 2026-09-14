@@ -450,7 +450,10 @@ export function LiveAtlasSection() {
         <div className="atlas-tags">
           {interests.map((item) => <span key={item}>{item}</span>)}
         </div>
-        <CatProfileEditor profile={profile} saving={saving} onSave={updateProfile} />
+        <details className="atlas-profile-settings">
+          <summary>调整名字与外观</summary>
+          <CatProfileEditor profile={profile} saving={saving} onSave={updateProfile} />
+        </details>
       </PaperCard>
 
       <div className="atlas-mobile-index" aria-label="移动端图鉴索引">

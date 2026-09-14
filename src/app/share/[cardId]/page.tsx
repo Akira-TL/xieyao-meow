@@ -1,7 +1,7 @@
 import { DemoFlowButton } from "@/features/demo/client";
 import {
+  AppHeader,
   DemoPage,
-  PublicHeader,
 } from "@/features/demo/components";
 import { DEMO_FIXTURE } from "@/features/demo/fixtures";
 import { ShareRelationshipVisual, ShareSceneButton } from "@/features/demo/interaction-client";
@@ -9,7 +9,7 @@ import { ShareRelationshipVisual, ShareSceneButton } from "@/features/demo/inter
 export default function SharePage() {
   return (
     <DemoPage scene="encounter">
-      <PublicHeader right={<span className="public-kicker">SCENE 07 · 第一段关系成立</span>} />
+      <AppHeader active="home" right={<span className="public-kicker">SCENE 07 · 第一段关系成立</span>} />
       <section className="share-stage">
         <p className="stage-caption">SCENE 07 · 第一次相遇 · 第一段关系成立</p>
         <h1>第一段关系，<br />已经<span>成立</span>。</h1>

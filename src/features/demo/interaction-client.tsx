@@ -409,7 +409,7 @@ export function FirstMatchInteraction() {
       <p className="match-handwriting">不同，才更有意思。</p>
 
       <div className="match-stage-grid">
-        <div className="match-persona">
+        <div className="match-persona match-persona--self">
           <PersonaArt alt="本喵第一次遇见候选 Persona" className="match-self-persona-art" persona={playerPersona} state="thinking" />
           <strong>{selfPersona?.certifiedTitle ?? DEMO_FIXTURE.persona.title}</strong>
           <span>{selfStyle}</span>
@@ -424,7 +424,7 @@ export function FirstMatchInteraction() {
             <div><b>连接话题</b><em>{bridge}</em><small>{matchInsight?.mode === "zhida" ? "知乎直答找到的连接点" : "决定第一场对手戏"}</small></div>
           </div>
         </div>
-        <div className="match-persona">
+        <div className="match-persona match-persona--other">
           <ResidentArt
             alt={`${candidate.displayName} · ${candidate.species}`}
             className="match-resident-art"
@@ -436,6 +436,11 @@ export function FirstMatchInteraction() {
           <span>{candidate.title}</span>
           <q>{candidate.catchphrase}</q>
         </div>
+      </div>
+
+      <div className="match-mobile-summary">
+        <span><b>共同</b>{sharedInterests.slice(0, 2).join(" / ") || primaryInterest}</span>
+        <span><b>不同</b>{selfStyle} ↔ {candidate.personality[0]}</span>
       </div>
 
       <div className="match-contrast-row">

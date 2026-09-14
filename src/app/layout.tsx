@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./target-parity.css";
 
 export const metadata: Metadata = {
   title: "谢邀喵",

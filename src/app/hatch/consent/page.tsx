@@ -7,7 +7,7 @@ import {
   ActivationHeader,
   ArtSlot,
   DemoPage,
-  KanshanPlaceholder,
+  PersonaArt,
   PaperCard,
 } from "@/features/demo/components";
 import { resolveP0Art } from "@/lib/art/p0";
@@ -46,7 +46,12 @@ export default function ConsentPage() {
               />
             </div>
             <div className="consent-guide-row">
-              <KanshanPlaceholder action="idle" />
+              <PersonaArt
+                alt="谢邀喵授权向导"
+                className="consent-guide-persona"
+                persona={{ visualVariant: "analyst-black" }}
+                state="thinking"
+              />
               <em>这些线索，让我们更懂你。</em>
             </div>
           </div>

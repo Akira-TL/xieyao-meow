@@ -9,7 +9,7 @@ import type { AnswerExperience } from "@/lib/experience";
 
 import { DEMO_STAGE_STORAGE_KEY, advanceActivationStage, isDemoActivationStage } from "./activation";
 import { DemoFlowButton, EvidenceList } from "./client";
-import { KanshanPlaceholder, PersonaEgg, PetStage } from "./components";
+import { PersonaArt, PersonaEgg, PetStage } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 
 export interface LivePersonaSnapshot {
@@ -178,7 +178,12 @@ export function ScanningStageVisual() {
       <div className="scanning-stage-egg-anchor">
         <PersonaEgg state={state} />
       </div>
-      <KanshanPlaceholder action="computer" className="kanshan-art--casting" />
+      <PersonaArt
+        alt="谢邀喵扫描向导"
+        className="kanshan-art--casting scanning-guide-persona"
+        persona={{ visualVariant: "analyst-black" }}
+        state="thinking"
+      />
       <p className="scanning-stage-status">{status}</p>
     </div>
   );

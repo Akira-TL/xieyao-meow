@@ -56,7 +56,6 @@ export function LandingActions() {
       return (
         <div className="flex flex-col gap-3 sm:flex-row">
           <DemoFlowButton href="/home">回我的窝</DemoFlowButton>
-          <DemoFlowButton href="/explore?mode=app" variant="secondary">看看它今天带回了什么</DemoFlowButton>
         </div>
       );
     }
@@ -64,7 +63,6 @@ export function LandingActions() {
     return (
       <div className="flex flex-col gap-3 sm:flex-row">
         <DemoFlowButton href="/hatch/consent">开幕</DemoFlowButton>
-        <DemoFlowButton href="/explore?mode=public" variant="secondary">先看看这个世界</DemoFlowButton>
       </div>
     );
   }

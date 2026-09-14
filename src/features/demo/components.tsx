@@ -1,8 +1,10 @@
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import AutoStoriesRoundedIcon from "@mui/icons-material/AutoStoriesRounded";
+import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import Diversity3RoundedIcon from "@mui/icons-material/Diversity3Rounded";
 import ExploreRoundedIcon from "@mui/icons-material/ExploreRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
@@ -29,10 +31,12 @@ const DEMO_ACTIVATION_STEPS = [
 ] as const;
 
 const PRODUCT_ACTIVATION_STEPS = [
-  ["01", "认识谢邀喵"],
-  ["02", "登录知乎"],
-  ["03", "读取知乎成分"],
-  ["04", "孵化人格"],
+  ["01", "序幕"],
+  ["02", "授权"],
+  ["03", "数据扫描"],
+  ["04", "人格登台"],
+  ["05", "首次相遇"],
+  ["06", "对手戏"],
 ] as const;
 
 type DemoScene = "default" | "landing" | "consent" | "casting" | "reveal" | "encounter" | "archive";
@@ -102,8 +106,8 @@ export function DemoPage({
 export function BrandMark() {
   return (
     <Link className="theatre-brand" href="/" aria-label="谢邀喵首页">
-      <span className="theatre-brand-name">谢邀喵</span>
-      <span className="theatre-brand-tagline">把知乎足迹孵化成会继续生活的 AI 数字人格</span>
+      <span className="theatre-brand-name">谢邀喵<sup>+</sup></span>
+      <span className="theatre-brand-tagline">每一个认真提问的人<br />都值得被看见</span>
     </Link>
   );
 }
@@ -143,9 +147,13 @@ export function AppHeader({ active, right }: { active: AppSection; right?: React
         <Link className="app-about-link" href="/about">关于</Link>
       </nav>
       <div className="app-header-right">
+        <Link className="header-icon-link header-search-link" href="/explore?mode=app" aria-label="搜索与探索">
+          <SearchRoundedIcon fontSize="small" />
+        </Link>
         <Link className="header-icon-link" href="/atlas" aria-label="我的人格档案">
           <AccountCircleRoundedIcon fontSize="small" />
         </Link>
+        <span className="header-menu-icon" aria-hidden="true"><MenuRoundedIcon fontSize="small" /></span>
         {right}
       </div>
     </header>
@@ -160,7 +168,11 @@ export function PublicHeader({ right }: { right?: ReactNode }) {
         <Link href="/explore?mode=public">公开试看</Link>
         <Link href="/about">关于谢邀喵</Link>
       </nav>
-      <div className="app-header-right">{right}</div>
+      <div className="app-header-right">
+        <Link className="header-icon-link" href="/explore?mode=public" aria-label="搜索公开内容"><SearchRoundedIcon fontSize="small" /></Link>
+        <span className="header-menu-icon" aria-hidden="true"><MenuRoundedIcon fontSize="small" /></span>
+        {right}
+      </div>
     </header>
   );
 }
