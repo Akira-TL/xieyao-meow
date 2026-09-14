@@ -1,0 +1,138 @@
+{
+  "version": "generated-v1",
+  "basePath": "/art/personas/generated-v1",
+  "packs": {
+    "00_exploration_samples": {
+      "sample_01_thinker_red_blueprint": {
+        "path": "/art/personas/generated-v1/00_exploration_samples/sample_01_thinker_red_blueprint.png",
+        "description": "思辨型探索样例：红围巾、眼镜、蓝图卷、档案包"
+      },
+      "sample_02_analyst_clipboard": {
+        "path": "/art/personas/generated-v1/00_exploration_samples/sample_02_analyst_clipboard.png",
+        "description": "分析型探索样例：黑领结、眼镜、夹板、档案包"
+      },
+      "sample_03_observer_returned": {
+        "path": "/art/personas/generated-v1/00_exploration_samples/sample_03_observer_returned.png",
+        "description": "观察型探索样例：蓝眼镜、纸牌项圈、帆布包、举卡"
+      },
+      "sample_04_engineer_thinking": {
+        "path": "/art/personas/generated-v1/00_exploration_samples/sample_04_engineer_thinking.png",
+        "description": "工程型探索样例：圆眼镜、蓝围巾、笔记本、工具包"
+      },
+      "sample_05_traveler_walking": {
+        "path": "/art/personas/generated-v1/00_exploration_samples/sample_05_traveler_walking.png",
+        "description": "旅行型探索样例：蓝领结、旅行背包、多功能工具"
+      }
+    },
+    "01_engineer_blue": {
+      "base": {
+        "path": "/art/personas/generated-v1/01_engineer_blue/base.png",
+        "description": "工程脑基础立姿"
+      },
+      "thinking": {
+        "path": "/art/personas/generated-v1/01_engineer_blue/thinking.png",
+        "description": "工程脑思考姿势"
+      },
+      "talking": {
+        "path": "/art/personas/generated-v1/01_engineer_blue/talking.png",
+        "description": "工程脑讲解姿势"
+      },
+      "walking": {
+        "path": "/art/personas/generated-v1/01_engineer_blue/walking.png",
+        "description": "工程脑行走/出门姿势"
+      },
+      "returned": {
+        "path": "/art/personas/generated-v1/01_engineer_blue/returned.png",
+        "description": "工程脑回家/举卡姿势"
+      }
+    },
+    "02_analyst_black": {
+      "base": {
+        "path": "/art/personas/generated-v1/02_analyst_black/base.png",
+        "description": "分析型基础立姿"
+      },
+      "thinking": {
+        "path": "/art/personas/generated-v1/02_analyst_black/thinking.png",
+        "description": "分析型思考姿势"
+      },
+      "talking": {
+        "path": "/art/personas/generated-v1/02_analyst_black/talking.png",
+        "description": "分析型讲解姿势"
+      },
+      "walking": {
+        "path": "/art/personas/generated-v1/02_analyst_black/walking.png",
+        "description": "分析型行走/档案包姿势"
+      },
+      "returned": {
+        "path": "/art/personas/generated-v1/02_analyst_black/returned.png",
+        "description": "分析型回家/举卡姿势"
+      }
+    },
+    "03_thinker_red": {
+      "base": {
+        "path": "/art/personas/generated-v1/03_thinker_red/base.png",
+        "description": "思辨型基础立姿"
+      },
+      "thinking": {
+        "path": "/art/personas/generated-v1/03_thinker_red/thinking.png",
+        "description": "思辨型思考+蓝图卷"
+      },
+      "talking": {
+        "path": "/art/personas/generated-v1/03_thinker_red/talking.png",
+        "description": "思辨型讲解+夹板"
+      },
+      "walking": {
+        "path": "/art/personas/generated-v1/03_thinker_red/walking.png",
+        "description": "思辨型行走+档案包"
+      },
+      "returned": {
+        "path": "/art/personas/generated-v1/03_thinker_red/returned.png",
+        "description": "思辨型回家/举卡+档案包"
+      }
+    },
+    "04_observer_canvas": {
+      "base": {
+        "path": "/art/personas/generated-v1/04_observer_canvas/base.png",
+        "description": "观察型基础立姿"
+      },
+      "thinking": {
+        "path": "/art/personas/generated-v1/04_observer_canvas/thinking.png",
+        "description": "观察型思考+笔记本"
+      },
+      "talking": {
+        "path": "/art/personas/generated-v1/04_observer_canvas/talking.png",
+        "description": "观察型讲解+笔记本"
+      },
+      "walking": {
+        "path": "/art/personas/generated-v1/04_observer_canvas/walking.png",
+        "description": "观察型行走+帆布包"
+      },
+      "returned": {
+        "path": "/art/personas/generated-v1/04_observer_canvas/returned.png",
+        "description": "观察型回家/举卡+帆布包"
+      }
+    },
+    "05_traveler_blue": {
+      "base": {
+        "path": "/art/personas/generated-v1/05_traveler_blue/base.png",
+        "description": "旅行型基础立姿"
+      },
+      "thinking": {
+        "path": "/art/personas/generated-v1/05_traveler_blue/thinking.png",
+        "description": "旅行型思考+蓝图卷"
+      },
+      "talking": {
+        "path": "/art/personas/generated-v1/05_traveler_blue/talking.png",
+        "description": "旅行型讲解+多功能工具"
+      },
+      "walking": {
+        "path": "/art/personas/generated-v1/05_traveler_blue/walking.png",
+        "description": "旅行型行走+旅行背包"
+      },
+      "returned": {
+        "path": "/art/personas/generated-v1/05_traveler_blue/returned.png",
+        "description": "旅行型回家/举卡+旅行背包"
+      }
+    }
+  }
+}
