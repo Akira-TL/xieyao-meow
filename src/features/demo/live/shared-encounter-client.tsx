@@ -31,7 +31,6 @@ function participantPersona(participant: SharedEncounterView["participants"][num
 export function SharedEncounterPanel() {
   const [encounter, setEncounter] = useState<SharedEncounterView | null>(null);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState("");
   const [authRequired, setAuthRequired] = useState(false);
 
@@ -60,34 +59,6 @@ export function SharedEncounterPanel() {
   useEffect(() => {
     void loadLatest();
   }, []);
-
-  async function createEncounter() {
-    setCreating(true);
-    setMessage("");
-    try {
-      const response = await fetch("/api/community/encounters", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: "{}",
-      });
-      const body = (await response.json()) as EncounterResponse;
-      if (response.status === 401) {
-        setAuthRequired(true);
-        setMessage("");
-        return;
-      }
-      if (!response.ok && response.status !== 202) {
-        throw new Error(body.error || "创建 Shared Encounter 失败");
-      }
-      setAuthRequired(false);
-      setEncounter(body.encounter);
-      if (response.status === 202) setMessage("两只猫正在把这一幕写进共同历史。刷新后仍然会读到同一场。 ");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "创建 Shared Encounter 失败");
-    } finally {
-      setCreating(false);
-    }
-  }
 
   const self = encounter?.participants.find((item) => item.isSelf);
   const other = encounter?.participants.find((item) => !item.isSelf);
@@ -124,11 +95,11 @@ export function SharedEncounterPanel() {
       {!loading && !encounter ? (
         <PaperCard className="shared-encounter-empty">
           <span>SCENE 05 · FIRST REAL ENCOUNTER</span>
-          <h2>舞台已经亮了，<br />还差另一只真实的猫。</h2>
-          <p>匹配只会从已完成知乎授权、已经生成 Persona 的真实用户里选；不会让你点名，也不会用测试居民补位。</p>
-          <button className="theatre-button theatre-button-primary" disabled={creating} onClick={createEncounter} type="button">
-            {creating ? "正在找另一只猫…" : "让它去遇见谁"} <b>→</b>
-          </button>
+          <h2>旅行册里，<br />还没有一张关系票根。</h2>
+          <p>不用在这里刷匹配。它出门时会自己遇见别的真实 Persona；你只能用纸条轻轻影响路线，不能点名对象。</p>
+          <a className="theatre-button theatre-button-primary" href="/home">
+            回窝准备下一趟 <b>→</b>
+          </a>
         </PaperCard>
       ) : null}
 
@@ -181,9 +152,9 @@ export function SharedEncounterPanel() {
             ) : null}
           </PaperCard>
 
-          <button className="theatre-button theatre-button-primary shared-encounter-again" disabled={creating} onClick={createEncounter} type="button">
-            {creating ? "正在找下一场…" : "去见更多真实灵魂"} <b>→</b>
-          </button>
+          <a className="theatre-button theatre-button-primary shared-encounter-again" href="/home">
+            回窝等下一趟 <b>→</b>
+          </a>
         </div>
       ) : null}
     </section>

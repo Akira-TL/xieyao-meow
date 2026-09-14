@@ -73,12 +73,20 @@ export interface JourneyAtlasView {
   memories: PersonaMemoryView[];
 }
 
+export interface JourneyReturnArtifactSeed {
+  type: ReturnArtifactType;
+  title: string;
+  sourceUrl: string;
+  sourceKey: string;
+}
+
 export interface JourneyDiscoveryResult {
   question: JourneyQuestion | null;
   contentSource: JourneyContentSource;
   knowledgeSource: JourneyKnowledgeSource;
   sourceFetchedAt: number;
   postcardBody: string;
+  returnArtifact?: JourneyReturnArtifactSeed;
 }
 
 export interface JourneyDiscoveryInput {

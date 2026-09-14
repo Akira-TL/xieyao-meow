@@ -1,10 +1,17 @@
 import "server-only";
 
+import { getAccountStore } from "@/lib/auth/runtime";
 import { buildComposition, buildPersona } from "@/lib/persona";
+import { SocialDialogueService, type SocialAgent } from "@/lib/social";
+import {
+  SharedEncounterService,
+  type SharedEncounterProvenance,
+} from "@/lib/social/shared-encounter";
+import { getSharedEncounterStore } from "@/lib/social/runtime";
 import { createZhihuGatewayFromEnv } from "@/lib/zhihu/env";
 
 import { JourneyService } from "./service";
-import type { JourneyDiscoverer } from "./types";
+import type { JourneyDiscoverer, JourneyReturnArtifactSeed } from "./types";
 
 const INTEREST_TERMS: Record<string, string[]> = {
   "AI 与数码": ["ai", "人工智能", "大模型", "模型", "机器人", "科技", "数码", "智能"],
@@ -30,7 +37,16 @@ function stableTieBreak(seed: string): number {
   return hash >>> 0;
 }
 
+const ENCOUNTER_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+function shouldTryEncounter(planSeed: string, routeBias: string | null): boolean {
+  const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
+  const chance = route.includes("吵") ? 85 : route.includes("陌生") ? 55 : 35;
+  return stableTieBreak(`${planSeed}:shared-encounter`) % 100 < chance;
+}
+
 const discoverJourneyContent: JourneyDiscoverer = async ({
+  userId,
   oauthAccessToken,
   routeBias,
   planSeed,
@@ -52,12 +68,22 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   }
 
   let interests: string[] = [];
+  let actor: SocialAgent | null = null;
   try {
-    const profile = await gateway.getUserProfile({ oauthAccessToken });
-    const persona = buildPersona(buildComposition(profile));
+    const zhihuProfile = await gateway.getUserProfile({ oauthAccessToken });
+    const composition = buildComposition(zhihuProfile);
+    const persona = buildPersona(composition);
     interests = persona.interests;
+    actor = {
+      id: `user:${userId}`,
+      displayName: getAccountStore().getUserProfile(userId).catName,
+      composition,
+      persona,
+    };
+    getSharedEncounterStore().savePersonaSnapshot(userId, actor, "live");
   } catch {
     interests = [];
+    actor = null;
   }
 
   const interestTerms = interests.flatMap((interest) => INTEREST_TERMS[interest] ?? []);
@@ -92,6 +118,52 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     .sort((left, right) => right.score - left.score || left.tie - right.tie);
 
   const selected = ranked[0]!.item;
+  let returnArtifact: JourneyReturnArtifactSeed | undefined;
+  let encounterName: string | null = null;
+
+  if (actor && shouldTryEncounter(planSeed, routeBias)) {
+    const store = getSharedEncounterStore();
+    const target = store.findPersonaCandidate(userId);
+    const relationship = target ? store.getRelationship(userId, target.userId) : null;
+    const insideCooldown = relationship?.lastEncounterAt
+      ? fetchedAt - relationship.lastEncounterAt < ENCOUNTER_COOLDOWN_MS
+      : false;
+
+    if (target && target.source === "live" && !insideCooldown) {
+      const provenance: SharedEncounterProvenance = {
+        contentSource: "live",
+        knowledgeSource: "journey-selected-question",
+        fetchedAt,
+      };
+      try {
+        const encounter = await new SharedEncounterService(
+          store,
+          new SocialDialogueService(gateway),
+        ).create({
+          requestUserId: userId,
+          otherUserId: target.userId,
+          topic: {
+            title: selected.title,
+            url: selected.url,
+            summary: selected.summary.slice(0, 1800),
+          },
+          provenance,
+        });
+        if (encounter.status === "completed") {
+          encounterName = target.agent.displayName;
+          returnArtifact = {
+            type: "RELATION_TICKET",
+            title: `和 ${target.agent.displayName} 的一场相遇`,
+            sourceUrl: "/encounter",
+            sourceKey: encounter.id,
+          };
+        }
+      } catch {
+        // Social luck never blocks a Journey from coming home.
+      }
+    }
+  }
+
   return {
     question: {
       title: selected.title,
@@ -102,7 +174,10 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     contentSource: "live",
     knowledgeSource: "template",
     sourceFetchedAt: fetchedAt,
-    postcardBody: `它在「${selected.title}」前停了一会儿。没有替你下结论，只觉得这题值得叼回来。`,
+    postcardBody: encounterName
+      ? `它在「${selected.title}」前停了一会儿，还碰见了 ${encounterName}。你不在场，但两只 Persona 已经把这一幕聊完了。`
+      : `它在「${selected.title}」前停了一会儿。没有替你下结论，只觉得这题值得叼回来。`,
+    ...(returnArtifact ? { returnArtifact } : {}),
   };
 };
 

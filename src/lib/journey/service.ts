@@ -381,7 +381,15 @@ export class JourneyService {
 
     const question = result.question;
     const headline = question ? "它叼回来一个问题。" : "它空着爪子回来了。";
-    const artifactId = question ? this.createId() : null;
+    const artifactSeed = result.returnArtifact ?? (question
+      ? {
+          type: "QUESTION_TICKET" as const,
+          title: question.title,
+          sourceUrl: question.url,
+          sourceKey: question.url,
+        }
+      : null);
+    const artifactId = artifactSeed ? this.createId() : null;
     const memoryId = question ? this.createId() : null;
     const nextEligibleAt = row.return_at + restDurationMs(row.plan_seed, this.timeScale);
 
@@ -430,19 +438,20 @@ export class JourneyService {
         latest.return_at,
       );
 
-      if (question && artifactId) {
+      if (artifactSeed && artifactId) {
         this.db.prepare(`
           INSERT OR IGNORE INTO return_artifacts (
             id, owner_user_id, origin_journey_id, type, title,
             source_url, source_key, created_at
-          ) VALUES (?, ?, ?, 'QUESTION_TICKET', ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
           artifactId,
           userId,
           journeyId,
-          question.title,
-          question.url,
-          question.url,
+          artifactSeed.type,
+          artifactSeed.title,
+          artifactSeed.sourceUrl,
+          artifactSeed.sourceKey,
           latest.return_at,
         );
       }

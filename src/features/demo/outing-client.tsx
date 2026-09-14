@@ -253,6 +253,15 @@ function ReturnedStage({
   const question = journey.question;
   const interests = playerPersona.interests.slice(0, 2);
   const thought = journey.postcard?.body ?? "它按时回来了，只是这趟没有值得带回来的新问题。";
+  const relationTicket = journey.artifact?.type === "RELATION_TICKET";
+  const artifactLabel = relationTicket
+    ? "关系票根 · RELATION TICKET"
+    : journey.artifact
+      ? "问题票根 · QUESTION TICKET"
+      : "旅途明信片 · POSTCARD";
+  const artifactTitle = relationTicket
+    ? journey.artifact?.title ?? "旅途中遇见了另一个 Persona"
+    : question?.title ?? "今天没碰到值得带回来的新问题";
 
   useEffect(() => {
     setOpened(false);
@@ -278,15 +287,19 @@ function ReturnedStage({
         </PaperCard>
       ) : (
         <PaperCard className="returned-artifact is-opened">
-          <span>{journey.artifact ? "问题票根 · QUESTION TICKET" : "旅途明信片 · POSTCARD"}</span>
-          <h2>{question?.title ?? "今天没碰到值得带回来的新问题"}</h2>
+          <span>{artifactLabel}</span>
+          <h2>{artifactTitle}</h2>
           <p>出门方向：{journey.routeBias ?? "随便逛"}{interests.length ? ` · ${interests.join(" / ")}` : ""}</p>
           <blockquote>“{thought}”</blockquote>
           <div className="returned-meta">
             <span>内容来源 <b>{journey.contentSource === "live" ? "知乎实时公开内容" : "本趟无新内容"}</b></span>
             <span>带回 <b>{journey.artifact ? "1 张问题票根" : "1 张明信片"}</b></span>
           </div>
-          {question ? <a className="home-last-night-link" href={question.url} rel="noreferrer" target="_blank">去知乎看原问题 →</a> : null}
+          {relationTicket ? (
+            <a className="home-last-night-link" href="/encounter">看它们这一幕 →</a>
+          ) : question ? (
+            <a className="home-last-night-link" href={question.url} rel="noreferrer" target="_blank">去知乎看原问题 →</a>
+          ) : null}
           <button className="theatre-button theatre-button-primary" onClick={onArchive} type="button">收进旅行册 <span>→</span></button>
         </PaperCard>
       )}
