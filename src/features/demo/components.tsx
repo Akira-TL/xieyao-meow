@@ -35,15 +35,40 @@ const PRODUCT_ACTIVATION_STEPS = [
   ["04", "孵化人格"],
 ] as const;
 
-function TheatreSceneArt({ overlay }: { overlay?: ReactNode }) {
+type DemoScene = "default" | "landing" | "casting" | "reveal" | "encounter" | "archive";
+
+function resolveSceneBackdrop(scene: DemoScene): string | null {
+  if (scene === "landing" || scene === "reveal") return resolveP0Art("stage-spotlight-empty");
+  if (scene === "casting") return resolveP0Art("stage-industrial-empty");
+  if (scene === "encounter") return resolveP0Art("stage-shadow-empty");
+  if (scene === "archive") return resolveP0Art("stage-paper-archive");
+  return null;
+}
+
+function resolveSceneAccent(scene: DemoScene): string | null {
+  if (scene === "casting") return resolveP0Art("neon-scanning-mind");
+  if (scene === "encounter") return resolveP0Art("neon-good-minds");
+  return null;
+}
+
+function TheatreSceneArt({ scene, overlay }: { scene: DemoScene; overlay?: ReactNode }) {
+  const backdrop = resolveSceneBackdrop(scene);
+  const accent = resolveSceneAccent(scene);
   return (
-    <div className="theatre-scene-art" aria-hidden="true">
-      <div className="theatre-scene-wing theatre-scene-wing--left" />
-      <div className="theatre-scene-wing theatre-scene-wing--right" />
+    <div className="theatre-scene-art theatre-scene-art--generated" data-scene={scene} aria-hidden="true">
+      {backdrop ? (
+        <div
+          className="theatre-scene-backdrop"
+          style={{ backgroundImage: `url(${JSON.stringify(backdrop)})` }}
+        />
+      ) : null}
+      {accent ? (
+        <div
+          className="theatre-scene-accent"
+          style={{ backgroundImage: `url(${JSON.stringify(accent)})` }}
+        />
+      ) : null}
       <div className="theatre-scene-canvas">
-        <div className="theatre-scene-curtain" />
-        <div className="theatre-scene-spotlight" />
-        <div className="theatre-scene-floor" />
         {overlay ? <div className="theatre-scene-overlay">{overlay}</div> : null}
       </div>
     </div>
@@ -59,15 +84,15 @@ export function DemoPage({
 }: {
   children: ReactNode;
   width?: string;
-  scene?: "default" | "landing" | "casting" | "reveal" | "encounter" | "archive";
+  scene?: DemoScene;
   activation?: boolean;
   sceneOverlay?: ReactNode;
 }) {
-  const usesTheatreScenery = scene === "landing" || scene === "casting" || scene === "reveal" || scene === "encounter";
+  const usesTheatreScenery = scene !== "default";
 
   return (
     <main className={`theatre-page theatre-page--${scene}${activation ? " theatre-page--activation" : ""}`}>
-      {usesTheatreScenery ? <TheatreSceneArt overlay={sceneOverlay} /> : null}
+      {usesTheatreScenery ? <TheatreSceneArt scene={scene} overlay={sceneOverlay} /> : null}
       <div className="theatre-grain" aria-hidden="true" />
       <div className={`relative z-10 mx-auto w-full ${width}`}>{children}</div>
     </main>

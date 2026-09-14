@@ -5,10 +5,12 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import { DemoRouteGuard } from "@/features/demo/client";
 import {
   ActivationHeader,
+  ArtSlot,
   DemoPage,
   KanshanPlaceholder,
   PaperCard,
 } from "@/features/demo/components";
+import { resolveP0Art } from "@/lib/art/p0";
 import { BottomSheet, ZhihuConsentActions } from "@/features/demo/interaction-client";
 
 const permissions = [
@@ -27,6 +29,22 @@ export default function ConsentPage() {
             <p className="stage-caption">ACT 01 · PERMISSION</p>
             <h1>孵化需要一点<br />你的<span>知乎</span>成分。</h1>
             <p>这些公开内容，用来理解一个更像你的它。不是复制你，而是从你的思想轨迹里，孵化出一个更完整的你。</p>
+            <div className="consent-collage-stack" aria-hidden="true">
+              <ArtSlot
+                aspect="portrait"
+                className="consent-collage-art consent-collage-art--signals"
+                fit="contain"
+                name="consent/zhihu-signals"
+                src={resolveP0Art("collage-zhihu-signals")}
+              />
+              <ArtSlot
+                aspect="portrait"
+                className="consent-collage-art consent-collage-art--following"
+                fit="contain"
+                name="consent/following"
+                src={resolveP0Art("collage-following")}
+              />
+            </div>
             <div className="consent-guide-row">
               <KanshanPlaceholder action="idle" />
               <em>这些线索，让我们更懂你。</em>

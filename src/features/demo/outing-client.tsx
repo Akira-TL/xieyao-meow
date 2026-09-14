@@ -21,7 +21,7 @@ function RoomBackdrop({ empty = false }: { empty?: boolean }) {
     <div
       aria-hidden="true"
       className="home-room-backdrop"
-      style={{ backgroundImage: `url(${resolveP0Art(empty ? "room-empty-night" : "room-home-night")})` }}
+      style={{ backgroundImage: `url(${resolveP0Art(empty ? "room-empty-night" : "room-study-night-empty")})` }}
     />
   );
 }
