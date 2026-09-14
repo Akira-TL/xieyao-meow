@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { withHumanizerZh } from "@/lib/copy/humanizer";
 import type { ZhidaRequest, ZhidaResult } from "@/lib/zhihu";
 
 import { buildSocialSignals } from "./engine";
@@ -138,7 +139,7 @@ export class SocialMatchService {
     try {
       const result = await this.gateway.askZhida({
         model: "zhida-fast-1p5",
-        messages: [{ role: "user", content: matchPrompt(actor, target, baseline) }],
+        messages: [{ role: "user", content: withHumanizerZh(matchPrompt(actor, target, baseline), { structured: true }) }],
       });
       const semantic = parseZhidaMatch(result.content);
       return {

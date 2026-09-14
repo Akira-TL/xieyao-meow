@@ -97,6 +97,8 @@ describe("SocialMatchService", () => {
     expect(gateway.calls).toHaveLength(1);
     expect(gateway.calls[0]?.model).toBe("zhida-fast-1p5");
     expect(gateway.calls[0]?.messages[0]?.content).toContain("不是知乎官方评分");
+    expect(gateway.calls[0]?.messages[0]?.content).toContain("中文表达约束（Humanizer-zh）");
+    expect(gateway.calls[0]?.messages[0]?.content).toContain("JSON 结构必须原样遵守");
   });
 
   it("falls back to explainable local rules when Zhida is unavailable", async () => {

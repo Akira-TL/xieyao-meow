@@ -1,3 +1,4 @@
+import { withHumanizerZh } from "@/lib/copy/humanizer";
 import { buildComposition, buildPersona } from "@/lib/persona";
 
 import type {
@@ -126,7 +127,7 @@ export class AnswerExperienceService {
 
       const knowledgeResult = await this.options.gateway.askZhida({
         model: "zhida-fast-1p5",
-        messages: [{ role: "user", content: knowledgePrompt(question, summaries) }],
+        messages: [{ role: "user", content: withHumanizerZh(knowledgePrompt(question, summaries)) }],
       });
       const knowledge: KnowledgeContext = {
         source: summaries.length > 0 ? "zhihu-question-answers+zhida" : "zhida",
@@ -136,7 +137,7 @@ export class AnswerExperienceService {
 
       const personaResult = await this.options.gateway.askZhida({
         model: "zhida-fast-1p5",
-        messages: [{ role: "user", content: personaPrompt(question, knowledge, persona) }],
+        messages: [{ role: "user", content: withHumanizerZh(personaPrompt(question, knowledge, persona)) }],
       });
 
       const experience: AnswerExperience = {

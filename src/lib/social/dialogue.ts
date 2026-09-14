@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { withHumanizerZh } from "@/lib/copy/humanizer";
 import type { ZhidaRequest, ZhidaResult } from "@/lib/zhihu";
 
 import type { SocialAgent } from "./types";
@@ -185,13 +186,13 @@ export class SocialDialogueService {
     try {
       const selfResult = await this.gateway.askZhida({
         model: "zhida-fast-1p5",
-        messages: [{ role: "user", content: firstSpeakerPrompt(input, roundNumber) }],
+        messages: [{ role: "user", content: withHumanizerZh(firstSpeakerPrompt(input, roundNumber), { structured: true }) }],
       });
       const selfPayload = firstSpeakerSchema.parse(parseJsonObject(selfResult.content));
 
       const otherResult = await this.gateway.askZhida({
         model: "zhida-fast-1p5",
-        messages: [{ role: "user", content: secondSpeakerPrompt(input, roundNumber, selfPayload.text) }],
+        messages: [{ role: "user", content: withHumanizerZh(secondSpeakerPrompt(input, roundNumber, selfPayload.text), { structured: true }) }],
       });
       const otherPayload = secondSpeakerSchema.parse(parseJsonObject(otherResult.content));
 

@@ -164,6 +164,8 @@ describe("AnswerExperienceService", () => {
 
     expect(gateway.zhidaCalls).toHaveLength(2);
     expect(gateway.zhidaCalls[0]?.messages[0]?.content).not.toContain("工程脑");
+    expect(gateway.zhidaCalls[0]?.messages[0]?.content).toContain("中文表达约束（Humanizer-zh）");
+    expect(gateway.zhidaCalls[1]?.messages[0]?.content).toContain("中文表达约束（Humanizer-zh）");
     expect(gateway.zhidaCalls[1]?.messages[0]?.content).toContain("工程脑");
     expect(gateway.zhidaCalls[1]?.messages[0]?.content).toContain(
       "事实层：Agent 通常组合模型、工具与执行循环。",

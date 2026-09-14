@@ -111,7 +111,9 @@ describe("SocialDialogueService", () => {
     expect(result.roundNumber).toBe(1);
     expect(gateway.requests).toHaveLength(2);
     expect(gateway.requests[0]?.messages[0]?.content).toContain("最近更愿意先听完反方再拆结构");
+    expect(gateway.requests[0]?.messages[0]?.content).toContain("中文表达约束（Humanizer-zh）");
     expect(gateway.requests[1]?.messages[0]?.content).toContain("先把决定权分层");
+    expect(gateway.requests[1]?.messages[0]?.content).toContain("JSON 结构必须原样遵守");
   });
 
   it("allows a natural stop from round two and forces a stop at round four", async () => {
