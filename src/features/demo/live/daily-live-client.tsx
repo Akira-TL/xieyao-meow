@@ -6,8 +6,10 @@ import CreateOutlinedIcon from "@mui/icons-material/CreateOutlined";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { resolveP0Art } from "@/lib/art/p0";
+import type { JourneyAtlasView } from "@/lib/journey/types";
 
 import { DemoFlowButton } from "../client";
 import { ArtSlot, PaperCard, PersonaArt } from "../components";
@@ -27,6 +29,15 @@ function questionReason(index: number, primaryInterest: string) {
   return "完全是顺路拐进去的陌生地方。它觉得这张票根值得带回来。";
 }
 
+function formatJourneyDate(value: number) {
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
 export function LiveExploreSection({ appMode }: { appMode: boolean }) {
   const personaSnapshot = useLivePersonaSnapshot();
   const questionSnapshot = useLiveQuestionSnapshot();
@@ -34,20 +45,51 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
   const basePersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
   const { profile, persona: playerPersona } = useCatProfile(basePersona, appMode);
   const catName = profile.catName;
-  const fallbackQuestions = DEMO_FIXTURE.explore.items.map((item) => ({
-    title: item.title,
-    url: item.sourceUrl,
-    summary: item.whyPicked,
-    thumbnailUrl: "",
-  }));
+  const [atlas, setAtlas] = useState<JourneyAtlasView | null>(null);
+
+  useEffect(() => {
+    if (!appMode) return;
+    let cancelled = false;
+    fetch("/api/atlas", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`atlas HTTP ${response.status}`);
+        return (await response.json()) as JourneyAtlasView;
+      })
+      .then((next) => {
+        if (!cancelled) setAtlas(next);
+      })
+      .catch(() => {
+        if (!cancelled) setAtlas({ journeys: [], memories: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [appMode]);
+
   const liveQuestions = questionSnapshot?.questions?.length
     ? questionSnapshot.questions
     : questionSnapshot?.question
       ? [questionSnapshot.question]
       : [];
-  const questions = [...liveQuestions, ...fallbackQuestions]
-    .filter((item, index, collection) => collection.findIndex((candidate) => candidate.title === item.title) === index)
-    .slice(0, 3);
+  const publicQuestions = liveQuestions.slice(0, 3).map((item) => ({
+    ...item,
+    completedAt: null as number | null,
+    routeBias: null as string | null,
+    artifactType: null as string | null,
+  }));
+  const journeyQuestions = (atlas?.journeys ?? [])
+    .filter((entry) => entry.postcard.question)
+    .slice(0, 3)
+    .map((entry) => ({
+      title: entry.postcard.question!.title,
+      url: entry.postcard.question!.url,
+      summary: entry.postcard.body,
+      thumbnailUrl: entry.postcard.question!.thumbnailUrl ?? "",
+      completedAt: entry.completedAt,
+      routeBias: entry.routeBias,
+      artifactType: entry.artifact?.type ?? null,
+    }));
+  const questions = appMode ? journeyQuestions : publicQuestions;
 
   return (
     <section className={`explore-stage ${appMode ? "explore-stage--app" : "explore-stage--public"}`}>
@@ -82,7 +124,7 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
         {questions.map((item, index) => (
           <PaperCard className={index === 0 ? "explore-card is-featured" : "explore-card"} key={`${item.url}-${index}`}>
             <div className="explore-card-number">{String(index + 1).padStart(2, "0")}</div>
-            <span className="explore-card-badge">{appMode ? (index === 0 ? "最近带回" : "旧票根") : (index === 0 ? "今天先看" : index === 1 ? "顺路闻到" : "陌生领域")}</span>
+            <span className="explore-card-badge">{appMode ? (index === 0 ? "最近带回" : `旅途 ${index + 1}`) : (index === 0 ? "今天先看" : index === 1 ? "顺路闻到" : "陌生领域")}</span>
             <h2>{item.title}</h2>
             <p>{compact(item.summary)}</p>
             <ArtSlot
@@ -92,7 +134,9 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
               src={item.thumbnailUrl || undefined}
             />
             <div className="explore-why">
-              <b>{appMode ? "它为什么停下：" : "为什么带回来："}</b>{appMode ? questionReason(index, primaryInterest) : "来自当前知乎公开内容，用来展示不同问题如何触发不同 Persona 的注意。"}
+              <b>{appMode ? "这一趟：" : "为什么带回来："}</b>{appMode
+                ? `${item.completedAt ? formatJourneyDate(item.completedAt) : ""} · 纸条「${item.routeBias ?? "随便逛"}」${item.artifactType === "RELATION_TICKET" ? " · 途中还遇见了另一只猫" : ""}`
+                : "来自当前知乎公开内容，用来展示不同问题如何触发不同 Persona 的注意。"}
             </div>
             <a className="explore-card-link" href={item.url} rel="noreferrer" target="_blank">
               查看知乎原问题 <OpenInNewRoundedIcon fontSize="inherit" />
@@ -103,8 +147,8 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
 
       {appMode ? (
         <div className="explore-log-strip">
-          <strong>{questionSnapshot?.mode === "live" ? "今天的真实知乎航迹" : "本轮备用航迹"}</strong>
-          <span>{primaryInterest} · 已带回 {questions.length} 张问题票根</span>
+          <strong>真实旅途航迹</strong>
+          <span>{atlas === null ? "正在翻旅行册……" : questions.length ? `${primaryInterest} · 最近 ${questions.length} 趟带回了问题` : "还没有真实旅途票根。等它第一次回来再看。"}</span>
           <a href="/home">回窝看看它在不在 →</a>
         </div>
       ) : (

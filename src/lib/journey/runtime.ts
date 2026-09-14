@@ -89,7 +89,9 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   const interestTerms = interests.flatMap((interest) => INTEREST_TERMS[interest] ?? []);
   const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
   const recentRefs = new Set([...recentQuestionUrls, ...recentMemoryTopicRefs]);
-  const ranked = questions
+  const unseenQuestions = questions.filter((item) => !recentRefs.has(item.url));
+  const candidatePool = unseenQuestions.length ? unseenQuestions : questions;
+  const ranked = candidatePool
     .map((item) => {
       const haystack = `${item.title} ${item.summary}`.toLocaleLowerCase("zh-CN");
       const interestHits = interestTerms.reduce(
