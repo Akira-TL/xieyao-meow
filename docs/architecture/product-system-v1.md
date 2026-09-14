@@ -209,10 +209,14 @@ explanations[]
 
 ### Persona
 
-孵化后的数字人格。
+用户当前可见的数字人格是服务端投影，不是一份可被单次生成整体覆盖的 JSON。正式状态分为 Root Persona、Persona Mood 与 Persona Memory。
+
+#### Root Persona
 
 ```text
 personaId
+version
+derivedFromVersion?
 species
 archetype
 traits[]
@@ -222,10 +226,12 @@ interestVector
 expressionProfile
 visualSeed
 visualIdentity
-version
+evidenceRefs[]
+changeExplanation?
+createdAt
 ```
 
-玩家 Persona 的 `species` 当前固定为 `cat`，正式视觉统一为黑猫；用户差异由 `archetype + visualIdentity` 表达。`species` 字段继续保留，主要用于社区 NPC / Resident（狐、兔、鸟、熊、汪等）的统一建模。
+Root Persona 是慢变量。玩家 `species` 固定为 `cat`，正式视觉统一为黑猫；用户差异由 `archetype + visualIdentity` 等稳定身份表达。一次 Journey、Shared Encounter 或模型输出不能直接修改当前版本；长期变化必须由多次独立有效事件通过 promotion gate 后生成新 version，并保留证据与解释。
 
 `visualIdentity` 至少可承载：
 
@@ -242,7 +248,37 @@ journeyTraces[]
 relationshipMarks[]
 ```
 
-Persona 不是每次打开都重新随机生成；用户的身份资产必须稳定、可演化。
+黑猫物种、稳定视觉母体、用户明确设置的猫名等身份锚点不参与自动人格演化。
+
+#### Persona Mood
+
+```text
+label
+strength
+sourceEventIds[]
+computedAt
+expiresAt?
+```
+
+Mood 由最近若干有效 Journey / Shared Encounter / Return 事件投影并自然衰减，只影响近期表达、探索权重和动作/文案表现，不写回 Root Persona。
+
+#### Persona Memory
+
+```text
+memoryId
+type
+sourceEventId
+topicRef?
+otherPersonaId?
+observation
+weight
+createdAt
+expiresAt?
+```
+
+Memory 必须能追溯到服务端真实事件。知乎直答或其他模型只能提出 Memory Candidate；服务端经过来源、类型、重复和可归因规则后才能将候选晋升为正式 Memory。自由文本 `memory_note` 本身不是长期人格真相。
+
+Root Persona 自动演化采用累积证据与迟滞：单次事件只产生 Mood / Memory；长期变化需跨多趟 Journey 或多个来源重复出现，每个新 version 最多 1 个主要变化，证据暂时减少时不立即反向回滚。
 
 ### PetGrowth
 
@@ -410,8 +446,10 @@ ZhihuGateway
 PersonaService
 ├─ Context normalization
 ├─ Composition extraction
-├─ Explainability
-└─ Persona hatch/evolve
+├─ Root Persona versioning / promotion gate
+├─ Persona Mood projection
+├─ Persona Memory validation
+└─ Explainability
 
 MatchService
 ├─ Candidate retrieval

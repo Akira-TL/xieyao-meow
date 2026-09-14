@@ -29,7 +29,19 @@
 
 ### Persona
 
-由知乎成分映射得到的结构化人格。对玩家而言 `species` 固定为 `cat`、`coat` 固定为黑猫，个体差异主要由 `archetype + visualIdentity + accessories + traits + interests` 等稳定身份表达，再叠加口头禅、回答长度与密度、作息、称号、旅途痕迹和关系资产。视觉身份一旦孵化，后续页面必须保持同一黑猫基础母体和模块组合逻辑，不重新随机设计。
+用户当前可见的数字人格整体，由稳定 Root Persona、短期 Persona Mood、可追溯 Persona Memory 与关系/旅途痕迹共同投影。对玩家而言黑猫身份与视觉母体保持稳定，经历只能在受控证据门槛下让长期人格缓慢演化。
+
+### Root Persona
+
+Persona 的版本化稳定身份层，承载 archetype、核心 traits、长期兴趣结构、answer style 与 visual identity 等慢变量。一次 Journey、Shared Encounter 或模型生成不能直接改写 Root Persona；长期变化必须由多次独立证据晋升为新 version。
+
+### Persona Mood
+
+由近期 Journey、Shared Encounter 与归来事件投影出的短生命周期心境，会随时间和新经历衰减或替换。它只影响近期表达、探索权重和表现，不直接成为 Root Persona。
+
+### Persona Memory
+
+由真实 Journey、Shared Encounter、关系里程碑等服务端事件产生的结构化经历记忆，每条都能追溯来源。模型输出只能提出 Memory Candidate，不能把自由文本直接写成长期人格真相。
 
 ### User
 
