@@ -3,6 +3,7 @@ import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
+import { resolveDatabasePath } from "@/lib/persistence/database-path";
 import type { CatProfile, CatProfilePatch } from "@/lib/profile/types";
 import { createDefaultCatProfile, normalizeCatName } from "@/lib/profile/types";
 
@@ -51,7 +52,7 @@ export class AccountStore {
   private readonly hasLegacyProfiles: boolean;
 
   constructor(options: AccountStoreOptions = {}) {
-    const dbPath = options.dbPath ?? path.join(process.cwd(), "data", "xieyao.sqlite");
+    const dbPath = resolveDatabasePath(options.dbPath);
     if (dbPath !== ":memory:") mkdirSync(path.dirname(dbPath), { recursive: true });
 
     this.now = options.now ?? Date.now;

@@ -3,6 +3,8 @@ import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
+import { resolveDatabasePath } from "@/lib/persistence/database-path";
+
 import type {
   JourneyAtlasEntry,
   JourneyAtlasView,
@@ -131,7 +133,7 @@ export class JourneyService {
   private readonly timeScale: number;
 
   constructor(private readonly options: JourneyServiceOptions) {
-    const dbPath = options.dbPath ?? path.join(process.cwd(), "data", "xieyao.sqlite");
+    const dbPath = resolveDatabasePath(options.dbPath);
     if (dbPath !== ":memory:") mkdirSync(path.dirname(dbPath), { recursive: true });
     this.now = options.now ?? Date.now;
     this.createId = options.createId ?? randomUUID;
