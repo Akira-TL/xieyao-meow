@@ -1751,8 +1751,10 @@ a { color: inherit; text-decoration: none; }
     "eyebrow eyebrow"
     "art title"
     "art subtitle"
+    "art cert"
     "art quote"
-    "art tags";
+    "art tags"
+    "art editor";
   gap: 8px 22px;
   align-items: center;
 }
@@ -1760,8 +1762,44 @@ a { color: inherit; text-decoration: none; }
 .atlas-persona-card > .art-slot, .atlas-current-persona-art { grid-area: art; width: 100%; max-width: 300px; }
 .atlas-persona-card h2 { grid-area: title; margin: 0; font-size: 50px; line-height: .9; }
 .atlas-persona-card h3 { grid-area: subtitle; margin: 0; color: #176fd2; font-size: 24px; }
+.atlas-cert-title { grid-area: cert; margin: 0; color: #6f6a62; font-size: 11px; }
 .atlas-persona-card blockquote { grid-area: quote; margin: 8px 0 0; font-size: 18px; line-height: 1.5; }
 .atlas-tags { grid-area: tags; display: flex; flex-wrap: wrap; gap: 8px; }
+.cat-profile-editor {
+  grid-area: editor;
+  display: grid;
+  grid-template-columns: minmax(120px,.7fr) minmax(160px,1fr) auto;
+  gap: 8px;
+  align-items: end;
+  margin-top: 8px;
+  border-top: 1px solid rgba(0,0,0,.12);
+  padding-top: 12px;
+}
+.cat-profile-editor label { display: grid; gap: 5px; min-width: 0; }
+.cat-profile-editor label > span { color: #756f66; font-size: 9px; }
+.cat-profile-editor input, .cat-profile-editor select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid rgba(0,0,0,.16);
+  border-radius: 0;
+  background: rgba(255,255,255,.42);
+  color: #1d2024;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 11px;
+}
+.cat-profile-editor button {
+  min-height: 38px;
+  border: 1px solid #176fd2;
+  background: #176fd2;
+  color: #fff;
+  padding: 0 14px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.cat-profile-editor button:disabled { opacity: .55; cursor: default; }
+.cat-profile-editor > small { grid-column: 1 / -1; color: #176fd2; font-size: 9px; }
 .atlas-tags span { border: 1px solid rgba(0,0,0,.15); background: rgba(255,255,255,.25); padding: 6px 9px; font-size: 10px; }
 .atlas-mobile-index { display: none; }
 .atlas-grid { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -1790,13 +1828,17 @@ a { color: inherit; text-decoration: none; }
   .atlas-hero-copy .stage-caption { margin: 0; font-size: 8px; text-align: left; }
   .atlas-hero-copy h1 { margin-top: 7px; max-width: 100%; font-size: 40px; line-height: .92; }
   .atlas-hero-copy > p:not(.stage-caption) { margin: 8px 0 0; font-size: 11px; line-height: 1.55; }
-  .atlas-persona-card { margin-top: 12px; grid-template-columns: 112px minmax(0,1fr); grid-template-areas: "eyebrow eyebrow" "art title" "art subtitle" "art quote" "tags tags"; gap: 5px 10px; padding: 12px; align-items: center; }
+  .atlas-persona-card { margin-top: 12px; grid-template-columns: 112px minmax(0,1fr); grid-template-areas: "eyebrow eyebrow" "art title" "art subtitle" "art cert" "art quote" "tags tags" "editor editor"; gap: 5px 10px; padding: 12px; align-items: center; }
   .atlas-persona-card > .art-slot, .atlas-current-persona-art { max-width: 112px; min-height: 132px; margin: 0; }
   .atlas-persona-card h2 { font-size: 30px; }
   .atlas-persona-card h3 { font-size: 14px; line-height: 1.18; }
+  .atlas-cert-title { font-size: 9px; line-height: 1.3; }
   .atlas-persona-card blockquote { display: -webkit-box; margin-top: 4px; overflow: hidden; font-size: 12px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
   .atlas-tags { margin-top: 5px; gap: 5px; }
   .atlas-tags span { padding: 4px 7px; font-size: 9px; }
+  .cat-profile-editor { grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 8px; padding-top: 10px; }
+  .cat-profile-editor input, .cat-profile-editor select { min-height: 40px; font-size: 11px; }
+  .cat-profile-editor button { grid-column: 1 / -1; min-height: 42px; font-size: 11px; }
   .atlas-mobile-index { display: grid; gap: 7px; margin-top: 12px; }
   .atlas-mobile-index > details, .atlas-mobile-index > a { border: 1px solid rgba(255,255,255,.11); background: rgba(255,255,255,.035); color: #f2f3f5; }
   .atlas-mobile-index summary, .atlas-mobile-index > a { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 12px; padding: 12px; cursor: pointer; list-style: none; }

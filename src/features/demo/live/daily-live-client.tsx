@@ -13,6 +13,7 @@ import { DemoFlowButton } from "../client";
 import { ArtSlot, PaperCard, PersonaArt } from "../components";
 import { DEMO_FIXTURE } from "../fixtures";
 import { useLivePersonaSnapshot, useLiveQuestionSnapshot } from "../live-client";
+import { CatProfileEditor, useCatProfile } from "../profile/client";
 
 function compact(value: string, max = 112) {
   const normalized = value.replace(/\s+/g, " ").trim();
@@ -30,7 +31,9 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
   const personaSnapshot = useLivePersonaSnapshot();
   const questionSnapshot = useLiveQuestionSnapshot();
   const primaryInterest = personaSnapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.interests[0];
-  const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
+  const basePersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
+  const { profile, persona: playerPersona } = useCatProfile(basePersona, appMode);
+  const catName = profile.catName;
   const fallbackQuestions = DEMO_FIXTURE.explore.items.map((item) => ({
     title: item.title,
     url: item.sourceUrl,
@@ -60,7 +63,7 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
           style={{ backgroundImage: `url(${resolveP0Art("journey-zhihu-gate")})` }}
         >
           {appMode ? (
-            <PersonaArt alt="本喵背着包走进知乎知识世界" aspect="portrait" className="explore-persona-art" persona={playerPersona} state="walking" />
+            <PersonaArt alt={`${catName}背着包走进知乎知识世界`} aspect="portrait" className="explore-persona-art" persona={playerPersona} state="walking" />
           ) : (
             <div className="public-world-ensemble" aria-label="社区居民群像">
               {DEMO_FIXTURE.residents.slice(0, 3).map((resident, index) => (
@@ -126,8 +129,10 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
   const personaSnapshot = useLivePersonaSnapshot();
   const questionSnapshot = useLiveQuestionSnapshot();
   const persona = personaSnapshot?.persona;
-  const playerPersona = persona ?? DEMO_FIXTURE.persona;
-  const selfInterests = persona?.interests ?? DEMO_FIXTURE.persona.interests;
+  const basePersona = persona ?? DEMO_FIXTURE.persona;
+  const { profile, persona: playerPersona } = useCatProfile(basePersona);
+  const catName = profile.catName;
+  const selfInterests = basePersona.interests;
   const question = questionSnapshot?.question ?? {
     title: DEMO_FIXTURE.encounter.topic.title,
     url: DEMO_FIXTURE.encounter.topic.url,
@@ -158,9 +163,9 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
         <div className="daily-dialogue-stage">
           <PersonaArt alt={selfTitle} className="encounter-self-art" persona={playerPersona} state="talking" />
           <div className="daily-dialogue-lines">
-            <p><b>本喵</b>：{persona?.catchphrase ?? DEMO_FIXTURE.persona.catchphrase} 先别急着站队，这题要先看谁在承担真正的代价。</p>
+            <p><b>{catName}</b>：{persona?.catchphrase ?? DEMO_FIXTURE.persona.catchphrase} 先别急着站队，这题要先看谁在承担真正的代价。</p>
             <p className="is-other"><b>{latest.displayName}</b>：{latest.catchphrase} 你负责拆结构，我先问普通人的感受是不是被漏掉了。</p>
-            <p><b>本喵</b>：{summary}</p>
+            <p><b>{catName}</b>：{summary}</p>
           </div>
           <ArtSlot name={`npc/${latest.id}/talking`} label={latest.displayName} aspect="portrait" fit="contain" />
         </div>
@@ -176,7 +181,7 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
         <p className="stage-caption">MORE ENCOUNTERS · PERSONA RELATIONSHIPS</p>
         <h1>最近，<br />它<span>遇见</span>了<br />这些有趣的灵魂。</h1>
         <p>每段关系都从共同兴趣、表达差异和一个真实问题开始。</p>
-        <PersonaArt alt="本喵坐在剧场回看最近的相遇" aspect="wide" className="encounter-audience-persona" persona={playerPersona} state="thinking" />
+        <PersonaArt alt={`${catName}坐在剧场回看最近的相遇`} aspect="wide" className="encounter-audience-persona" persona={playerPersona} state="thinking" />
       </div>
 
       <PaperCard className="latest-encounter-card">
@@ -219,7 +224,9 @@ export function LiveJourneyDetail() {
     thumbnailUrl: "",
   };
   const primaryInterest = personaSnapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.interests[0];
-  const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
+  const basePersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
+  const { profile, persona: playerPersona } = useCatProfile(basePersona);
+  const catName = profile.catName;
   const summary = compact(question.summary, 180);
   const galleryQuestions = questionSnapshot?.questions?.length
     ? questionSnapshot.questions.slice(0, 3)
@@ -251,7 +258,7 @@ export function LiveJourneyDetail() {
             className="journey-scene-visual"
             style={{ backgroundImage: `url(${resolveP0Art("journey-zhihu-gate")})` }}
           >
-            <PersonaArt alt="本喵穿过知乎知识世界" className="journey-persona-art" persona={playerPersona} state="walking" />
+            <PersonaArt alt={`${catName}穿过知乎知识世界`} className="journey-persona-art" persona={playerPersona} state="walking" />
           </div>
           <PaperCard className="journey-topic-paper">
             <span>带回的问题 · 知乎</span>
@@ -290,7 +297,7 @@ export function LiveJourneyDetail() {
             </div>
           </div>
           <PaperCard>
-            <h2>本喵为什么把这个带给你？</h2>
+            <h2>{catName}为什么把这个带给你？</h2>
             <p>{questionReason(0, primaryInterest)}</p>
             <p>你可以去看原问题，也可以什么都不做。旅途的意义不是完成任务，而是让人格真的多见一点东西。</p>
           </PaperCard>
@@ -306,8 +313,10 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
   const personaSnapshot = useLivePersonaSnapshot();
   const questionSnapshot = useLiveQuestionSnapshot();
   const persona = personaSnapshot?.persona;
-  const playerPersona = persona ?? DEMO_FIXTURE.persona;
-  const selfInterests = persona?.interests ?? DEMO_FIXTURE.persona.interests;
+  const basePersona = persona ?? DEMO_FIXTURE.persona;
+  const { profile, persona: playerPersona } = useCatProfile(basePersona);
+  const catName = profile.catName;
+  const selfInterests = basePersona.interests;
   const legacyResidentId = relationshipId === "neighbor" ? "resident-rice" : `resident-${relationshipId}`;
   const candidate = DEMO_FIXTURE.residents.find((resident) => resident.id === legacyResidentId) ?? DEMO_FIXTURE.residents[0];
   const score = residentScore(selfInterests, candidate.interests);
@@ -331,8 +340,8 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
 
       <div className="relationship-pair-stage">
         <div>
-          <PersonaArt alt={selfTitle} className="relationship-self-art" persona={playerPersona} state="thinking" />
-          <strong>{selfTitle}</strong><span>{selfDescriptor} · {selfInterests.slice(0, 2).join(" × ")}</span>
+          <PersonaArt alt={`${catName} · ${selfTitle}`} className="relationship-self-art" persona={playerPersona} state="thinking" />
+          <strong>{catName}</strong><span>{basePersona.species} · {selfDescriptor} · {selfInterests.slice(0, 2).join(" × ")}</span>
         </div>
         <i>♡</i>
         <div>
@@ -365,7 +374,7 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
           </div>
           <h2 className="relationship-difference-heading">最大的差异</h2>
           <div className="relationship-difference">
-            <span><b>本喵</b>{selfDescriptor}</span>
+            <span><b>{catName}</b>{selfDescriptor}</span>
             <span><b>{candidate.displayName}</b>{candidate.personality[0]}</span>
           </div>
           <p className="relationship-note">不是越像越好；能围绕同一问题继续说下一句，才是这段关系真正有价值的地方。</p>
@@ -403,8 +412,10 @@ export function LiveAtlasSection() {
   const persona = snapshot?.persona;
   const composition = snapshot?.composition;
   const fallback = DEMO_FIXTURE.persona;
-  const playerPersona = persona ?? fallback;
-  const species = persona?.species ?? fallback.species;
+  const basePersona = persona ?? fallback;
+  const { profile, persona: playerPersona, saving, updateProfile } = useCatProfile(basePersona);
+  const catName = profile.catName;
+  const species = basePersona.species;
   const title = persona?.certifiedTitle ?? fallback.title;
   const catchphrase = persona?.catchphrase ?? fallback.catchphrase;
   const primaryInterest = composition?.primaryInterest ?? fallback.interests[0];
@@ -429,13 +440,15 @@ export function LiveAtlasSection() {
 
       <PaperCard className="atlas-persona-card">
         <span>当前人格 · CURRENT PERSONA</span>
-        <PersonaArt alt={`当前人格 / ${species}`} className="atlas-current-persona-art" persona={playerPersona} state="base" />
-        <h2>{species}</h2>
-        <h3>{(persona?.personality[0] ?? fallback.archetype).toUpperCase()} · {title}</h3>
+        <PersonaArt alt={`${catName} / ${species}`} className="atlas-current-persona-art" persona={playerPersona} state="base" />
+        <h2>{catName}</h2>
+        <h3>{species} · {persona?.personality[0] ?? fallback.archetype}</h3>
+        <p className="atlas-cert-title">{title}</p>
         <blockquote>“{catchphrase}”</blockquote>
         <div className="atlas-tags">
           {interests.map((item) => <span key={item}>{item}</span>)}
         </div>
+        <CatProfileEditor profile={profile} saving={saving} onSave={updateProfile} />
       </PaperCard>
 
       <div className="atlas-mobile-index" aria-label="移动端图鉴索引">
@@ -501,7 +514,7 @@ export function LiveAtlasSection() {
           <div className="persona-history-flow">
             <article><b>知乎成分</b><span>{primaryInterest}</span></article>
             <i>→</i>
-            <article><b>{species}</b><span>{persona?.personality[0] ?? fallback.archetype}</span></article>
+            <article><b>{catName}</b><span>{species} · {persona?.personality[0] ?? fallback.archetype}</span></article>
             <i>→</i>
             <article className="is-current"><b>{title}</b><span>当前</span></article>
           </div>

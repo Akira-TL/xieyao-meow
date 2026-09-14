@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 
 import { resolveP0Art } from "@/lib/art/p0";
+import type { PlayerPersona } from "@/lib/persona";
 
 import { GrowthStrip, PaperCard, PersonaArt } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import { BottomSheet } from "./interaction-client";
+import { useCatProfile } from "./profile/client";
 import {
   type LivePersonaSnapshot,
   type LiveQuestionSnapshot,
@@ -52,6 +54,9 @@ export function DemoOutingHome() {
   const [ready, setReady] = useState(false);
   const personaSnapshot = useLivePersonaSnapshot();
   const questionSnapshot = useLiveQuestionSnapshot();
+  const basePersona = (personaSnapshot?.persona ?? DEMO_FIXTURE.persona) as PlayerPersona;
+  const { profile, persona: playerPersona } = useCatProfile(basePersona);
+  const catName = profile.catName;
 
   useEffect(() => {
     setOuting(loadOuting());
@@ -82,12 +87,13 @@ export function DemoOutingHome() {
   if (!ready) {
     return <div className="outing-loading">正在看它在不在家……</div>;
   }
-  if (outing.state === "PREPARING") return <PreparingStage personaSnapshot={personaSnapshot} routeBias={outing.routeBias} />;
+  if (outing.state === "PREPARING") return <PreparingStage catName={catName} playerPersona={playerPersona} routeBias={outing.routeBias} />;
   if (outing.state === "AWAY") return <AwayStage routeBias={outing.routeBias} />;
   if (outing.state === "RETURNED") {
     return (
       <ReturnedStage
-        personaSnapshot={personaSnapshot}
+        catName={catName}
+        playerPersona={playerPersona}
         questionSnapshot={questionSnapshot}
         onArchive={() => setOuting((current) => advanceDemoOuting(current, { type: "archive" }))}
       />
@@ -96,7 +102,9 @@ export function DemoOutingHome() {
 
   return (
     <AtHomeStage
+      catName={catName}
       personaSnapshot={personaSnapshot}
+      playerPersona={playerPersona}
       questionSnapshot={questionSnapshot}
       onPrepare={(routeBias) => setOuting((current) => advanceDemoOuting(current, { type: "prepare", routeBias }))}
     />
@@ -104,12 +112,16 @@ export function DemoOutingHome() {
 }
 
 function AtHomeStage({
+  catName,
   onPrepare,
   personaSnapshot,
+  playerPersona,
   questionSnapshot,
 }: {
+  catName: string;
   onPrepare: (routeBias: string) => void;
   personaSnapshot: LivePersonaSnapshot | null;
+  playerPersona: PlayerPersona;
   questionSnapshot: LiveQuestionSnapshot | null;
 }) {
   const fixture = DEMO_FIXTURE;
@@ -120,7 +132,6 @@ function AtHomeStage({
     thumbnailUrl: "",
   };
   const composition = personaSnapshot?.composition;
-  const playerPersona = personaSnapshot?.persona ?? fixture.persona;
   const growth = {
     knowledge: Math.max(1, Math.min(5, composition?.interests.length ?? fixture.home.growth.knowledge)),
     expression: Math.max(1, Math.min(5, Math.ceil((composition?.sourceCounts.contents ?? 10) / 12))),
@@ -138,7 +149,7 @@ function AtHomeStage({
 
       <div className="home-hero-art">
         <PersonaArt
-          alt="本喵在窝里回想昨晚的对话"
+          alt={`${catName}在窝里回想昨晚的对话`}
           aspect="portrait"
           className="home-persona-art"
           persona={playerPersona}
@@ -172,19 +183,20 @@ function AtHomeStage({
 }
 
 function PreparingStage({
+  catName,
+  playerPersona,
   routeBias,
-  personaSnapshot,
 }: {
+  catName: string;
+  playerPersona: PlayerPersona;
   routeBias: string | null;
-  personaSnapshot: LivePersonaSnapshot | null;
 }) {
-  const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
   return (
     <div className="outing-empty-stage home-room-stage">
       <RoomBackdrop />
       <p className="stage-caption">BACKSTAGE / PREPARING</p>
       <h1>它在后台<br />收东西。</h1>
-      <PersonaArt alt="本喵收拾出门装备" className="outing-state-persona" persona={playerPersona} state="thinking" />
+      <PersonaArt alt={`${catName}收拾出门装备`} className="outing-state-persona" persona={playerPersona} state="thinking" />
       <PaperCard className="outing-note-card">
         <span>今天的纸条</span>
         <strong>「{routeBias ?? "随便逛"}」</strong>
@@ -215,12 +227,14 @@ function AwayStage({ routeBias }: { routeBias: string | null }) {
 }
 
 function ReturnedStage({
+  catName,
   onArchive,
-  personaSnapshot,
+  playerPersona,
   questionSnapshot,
 }: {
+  catName: string;
   onArchive: () => void;
-  personaSnapshot: LivePersonaSnapshot | null;
+  playerPersona: PlayerPersona;
   questionSnapshot: LiveQuestionSnapshot | null;
 }) {
   const artifact = DEMO_FIXTURE.outing.returnArtifact;
@@ -230,8 +244,7 @@ function ReturnedStage({
     summary: "",
     thumbnailUrl: "",
   };
-  const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
-  const interests = personaSnapshot?.persona.interests.slice(0, 2) ?? artifact.places;
+  const interests = playerPersona.interests.slice(0, 2).length ? playerPersona.interests.slice(0, 2) : artifact.places;
   const thought = question.summary?.trim()
     ? `${question.summary.replace(/\s+/g, " ").trim().slice(0, 72)}${question.summary.length > 72 ? "…" : ""}`
     : "这题不一定和你最像，但值得带回来多问一步。";
@@ -244,7 +257,7 @@ function ReturnedStage({
         <h1>它回来了。</h1>
         <p>而且好像有话要说。</p>
       </div>
-      <PersonaArt alt="本喵带着旅途札记回到窝里" className="returned-persona-art" persona={playerPersona} state="returned" />
+      <PersonaArt alt={`${catName}带着旅途札记回到窝里`} className="returned-persona-art" persona={playerPersona} state="returned" />
       <PaperCard className="returned-artifact">
         <span>{artifact.label}</span>
         <h2>{question.title}</h2>
