@@ -174,6 +174,14 @@ export function Surface({
   );
 }
 
+function resolveArtSlotFallback(name: string): string | undefined {
+  if (name.startsWith("npc/")) return `/art/slots/${name}.png`;
+  if (name.startsWith("journey/") || name === "relationship/latest-scene") {
+    return resolveP0Art("journey-zhihu-gate");
+  }
+  return undefined;
+}
+
 export function ArtSlot({
   name,
   label,
@@ -189,7 +197,7 @@ export function ArtSlot({
   src?: string;
   fit?: "cover" | "contain";
 }) {
-  const assetSrc = src?.trim() || (name.startsWith("npc/") ? `/art/slots/${name}.png` : undefined);
+  const assetSrc = src?.trim() || resolveArtSlotFallback(name);
   const style = assetSrc
     ? ({ "--art-slot-image": `url(${JSON.stringify(assetSrc)})` } as CSSProperties & { "--art-slot-image": string })
     : undefined;
