@@ -31,6 +31,18 @@
 
 由知乎成分映射得到的结构化人格。对玩家而言 `species` 固定为 `cat`、`coat` 固定为黑猫，个体差异主要由 `archetype + visualIdentity + accessories + traits + interests` 等稳定身份表达，再叠加口头禅、回答长度与密度、作息、称号、旅途痕迹和关系资产。视觉身份一旦孵化，后续页面必须保持同一黑猫基础母体和模块组合逻辑，不重新随机设计。
 
+### User
+
+谢邀喵内部的长期用户主体。`User` 由应用生成的稳定 `user_id` 标识，是猫资料、Persona、旅行、收藏和关系等长期资产的唯一 owner；它不等同于一次 OAuth Session。
+
+### OAuth Identity
+
+外部知乎账号与内部 `User` 的稳定映射。正式绑定只能使用知乎官方确认稳定的 provider subject；`sessionId`、`access_token`、`authorization_code` 等临时凭据都不能充当用户身份。
+
+### Session
+
+一次登录会话，只负责证明当前请求对应哪个 `User`，不承担长期身份语义。Session 可以轮换、过期或删除，而长期游戏资产仍归属于稳定 `user_id`。
+
 ### Knowledge Layer
 
 负责提供与问题相关的事实、背景、知乎内容或直答结果，目标是保证回答的信息基础。
