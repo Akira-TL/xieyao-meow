@@ -7,7 +7,13 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import type { AnswerExperience } from "@/lib/experience";
-import type { SocialEvent, SocialMatchInsight } from "@/lib/social";
+import type {
+  PersonaExperienceMemory,
+  SocialDialogueRound,
+  SocialDialogueTurn,
+  SocialEvent,
+  SocialMatchInsight,
+} from "@/lib/social";
 
 import {
   DEMO_STAGE_STORAGE_KEY,
@@ -27,6 +33,48 @@ import {
 
 const SELECTED_RESIDENT_STORAGE_KEY = "xieya-selected-resident";
 const SOCIAL_EVENT_STORAGE_KEY = "xieya-social-event";
+const PERSONA_EXPERIENCE_MEMORY_STORAGE_KEY = "xieya-persona-experience-memory-v1";
+
+const EMPTY_PERSONA_EXPERIENCE_MEMORY: PersonaExperienceMemory = {
+  encounterCount: 0,
+  recentTopics: [],
+  recentResidents: [],
+  notes: [],
+};
+
+function loadPersonaExperienceMemory(): PersonaExperienceMemory {
+  const raw = window.localStorage.getItem(PERSONA_EXPERIENCE_MEMORY_STORAGE_KEY);
+  if (!raw) return EMPTY_PERSONA_EXPERIENCE_MEMORY;
+  try {
+    const parsed = JSON.parse(raw) as Partial<PersonaExperienceMemory>;
+    return {
+      encounterCount: typeof parsed.encounterCount === "number" ? Math.max(0, Math.floor(parsed.encounterCount)) : 0,
+      recentTopics: Array.isArray(parsed.recentTopics) ? parsed.recentTopics.filter((item): item is string => typeof item === "string").slice(0, 6) : [],
+      recentResidents: Array.isArray(parsed.recentResidents) ? parsed.recentResidents.filter((item): item is string => typeof item === "string").slice(0, 6) : [],
+      notes: Array.isArray(parsed.notes) ? parsed.notes.filter((item): item is string => typeof item === "string").slice(0, 8) : [],
+    };
+  } catch {
+    window.localStorage.removeItem(PERSONA_EXPERIENCE_MEMORY_STORAGE_KEY);
+    return EMPTY_PERSONA_EXPERIENCE_MEMORY;
+  }
+}
+
+function evolvePersonaExperienceMemory(
+  current: PersonaExperienceMemory,
+  topic: string,
+  resident: string,
+  note: string,
+  completed: boolean,
+): PersonaExperienceMemory {
+  const uniqueFront = (value: string, values: string[], limit: number) =>
+    [value, ...values.filter((item) => item !== value)].slice(0, limit);
+  return {
+    encounterCount: current.encounterCount + (completed ? 1 : 0),
+    recentTopics: uniqueFront(topic, current.recentTopics, 6),
+    recentResidents: uniqueFront(resident, current.recentResidents, 6),
+    notes: uniqueFront(note, current.notes, 8),
+  };
+}
 
 function advanceStage(requested: DemoActivationStage) {
   const stored = window.localStorage.getItem(DEMO_STAGE_STORAGE_KEY);
@@ -133,11 +181,6 @@ function useQuestionSnapshot() {
   }, []);
 
   return snapshot;
-}
-
-function excerpt(value: string, max = 86) {
-  const normalized = value.replace(/[#*_`>\n\r]+/g, " ").replace(/\s+/g, " ").trim();
-  return normalized.length > max ? `${normalized.slice(0, max).trim()}…` : normalized;
 }
 
 interface ZhihuOAuthStatus {
@@ -436,17 +479,101 @@ export function EncounterPlayback() {
   const snapshot = usePersonaSnapshot();
   const questionSnapshot = useQuestionSnapshot();
   const [residentId, setResidentId] = useState<string>(DEMO_FIXTURE.match.candidate.id);
-  const [shown, setShown] = useState(1);
-  const [socialEvent, setSocialEvent] = useState<SocialEvent | null>(null);
+  const [ready, setReady] = useState(false);
+  const [turns, setTurns] = useState<SocialDialogueTurn[]>([]);
+  const [memory, setMemory] = useState<PersonaExperienceMemory>(EMPTY_PERSONA_EXPERIENCE_MEMORY);
+  const [dialogueLoading, setDialogueLoading] = useState(false);
+  const [dialogueDone, setDialogueDone] = useState(false);
+  const [dialogueSource, setDialogueSource] = useState<string | null>(null);
+  const [dialogueError, setDialogueError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
+  const [relationshipSettled, setRelationshipSettled] = useState(false);
 
   useEffect(() => {
     const stored = window.sessionStorage.getItem(SELECTED_RESIDENT_STORAGE_KEY);
     if (stored && DEMO_FIXTURE.residents.some((resident) => resident.id === stored)) {
       setResidentId(stored);
     }
+    setMemory(loadPersonaExperienceMemory());
+    setReady(true);
   }, []);
 
+  const candidate = DEMO_FIXTURE.residents.find((resident) => resident.id === residentId) ?? DEMO_FIXTURE.residents[0];
+  const liveTopic = experience?.question ?? questionSnapshot?.question ?? null;
+  const topic = liveTopic ?? {
+    ...DEMO_FIXTURE.encounter.topic,
+    summary: "",
+  };
+  const selfPersona = snapshot?.persona ?? experience?.persona;
+  const playerPersona = selfPersona ?? DEMO_FIXTURE.persona;
+  const selfTitle = selfPersona?.certifiedTitle ?? DEMO_FIXTURE.persona.title;
+  const selfDescriptor = selfPersona?.personality[0] ?? DEMO_FIXTURE.persona.archetype;
+
   useEffect(() => {
+    if (!ready || !liveTopic || dialogueDone || dialogueLoading || turns.length >= 8 || turns.length % 2 !== 0) return;
+
+    let cancelled = false;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      setDialogueLoading(true);
+      setDialogueError(null);
+
+      fetch("/api/community/dialogue", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          residentId: candidate.id,
+          topic: {
+            title: liveTopic.title,
+            url: liveTopic.url,
+            summary: liveTopic.summary ?? "",
+          },
+          history: turns,
+          memory,
+        }),
+        cache: "no-store",
+        signal: controller.signal,
+      })
+        .then(async (response) => {
+          if (!response.ok) throw new Error("dialogue request failed");
+          return (await response.json()) as {
+            round: SocialDialogueRound;
+            personaMode: "live" | "fallback";
+          };
+        })
+        .then(({ round }) => {
+          if (cancelled) return;
+          const nextMemory = evolvePersonaExperienceMemory(
+            memory,
+            liveTopic.title,
+            candidate.displayName,
+            round.memoryNote,
+            round.shouldStop,
+          );
+          setTurns((current) => [...current, ...round.turns]);
+          setMemory(nextMemory);
+          window.localStorage.setItem(PERSONA_EXPERIENCE_MEMORY_STORAGE_KEY, JSON.stringify(nextMemory));
+          setDialogueSource(round.sourceLabel);
+          setDialogueDone(round.shouldStop);
+        })
+        .catch((error: unknown) => {
+          if (cancelled || (error instanceof DOMException && error.name === "AbortError")) return;
+          setDialogueError("这轮接话断了一下。再让它们试一次。 ");
+        })
+        .finally(() => {
+          if (!cancelled) setDialogueLoading(false);
+        });
+    }, turns.length === 0 ? 180 : 720);
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [candidate.displayName, candidate.id, dialogueDone, liveTopic, memory, ready, retryKey, turns]);
+
+  useEffect(() => {
+    if (!dialogueDone || relationshipSettled) return;
     let cancelled = false;
     fetch("/api/community/interact", {
       method: "POST",
@@ -460,81 +587,46 @@ export function EncounterPlayback() {
       })
       .then(({ event }) => {
         if (cancelled) return;
-        setSocialEvent(event);
         window.sessionStorage.setItem(SOCIAL_EVENT_STORAGE_KEY, JSON.stringify(event));
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setRelationshipSettled(true);
+      });
 
     return () => {
       cancelled = true;
     };
-  }, [residentId]);
+  }, [dialogueDone, relationshipSettled, residentId]);
 
-  const candidate = DEMO_FIXTURE.residents.find((resident) => resident.id === residentId) ?? DEMO_FIXTURE.residents[0];
-  const topic = experience?.question ?? questionSnapshot?.question ?? DEMO_FIXTURE.encounter.topic;
-  const selfPersona = snapshot?.persona ?? experience?.persona;
-  const playerPersona = selfPersona ?? DEMO_FIXTURE.persona;
-  const selfTitle = selfPersona?.certifiedTitle ?? DEMO_FIXTURE.persona.title;
-  const selfDescriptor = selfPersona?.personality[0] ?? DEMO_FIXTURE.persona.archetype;
-  const selfInterests = selfPersona?.interests ?? DEMO_FIXTURE.persona.interests;
-  const sharedInterests = selfInterests.filter((interest) => new Set<string>(candidate.interests).has(interest));
-  const turns = useMemo(() => {
-    if (experience?.mode === "live") {
-      return [
-        {
-          speaker: "self" as const,
-          text: excerpt(experience.card.answer),
-        },
-        {
-          speaker: "other" as const,
-          text: `${candidate.catchphrase} 我先不接你的结论：如果把人的体验放在前面，你这套拆法还成立吗？`,
-        },
-        {
-          speaker: "self" as const,
-          text: "行，那就从人的体验往回推，再看技术应该替人做到哪一步。",
-        },
-      ];
-    }
-    if (snapshot?.mode === "live") {
-      return [
-        {
-          speaker: "self" as const,
-          text: `${snapshot.persona.catchphrase} 这题我先不急着下结论，先把谁在做决定、谁在承担代价拆开。`,
-        },
-        {
-          speaker: "other" as const,
-          text: `${candidate.catchphrase} 你负责拆结构，我先替普通人问一句：这么做到底让人更轻松了吗？`,
-        },
-        {
-          speaker: "self" as const,
-          text: "那就对了。先把人的体验放在前面，再看技术应该走到哪一步。",
-        },
-      ];
-    }
-    return [...DEMO_FIXTURE.encounter.turns];
-  }, [candidate.catchphrase, experience, snapshot]);
-
-  useEffect(() => {
-    if (shown >= turns.length) return;
-    const timer = window.setTimeout(() => setShown((value) => value + 1), 650);
-    return () => window.clearTimeout(timer);
-  }, [shown, turns.length]);
+  const roundCount = Math.ceil(turns.length / 2);
+  const conversationStatus = !liveTopic
+    ? "正在把今天的问题带进舞台…"
+    : dialogueError
+      ? dialogueError
+      : dialogueDone
+        ? `聊到第 ${roundCount} 轮，刚好停在这里。`
+        : dialogueLoading
+          ? roundCount === 0
+            ? "两只 Persona 正在找第一句。"
+            : `第 ${roundCount + 1} 轮，它们还在接话。`
+          : "准备接下一句。";
 
   return (
     <div className="encounter-playback">
       <h1 className="encounter-headline">{topic.title}</h1>
-      <p className="encounter-subtitle">一场从真实知乎问题长出来的第一次对手戏</p>
+      <p className="encounter-subtitle">同一个知乎问题，两种性格自己往下聊。</p>
 
       <div className="encounter-actors">
         <div className="encounter-actor">
           <PersonaArt alt="本喵正在和社区居民对话" className="encounter-playback-self-art" persona={playerPersona} state="talking" />
           <strong>{selfTitle}</strong>
-          <span>{selfDescriptor}</span>
+          <span>{selfDescriptor} · {selfPersona?.answerStyle.tone ?? "理性玩梗"}</span>
         </div>
         <article className="encounter-topic-card">
           <span>知乎 · 真实问题</span>
           <h2>{topic.title}</h2>
-          <a href={topic.url} rel="noreferrer" target="_blank">查看原问题 ↗</a>
+          {topic.url ? <a href={topic.url} rel="noreferrer" target="_blank">查看原问题 ↗</a> : null}
         </article>
         <div className="encounter-actor">
           <ResidentArt
@@ -545,41 +637,56 @@ export function EncounterPlayback() {
             state="talking"
           />
           <strong>{candidate.displayName}</strong>
-          <span>{candidate.personality[0]}</span>
+          <span>{candidate.personality[0]} · {candidate.answerStyle.tone}</span>
         </div>
       </div>
 
-      <div className="encounter-lines" aria-live="polite">
-        {turns.slice(0, shown).map((turn, index) => (
-          <p className={turn.speaker === "other" ? "is-other" : "is-self"} key={`${turn.speaker}-${index}`}>
-            <b>{turn.speaker === "other" ? candidate.displayName : "本喵"}：</b>
-            「{turn.text}」
-          </p>
+      <div className="encounter-chat" aria-live="polite">
+        {turns.map((turn, index) => (
+          <article
+            className={`encounter-bubble ${turn.speaker === "other" ? "is-other" : "is-self"}`}
+            key={`${turn.speaker}-${index}`}
+            style={{ animationDelay: `${index % 2 === 0 ? 0 : 120}ms` }}
+          >
+            <div className="encounter-bubble-speaker">
+              <strong>{turn.speaker === "other" ? candidate.displayName : "本喵"}</strong>
+              <span>{turn.speaker === "other" ? candidate.personality[0] : selfDescriptor}</span>
+            </div>
+            <p>{turn.text}</p>
+          </article>
         ))}
+        {dialogueLoading ? (
+          <div className="encounter-typing" role="status">
+            <i /><i /><i />
+            <span>{roundCount === 0 ? "找第一句" : "接下一轮"}</span>
+          </div>
+        ) : null}
       </div>
 
-      <div className="encounter-explanation">
-        <b>为什么会这么聊？</b>
-        <span>{sharedInterests.length > 0 ? sharedInterests.join(" / ") : "不同兴趣"} · {selfDescriptor} × {candidate.personality[0]}</span>
-        <p>
-          {socialEvent
-            ? `${socialEvent.reasons.slice(0, 2).join("；")}。这次互动让关系变成「${socialEvent.relationship}」${socialEvent.affinityDelta >= 0 ? `，关系 +${socialEvent.affinityDelta}` : `，关系 ${socialEvent.affinityDelta}`}。`
-            : experience?.mode === "live" || snapshot?.mode === "live"
-              ? "问题来自当前知乎真实内容；你的这一侧使用刚刚孵化出的 Persona 表达，另一侧使用社区居民 Persona。"
-              : DEMO_FIXTURE.encounter.explanation}
-        </p>
+      <div className="encounter-dialogue-status">
+        <span className={dialogueSource?.includes("知乎直答") ? "is-live" : ""}>
+          {dialogueSource ?? "双 Persona 对话"}
+        </span>
+        <p>{conversationStatus}</p>
+        {dialogueError ? (
+          <button onClick={() => setRetryKey((value) => value + 1)} type="button">再接一次 ↻</button>
+        ) : null}
       </div>
 
       <button
         className="theatre-button theatre-button-primary encounter-main-cta"
-        disabled={shown < turns.length}
+        disabled={!dialogueDone || !relationshipSettled}
         onClick={() => {
           advanceStage("ACTIVATED");
           router.push("/share/demo-match");
         }}
         type="button"
       >
-        {shown < turns.length ? "对手戏进行中…" : "我也想认识 TA"} <span>→</span>
+        {!dialogueDone
+          ? "它们还在聊…"
+          : !relationshipSettled
+            ? "关系落笔中…"
+            : "收下这段关系"} <span>→</span>
       </button>
       <button className="match-switch" onClick={() => router.push("/encounter/first?phase=match")} type="button">
         再看一个
