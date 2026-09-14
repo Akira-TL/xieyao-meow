@@ -1307,17 +1307,27 @@ a { color: inherit; text-decoration: none; }
 .consent-actions .sheet-trigger { color: #176fd2; font-size: 10px; text-align: center; }
 .sheet-inline-link { color: #66a8ff; }
 @media (max-width: 760px) {
-  .consent-layout { min-height: 100dvh; grid-template-columns: 1fr; gap: 12px; padding: 104px 14px 22px; }
+  .consent-layout { min-height: 100dvh; grid-template-columns: 1fr; gap: 8px; padding: 96px 14px 18px; }
   .consent-intro .stage-caption { text-align: right; }
-  .consent-intro h1 { max-width: 8ch; font-size: clamp(48px,14vw,62px); line-height: .84; }
-  .consent-intro > p:not(.stage-caption) { font-size: 12px; }
-  .consent-collage-stack { height: 150px; margin: 2px 0 4px; }
-  .consent-collage-art--signals { width: 52%; }
-  .consent-collage-art--following { width: 44%; }
+  .consent-intro h1 { max-width: 7.7ch; font-size: clamp(46px,13.2vw,58px); line-height: .82; }
+  .consent-intro > p:not(.stage-caption) { margin-top: 10px; font-size: 10px; line-height: 1.55; }
+  .consent-collage-stack { height: 94px; margin: 0 0 2px; }
+  .consent-collage-art--signals { width: 43%; }
+  .consent-collage-art--following { width: 37%; }
   .consent-guide-row { display: none; }
-  .consent-paper { transform: none; }
-  .consent-paper h2 { font-size: 21px; }
-  .permission-list article { grid-template-columns: 40px 1fr; }
+  .consent-paper { transform: none; padding: 13px; }
+  .consent-paper h2 { font-size: 17px; line-height: 1.1; }
+  .permission-list { gap: 6px; margin-top: 10px; }
+  .permission-list article { grid-template-columns: 32px 1fr; gap: 8px; padding: 8px; }
+  .permission-icon { width: 30px; height: 30px; }
+  .permission-list strong { font-size: 13px; }
+  .permission-list b { margin-top: 1px; font-size: 9px; }
+  .permission-list p { margin-top: 3px; font-size: 8px; line-height: 1.4; }
+  .privacy-boundary { margin-top: 8px; gap: 2px; padding-top: 8px; font-size: 8px; }
+  .privacy-boundary strong { font-size: 9px; }
+  .consent-actions { margin-top: 10px; gap: 6px; }
+  .consent-actions .theatre-button { min-height: 48px; font-size: 15px; }
+  .consent-actions .sheet-trigger { font-size: 9px; }
 }
 
 .scanning-layout {
