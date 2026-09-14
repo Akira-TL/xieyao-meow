@@ -120,11 +120,20 @@ export class ZhihuGateway {
       throw new Error("Zhihu OAuth user response is not an object");
     }
     const envelope = payload as Record<string, unknown>;
-    const sourceCandidate = envelope.data ?? envelope.Data ?? envelope.user ?? envelope;
-    if (!sourceCandidate || typeof sourceCandidate !== "object") {
-      throw new Error("Zhihu OAuth user response has no user object");
+    const objectCandidates = [envelope.data, envelope.Data, envelope.user, envelope]
+      .filter((candidate): candidate is Record<string, unknown> => (
+        Boolean(candidate) && typeof candidate === "object" && !Array.isArray(candidate)
+      ));
+    const source = objectCandidates.find((candidate) => (
+      candidate.id !== undefined || candidate.Id !== undefined || candidate.ID !== undefined
+    ));
+    if (!source) {
+      const shape = Object.entries(envelope)
+        .map(([key, value]) => `${key}:${Array.isArray(value) ? "array" : typeof value}`)
+        .sort()
+        .join(", ");
+      throw new Error(`Zhihu OAuth user response has no stable user object; shape=[${shape}]`);
     }
-    const source = sourceCandidate as Record<string, unknown>;
     const rawSubject = source.id ?? source.Id ?? source.ID;
     const providerSubject =
       typeof rawSubject === "string" || typeof rawSubject === "number"
