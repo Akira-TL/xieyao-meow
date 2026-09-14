@@ -15,7 +15,7 @@ import {
   isDemoActivationStage,
   type DemoActivationStage,
 } from "./activation";
-import { ArtSlot, PersonaArt, ResidentArt } from "./components";
+import { PersonaArt, ResidentArt } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import {
   LIVE_EXPERIENCE_STORAGE_KEY,
@@ -537,12 +537,12 @@ export function EncounterPlayback() {
           <a href={topic.url} rel="noreferrer" target="_blank">查看原问题 ↗</a>
         </article>
         <div className="encounter-actor">
-          <ArtSlot
-            name={`npc/${candidate.id}/talking`}
-            label={candidate.displayName}
-            aspect="portrait"
-            className="encounter-art"
-            fit="contain"
+          <ResidentArt
+            alt={`${candidate.displayName} 正在和本喵对话`}
+            className="encounter-resident-art"
+            priority
+            residentId={candidate.id}
+            state="talking"
           />
           <strong>{candidate.displayName}</strong>
           <span>{candidate.personality[0]}</span>
@@ -588,7 +588,7 @@ export function EncounterPlayback() {
   );
 }
 
-export function ShareRelationshipVisual() {
+export function ShareRelationshipVisual({ compact = false }: { compact?: boolean } = {}) {
   const snapshot = usePersonaSnapshot();
   const playerPersona = snapshot?.persona ?? DEMO_FIXTURE.persona;
   const [residentId, setResidentId] = useState<string>(DEMO_FIXTURE.match.candidate.id);
@@ -602,15 +602,15 @@ export function ShareRelationshipVisual() {
   }, []);
 
   return (
-    <div className="share-live-visual">
-      <PersonaArt alt="本喵完成第一次相遇" className="share-player-persona" persona={playerPersona} state="returned" />
+    <div className={`share-live-visual ${compact ? "is-compact" : ""}`}>
+      <PersonaArt alt="本喵完成第一次相遇" className="share-player-persona" persona={playerPersona} priority state="returned" />
       <span className="share-live-mark">×</span>
-      <ArtSlot
-        name={`npc/${resident.id}/meeting`}
-        label={resident.displayName}
-        aspect="portrait"
+      <ResidentArt
+        alt={`${resident.displayName} 与本喵的第一次关系纪念照`}
         className="share-resident-art"
-        fit="contain"
+        priority
+        residentId={resident.id}
+        state="meeting"
       />
     </div>
   );

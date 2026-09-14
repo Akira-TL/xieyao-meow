@@ -1,6 +1,5 @@
 import { DemoFlowButton } from "@/features/demo/client";
 import {
-  ArtSlot,
   DemoPage,
   PublicHeader,
 } from "@/features/demo/components";
@@ -20,7 +19,9 @@ export default function SharePage() {
             <ShareRelationshipVisual />
           </div>
           <div className="share-polaroid">
-            <ArtSlot name="share/polaroid" label="第一段关系纪念照" aspect="polaroid" />
+            <div className="share-polaroid-frame">
+              <ShareRelationshipVisual compact />
+            </div>
             <strong>第一段关系，已经成立。</strong>
           </div>
         </div>
