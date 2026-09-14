@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { resolveP0Art } from "@/lib/art/p0";
+import type { JourneyProjection, JourneyView } from "@/lib/journey/types";
 import type { PlayerPersona } from "@/lib/persona";
 
 import { PaperCard, PersonaArt } from "./components";
@@ -15,29 +16,6 @@ import {
   useLivePersonaSnapshot,
   useLiveQuestionSnapshot,
 } from "./live-client";
-import {
-  DEMO_OUTING_STORAGE_KEY,
-  advanceDemoOuting,
-  createDemoOutingState,
-  isDemoOutingState,
-  type DemoOutingState,
-} from "./outing";
-
-function loadOuting(): DemoOutingState {
-  if (typeof window === "undefined") return createDemoOutingState();
-  const raw = window.localStorage.getItem(DEMO_OUTING_STORAGE_KEY);
-  if (!raw) return createDemoOutingState();
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    return isDemoOutingState(parsed) ? parsed : createDemoOutingState();
-  } catch {
-    return createDemoOutingState();
-  }
-}
-
-function saveOuting(state: DemoOutingState) {
-  window.localStorage.setItem(DEMO_OUTING_STORAGE_KEY, JSON.stringify(state));
-}
 
 function RoomBackdrop({ empty = false }: { empty?: boolean }) {
   return (
@@ -50,64 +28,91 @@ function RoomBackdrop({ empty = false }: { empty?: boolean }) {
 }
 
 export function DemoOutingHome() {
-  const [outing, setOuting] = useState<DemoOutingState>(createDemoOutingState());
-  const [ready, setReady] = useState(false);
+  const [projection, setProjection] = useState<JourneyProjection | null>(null);
+  const [journeyError, setJourneyError] = useState<string | null>(null);
   const personaSnapshot = useLivePersonaSnapshot();
   const questionSnapshot = useLiveQuestionSnapshot();
   const basePersona = (personaSnapshot?.persona ?? DEMO_FIXTURE.persona) as PlayerPersona;
   const { profile, persona: playerPersona } = useCatProfile(basePersona);
   const catName = profile.catName;
 
-  useEffect(() => {
-    setOuting(loadOuting());
-    setReady(true);
+  const refreshJourney = useCallback(async () => {
+    try {
+      const response = await fetch("/api/journey", { cache: "no-store" });
+      if (response.status === 401) {
+        setJourneyError("先完成知乎授权，这只猫才有自己的长期旅途。");
+        setProjection({ state: "AT_HOME", journey: null });
+        return;
+      }
+      if (!response.ok) throw new Error(`journey HTTP ${response.status}`);
+      setProjection((await response.json()) as JourneyProjection);
+      setJourneyError(null);
+    } catch {
+      setJourneyError("旅途状态暂时没读到，刷新页面再试一次。");
+      setProjection((current) => current ?? { state: "AT_HOME", journey: null });
+    }
+  }, []);
+
+  const runAction = useCallback(async (body: unknown) => {
+    try {
+      const response = await fetch("/api/journey", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (response.status === 401) {
+        setJourneyError("先完成知乎授权，这只猫才有自己的长期旅途。");
+        return;
+      }
+      if (!response.ok) throw new Error(`journey HTTP ${response.status}`);
+      setProjection((await response.json()) as JourneyProjection);
+      setJourneyError(null);
+    } catch {
+      setJourneyError("这次没能把纸条交给它，再点一次就好。");
+    }
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
-    saveOuting(outing);
-  }, [outing, ready]);
+    void refreshJourney();
+  }, [refreshJourney]);
 
   useEffect(() => {
-    if (!ready || outing.state !== "PREPARING") return;
-    const timer = window.setTimeout(() => {
-      setOuting((current) => advanceDemoOuting(current, { type: "depart" }));
-    }, 1050);
-    return () => window.clearTimeout(timer);
-  }, [outing.state, ready]);
+    if (projection?.state !== "PREPARING" && projection?.state !== "AWAY") return;
+    const timer = window.setInterval(() => void refreshJourney(), 8_000);
+    return () => window.clearInterval(timer);
+  }, [projection?.state, refreshJourney]);
 
-  useEffect(() => {
-    if (!ready || outing.state !== "AWAY") return;
-    const timer = window.setTimeout(() => {
-      setOuting((current) => advanceDemoOuting(current, { type: "return" }));
-    }, 5200);
-    return () => window.clearTimeout(timer);
-  }, [outing.state, ready]);
-
-  if (!ready) {
+  if (!projection) {
     return <div className="outing-loading">正在看它在不在家……</div>;
   }
-  if (outing.state === "PREPARING") return <PreparingStage catName={catName} playerPersona={playerPersona} routeBias={outing.routeBias} />;
-  if (outing.state === "AWAY") return <AwayStage routeBias={outing.routeBias} />;
-  if (outing.state === "RETURNED") {
+  if (projection.state === "PREPARING" && projection.journey) {
+    return <PreparingStage catName={catName} playerPersona={playerPersona} routeBias={projection.journey.routeBias} />;
+  }
+  if (projection.state === "AWAY" && projection.journey) {
+    return <AwayStage routeBias={projection.journey.routeBias} />;
+  }
+  if (projection.state === "RETURNED" && projection.journey) {
     return (
       <ReturnedStage
         catName={catName}
+        journey={projection.journey}
         playerPersona={playerPersona}
-        questionSnapshot={questionSnapshot}
-        onArchive={() => setOuting((current) => advanceDemoOuting(current, { type: "archive" }))}
+        onArchive={() => void runAction({ action: "archive" })}
       />
     );
   }
 
   return (
-    <AtHomeStage
-      catName={catName}
-      personaSnapshot={personaSnapshot}
-      playerPersona={playerPersona}
-      questionSnapshot={questionSnapshot}
-      onPrepare={(routeBias) => setOuting((current) => advanceDemoOuting(current, { type: "prepare", routeBias }))}
-    />
+    <>
+      {journeyError ? <div className="outing-loading">{journeyError}</div> : null}
+      <AtHomeStage
+        catName={catName}
+        personaSnapshot={personaSnapshot}
+        playerPersona={playerPersona}
+        questionSnapshot={questionSnapshot}
+        onPrepare={(routeBias) => void runAction({ action: "start", routeBias })}
+      />
+    </>
   );
 }
 
@@ -219,26 +224,18 @@ function AwayStage({ routeBias }: { routeBias: string | null }) {
 
 function ReturnedStage({
   catName,
+  journey,
   onArchive,
   playerPersona,
-  questionSnapshot,
 }: {
   catName: string;
+  journey: JourneyView;
   onArchive: () => void;
   playerPersona: PlayerPersona;
-  questionSnapshot: LiveQuestionSnapshot | null;
 }) {
-  const artifact = DEMO_FIXTURE.outing.returnArtifact;
-  const question = questionSnapshot?.question ?? {
-    title: artifact.topic.title,
-    url: artifact.topic.url,
-    summary: "",
-    thumbnailUrl: "",
-  };
-  const interests = playerPersona.interests.slice(0, 2).length ? playerPersona.interests.slice(0, 2) : artifact.places;
-  const thought = question.summary?.trim()
-    ? `${question.summary.replace(/\s+/g, " ").trim().slice(0, 72)}${question.summary.length > 72 ? "…" : ""}`
-    : "这题不一定和你最像，但值得带回来多问一步。";
+  const question = journey.question;
+  const interests = playerPersona.interests.slice(0, 2);
+  const thought = journey.postcard?.body ?? "它按时回来了，只是这趟没有值得带回来的新问题。";
   return (
     <div className="returned-stage home-room-stage">
       <RoomBackdrop />
@@ -246,19 +243,20 @@ function ReturnedStage({
         <p className="stage-caption">LIGHTS UP / RETURNED</p>
         <span>门响了一下。</span>
         <h1>它回来了。</h1>
-        <p>而且好像有话要说。</p>
+        <p>{question ? "而且叼回来一个真实问题。" : "这趟空着爪子，但没有迟到。"}</p>
       </div>
       <PersonaArt alt={`${catName}带着旅途札记回到窝里`} className="returned-persona-art" persona={playerPersona} state="returned" />
       <PaperCard className="returned-artifact">
-        <span>{artifact.label}</span>
-        <h2>{question.title}</h2>
-        <p>今天去了：{interests.join(" / ")}</p>
+        <span>{journey.artifact ? "问题票根 · QUESTION TICKET" : "旅途明信片 · POSTCARD"}</span>
+        <h2>{question?.title ?? "今天没碰到值得带回来的新问题"}</h2>
+        <p>出门方向：{journey.routeBias ?? "随便逛"}{interests.length ? ` · ${interests.join(" / ")}` : ""}</p>
         <blockquote>“{thought}”</blockquote>
         <div className="returned-meta">
-          <span>同行者 <b>{artifact.companion}</b></span>
-          <span>关系变化 <b>{artifact.relationshipDelta}</b></span>
+          <span>内容来源 <b>{journey.contentSource === "live" ? "知乎实时公开内容" : "本趟无新内容"}</b></span>
+          <span>收藏 <b>{journey.artifact ? "已自动写入" : "没有额外掉落"}</b></span>
         </div>
-        <button className="theatre-button theatre-button-primary" onClick={onArchive} type="button">收进图鉴 <span>→</span></button>
+        {question ? <a className="home-last-night-link" href={question.url} rel="noreferrer" target="_blank">查看知乎原问题 →</a> : null}
+        <button className="theatre-button theatre-button-primary" onClick={onArchive} type="button">看完了 <span>→</span></button>
       </PaperCard>
     </div>
   );
