@@ -86,7 +86,7 @@ export const DEMO_FIXTURE = {
     },
     similarities: ["AI 与数码", "科学"],
     contrasts: ["你偏结构化长答", "TA 偏短句、直接、爱抖机灵"],
-    relationPrediction: "很可能边吵边加好友",
+    relationPrediction: "很可能边吵边继续相遇",
   },
   encounter: {
     topic: {
@@ -154,7 +154,7 @@ export const DEMO_FIXTURE = {
       },
       {
         label: "关系票根 #004",
-        summary: "在一个机械问题下面再次遇见齿轮，关系从同频路人变成了熟悉的杠精。",
+        summary: "在一个机械问题下面再次遇见齿轮，关系从同频猫友变成了熟悉的杠精。",
       },
     ],
   },
@@ -180,11 +180,11 @@ export const DEMO_FIXTURE = {
   atlas: {
     titles: ["盐选级工具猫", "收藏夹考古学家", "问题拆解工程师"],
     relationships: [
-      { id: "resident-gear", name: "齿轮", status: "同频路人" },
-      { id: "resident-rice", name: "糯米", status: "串门邻居" },
-      { id: "resident-thesis", name: "刻度", status: "证据搭子" },
-      { id: "resident-ink", name: "墨点", status: "灵感交换生" },
-      { id: "resident-waypoint", name: "路标", status: "偶遇旅伴" },
+      { id: "resident-gear", name: "齿轮", status: "同频猫友" },
+      { id: "resident-rice", name: "糯米", status: "初见" },
+      { id: "resident-thesis", name: "刻度", status: "同频猫友" },
+      { id: "resident-ink", name: "墨点", status: "初见" },
+      { id: "resident-waypoint", name: "路标", status: "初见" },
     ],
     history: ["孵化完成", "第一次遇见齿轮", "认识了 5 位社区居民", "社交 Lv.4"],
   },

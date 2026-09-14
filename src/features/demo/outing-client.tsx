@@ -39,7 +39,7 @@ export function DemoOutingHome() {
     try {
       const response = await fetch("/api/journey", { cache: "no-store" });
       if (response.status === 401) {
-        setJourneyError("先完成知乎授权，这只猫才有自己的长期旅途。");
+        setJourneyError(null);
         setProjection({ state: "AT_HOME", journey: null, resting: false, queuedRouteBias: null, nextJourneyAt: null });
         return;
       }
@@ -102,17 +102,15 @@ export function DemoOutingHome() {
   }
 
   return (
-    <>
-      {journeyError ? <div className="outing-loading">{journeyError}</div> : null}
-      <AtHomeStage
-        catName={catName}
-        playerPersona={playerPersona}
-        questionSnapshot={questionSnapshot}
-        resting={projection.resting}
-        queuedRouteBias={projection.queuedRouteBias}
-        onPrepare={(routeBias) => void runAction({ action: "start", routeBias })}
-      />
-    </>
+    <AtHomeStage
+      catName={catName}
+      playerPersona={playerPersona}
+      questionSnapshot={questionSnapshot}
+      resting={projection.resting}
+      queuedRouteBias={projection.queuedRouteBias}
+      journeyNotice={journeyError}
+      onPrepare={(routeBias) => void runAction({ action: "start", routeBias })}
+    />
   );
 }
 
@@ -123,6 +121,7 @@ function AtHomeStage({
   questionSnapshot,
   resting,
   queuedRouteBias,
+  journeyNotice,
 }: {
   catName: string;
   onPrepare: (routeBias: string) => void;
@@ -130,6 +129,7 @@ function AtHomeStage({
   questionSnapshot: LiveQuestionSnapshot | null;
   resting: boolean;
   queuedRouteBias: string | null;
+  journeyNotice: string | null;
 }) {
   const fixture = DEMO_FIXTURE;
   const question = questionSnapshot?.question ?? {
@@ -146,6 +146,11 @@ function AtHomeStage({
         <p className="stage-caption">{resting ? "REST / AT HOME · 刚回来，先歇会儿" : "ACT / AT HOME · 今天还没急着出门"}</p>
         <h1><span>{catName}</span>，<br />{resting ? "刚回窝。" : "还在窝里。"}</h1>
         <p>{resting ? (queuedRouteBias ? `下一趟的纸条已经压好了：「${queuedRouteBias}」。它歇够了会自己出门。` : "上一趟已经结算，明信片也收好了。歇够以后，它会自己再出门。") : `昨晚的东西还在慢慢消化。它刚刚又瞄了一眼「${question.title}」。`}</p>
+        {journeyNotice ? (
+          <p role="status" style={{ marginTop: 10, fontSize: 12, opacity: 0.62 }}>
+            {journeyNotice}
+          </p>
+        ) : null}
       </div>
 
       <div className="home-hero-art">

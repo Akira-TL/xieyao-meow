@@ -24,15 +24,23 @@ export function SharedEncounterPanel() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState("");
+  const [authRequired, setAuthRequired] = useState(false);
 
   async function loadLatest() {
     setLoading(true);
     try {
       const response = await fetch("/api/community/encounters", { cache: "no-store" });
       const body = (await response.json()) as EncounterResponse;
+      if (response.status === 401) {
+        setEncounter(null);
+        setMessage("");
+        setAuthRequired(true);
+        return;
+      }
       if (!response.ok) throw new Error(body.error || "读取 Shared Encounter 失败");
       setEncounter(body.encounter);
       setMessage("");
+      setAuthRequired(false);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "读取 Shared Encounter 失败");
     } finally {
@@ -54,9 +62,15 @@ export function SharedEncounterPanel() {
         body: "{}",
       });
       const body = (await response.json()) as EncounterResponse;
+      if (response.status === 401) {
+        setAuthRequired(true);
+        setMessage("");
+        return;
+      }
       if (!response.ok && response.status !== 202) {
         throw new Error(body.error || "创建 Shared Encounter 失败");
       }
+      setAuthRequired(false);
       setEncounter(body.encounter);
       if (response.status === 202) setMessage("两只猫正在把同一次相遇写进共同历史。刷新后仍会读取这一场。 ");
     } catch (error) {
@@ -69,6 +83,8 @@ export function SharedEncounterPanel() {
   const self = encounter?.participants.find((item) => item.isSelf);
   const other = encounter?.participants.find((item) => !item.isSelf);
 
+  if (authRequired && !encounter) return null;
+
   return (
     <section
       aria-label="Shared Encounter"
@@ -78,7 +94,8 @@ export function SharedEncounterPanel() {
         padding: "20px",
         border: "1px solid rgba(23, 114, 246, 0.24)",
         borderRadius: 18,
-        background: "rgba(255,255,255,0.88)",
+        background: "rgba(255,255,255,0.92)",
+        color: "#11161d",
       }}
     >
       <div style={{ display: "flex", gap: 16, justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>

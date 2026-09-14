@@ -116,9 +116,8 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
   );
 }
 
-function residentScore(selfInterests: string[], residentInterests: readonly string[]) {
-  const overlap = selfInterests.filter((item) => residentInterests.includes(item)).length;
-  return Math.min(96, 64 + overlap * 14);
+function residentRelationshipStatus(residentId: string) {
+  return DEMO_FIXTURE.atlas.relationships.find((item) => item.id === residentId)?.status ?? "初见";
 }
 
 function relationshipSlug(residentId: string) {
@@ -141,9 +140,10 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
   };
   const residents = DEMO_FIXTURE.residents.map((resident) => ({
     ...resident,
-    score: residentScore(selfInterests, resident.interests),
+    relationshipStatus: residentRelationshipStatus(resident.id),
   }));
   const latest = residents[0];
+  const latestRelationship = DEMO_FIXTURE.encounter.relationship;
   const selfTitle = persona?.certifiedTitle ?? DEMO_FIXTURE.persona.title;
   const selfDescriptor = persona?.personality[0] ?? DEMO_FIXTURE.persona.archetype;
 
@@ -169,7 +169,7 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
           </div>
           <ArtSlot name={`npc/${latest.id}/talking`} label={latest.displayName} aspect="portrait" fit="contain" />
         </div>
-        <p className="encounter-subtitle">{selfDescriptor} × {latest.personality[0]} · 契合度 {latest.score}%</p>
+        <p className="encounter-subtitle">{selfDescriptor} × {latest.personality[0]} · {latestRelationship.status} · 熟悉度 {latestRelationship.familiarity} · 化学反应 {latestRelationship.chemistry >= 0 ? "+" : ""}{latestRelationship.chemistry}</p>
         <Link className="theatre-button theatre-button-primary daily-relationship-link" href={`/relationship/${relationshipSlug(latest.id)}`}>看看这段关系 <span>→</span></Link>
       </div>
     );
@@ -191,7 +191,8 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
         <div className="latest-encounter-copy">
           <span>最近的相遇 · LATEST ENCOUNTER</span>
           <h2>{latest.displayName}</h2>
-          <b>{latest.score}% 契合度</b>
+          <b>{latestRelationship.status}</b>
+          <small>熟悉度 {latestRelationship.familiarity} · 化学反应 {latestRelationship.chemistry >= 0 ? "+" : ""}{latestRelationship.chemistry} · 已相遇 {latestRelationship.encounterCount} 次</small>
           <p>最近一次，它们围着「{question.title}」碰到了一起。共同兴趣让它们愿意停下来，表达差异决定了这场对话不会太无聊。</p>
           <blockquote>“{persona?.catchphrase ?? DEMO_FIXTURE.persona.catchphrase}”</blockquote>
           <Link href="/encounter?view=featured">看这一幕 →</Link>
@@ -204,7 +205,7 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
           {residents.map((item) => (
             <Link className="relationship-mini-card" href={`/relationship/${relationshipSlug(item.id)}`} key={item.id}>
               <ArtSlot name={`npc/${item.id}/idle`} label={item.displayName} aspect="avatar" fit="contain" />
-              <div><strong>{item.displayName}</strong><span>{item.personality[0]} · {item.interests.join(" / ")}</span><b>{item.score}%</b></div>
+              <div><strong>{item.displayName}</strong><span>{item.personality[0]} · {item.interests.join(" / ")}</span><b>{item.relationshipStatus}</b></div>
               <small>查看关系 →</small>
             </Link>
           ))}
@@ -319,7 +320,8 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
   const selfInterests = basePersona.interests;
   const legacyResidentId = relationshipId === "neighbor" ? "resident-rice" : `resident-${relationshipId}`;
   const candidate = DEMO_FIXTURE.residents.find((resident) => resident.id === legacyResidentId) ?? DEMO_FIXTURE.residents[0];
-  const score = residentScore(selfInterests, candidate.interests);
+  const relationshipStatus = residentRelationshipStatus(candidate.id);
+  const relationshipMetrics = candidate.id === DEMO_FIXTURE.residents[0].id ? DEMO_FIXTURE.encounter.relationship : null;
   const candidateInterestSet = new Set<string>(candidate.interests);
   const shared = selfInterests.filter((item) => candidateInterestSet.has(item));
   const question = questionSnapshot?.question ?? {
@@ -328,7 +330,6 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
     summary: "",
     thumbnailUrl: "",
   };
-  const relation = score >= 88 ? "很容易继续聊下去" : score >= 76 ? "同频路人" : "还在互相闻味道";
   const selfTitle = persona?.certifiedTitle ?? DEMO_FIXTURE.persona.title;
   const selfDescriptor = persona?.personality[0] ?? DEMO_FIXTURE.persona.archetype;
 
@@ -352,9 +353,9 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
 
       <PaperCard className="relationship-status-card">
         <h2>当前关系</h2>
-        <strong>{relation}</strong>
+        <strong>{relationshipStatus}</strong>
         <blockquote>“共同点决定愿不愿意停下，差异决定还有没有下一句话。”</blockquote>
-        <p>谢邀喵匹配度 {score}%。{shared.length ? `共同兴趣是 ${shared.join("、")}。` : "暂时没有明显的兴趣重合，关系主要由好奇心驱动。"}</p>
+        <p>{relationshipMetrics ? `熟悉度 ${relationshipMetrics.familiarity} · 化学反应 ${relationshipMetrics.chemistry >= 0 ? "+" : ""}${relationshipMetrics.chemistry} · 已相遇 ${relationshipMetrics.encounterCount} 次。` : "关系仍在初见阶段。"}{shared.length ? ` 共同兴趣是 ${shared.join("、")}。` : " 暂时没有明显的兴趣重合，关系主要由好奇心驱动。"}</p>
       </PaperCard>
 
       <div className="relationship-detail-grid">
@@ -363,7 +364,7 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
           <ol className="relationship-timeline">
             <li><b>第一次闻到对方</b><span>Persona 根据兴趣和表达风格完成第一次匹配</span></li>
             <li><b>第一次对手戏</b><span>围绕真实知乎问题「{question.title}」开始对话</span></li>
-            <li className="is-current"><b>现在</b><span>{relation} · 等待下一次真实问题把它们重新拉到一起</span></li>
+            <li className="is-current"><b>现在</b><span>{relationshipStatus} · 等待下一次真实问题把它们重新拉到一起</span></li>
           </ol>
         </PaperCard>
 
