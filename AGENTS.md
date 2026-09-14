@@ -14,11 +14,11 @@
 
 ### Issue tracker
 
-项目使用本地 Markdown issue tracker，spec 与 issue 统一放在 `.scratch/`。具体约定见 `docs/agents/issue-tracker.md`。
+项目使用 GitHub Issues（`Akira-TL/xieyao-meow`）承载 issue、spec 与 Wayfinder 决策地图。具体约定见 `docs/agents/issue-tracker.md`。
 
-### Triage labels
+### Workflow roles
 
-使用 Matt 默认五种 triage 状态。映射见 `docs/agents/triage-labels.md`。
+Matt 工程流程使用 canonical GitHub labels，包括 triage、`ready-for-agent` 与 `wayfinder:*` 角色。映射见 `docs/agents/triage-labels.md`。
 
 ### Domain docs
 
@@ -27,6 +27,6 @@
 ## 工程流程
 
 - 新的开发任务先读取 `ask-matt` Skill，并依据其路由选择 spec、ticket、implement、TDD 或其他流程。
-- 多阶段功能使用 `.scratch/<feature>/spec.md` 与 `.scratch/<feature>/issues/<NN>-<slug>.md`；issue 必须声明状态和 blocking 关系。
+- 多阶段功能、spec、实现 ticket 与 Wayfinder 决策统一发布到 GitHub Issues；blocking、claim、sub-issue 等关系优先使用 GitHub 原生能力，具体操作见 `docs/agents/issue-tracker.md`。
 - 若根目录存在 `.codegraph/`，理解或定位代码时先执行 CodeGraph 查询，再继续读取实现。
 - 比赛冲刺以可稳定演示的核心链路为优先级来源；具体范围以产品定义和当前 issue 为准，不在 `AGENTS.md` 重复缓存产品细节。

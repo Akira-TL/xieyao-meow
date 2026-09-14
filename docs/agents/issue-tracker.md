@@ -1,32 +1,38 @@
-# Issue tracker：本地 Markdown
+# Issue tracker: GitHub
 
-本仓库的 spec 与 issue 以 Markdown 文件保存在 `.scratch/`。
+本仓库的 spec、implementation ticket、triage 与 Wayfinder 决策地图统一使用 GitHub Issues：`Akira-TL/xieyao-meow`。所有操作使用已登录的 `gh` CLI。
 
-## 目录约定
+## Conventions
 
-- 每个 feature 一个目录：`.scratch/<feature-slug>/`
-- Feature spec：`.scratch/<feature-slug>/spec.md`
-- 实现 issue：`.scratch/<feature-slug>/issues/<NN>-<slug>.md`
-- issue 从 `01` 起编号，一个 ticket 一个文件，不合并成单一 tickets 文档
-- issue 顶部使用 `Status:` 记录状态；状态词见 `docs/agents/triage-labels.md`
-- blocking 关系使用 `Blocked by: NN, NN`
-- 补充讨论追加到文件底部 `## Comments`
+- 创建：`gh issue create --title "..." --body "..."`
+- 读取：`gh issue view <number> --comments`
+- 列表：`gh issue list --state open --json number,title,body,labels,comments`
+- 评论：`gh issue comment <number> --body "..."`
+- 标签：`gh issue edit <number> --add-label "..."` / `--remove-label "..."`
+- Claim：`gh issue edit <number> --add-assignee @me`
+- 关闭：`gh issue close <number> --comment "..."`
 
-## 发布与读取
+PRs 不作为 triage request surface。
 
-当 Matt skill 要求“publish to the issue tracker”时，在对应 `.scratch/<feature-slug>/` 下创建 spec 或 issue 文件。
+## Workflow roles
 
-当 skill 要求读取 ticket 时，以用户给出的路径或编号为准读取对应 Markdown 文件。
+所有 Matt Skill 通过 `docs/agents/triage-labels.md` 将 canonical workflow role 映射到 GitHub label。不要临时创造同义 label。
 
-## Work item 约定
+## Blocking / Frontier
 
-- **Blocking**：只有列出的所有前置 issue 都进入所属工作流的 resolved 状态后，当前 issue 才解除阻塞。
-- **Frontier**：从当前 workflow 中选择 open、未阻塞、未被 claim 的 issue，并保持既有编号顺序。
-- **Claim**：普通本地执行时，第一笔写操作应把 `Status:` 更新为当前工作流约定的 claimed/active 状态；多 Agent 并发时由协调器提供原子 claim 或互斥机制，不能只依赖文本状态。
+优先使用 GitHub 原生 issue dependencies。执行前先探测当前 `gh` 是否直接暴露 dependency 能力；若 CLI 没有便利参数，则使用 GitHub API 建立和查询依赖。只有 API 本身不可用时，才退回 issue body 中机器可读的 `Blocked by: #n, #m`。
 
-## Wayfinder 约定
+Frontier = 当前 workflow 下 open、未被未解决依赖阻塞、且未被 claim 的 work item。
 
-- Map：`.scratch/<effort>/map.md`
-- 子 ticket：`.scratch/<effort>/issues/<NN>-<slug>.md`
-- Wayfinder ticket 使用 `Type:` 标记 `research` / `prototype` / `grilling` / `task`
-- 解决后追加 `## Answer`，将 `Status:` 设为 `resolved`，并把决策摘要与链接写回 `map.md`
+## Wayfinder
+
+- Map：一个带 `wayfinder:map` label 的 GitHub Issue。
+- Decision ticket：Map 的 sub-issue，并根据类型使用 `wayfinder:research` / `wayfinder:prototype` / `wayfinder:grilling` / `wayfinder:task`。
+- 优先使用 GitHub 原生 sub-issues；若 CLI 没有便利参数，则通过 GitHub API 建立 parent/sub-issue 关系。
+- 若 sub-issue API 本身不可用，才在 Map 中用 task list，并在 child body 顶部写 `Part of #<map>`。
+- 解决一个 ticket 时：先在 ticket 留下 Answer comment，再关闭它，再把“一行 gist + ticket 链接”追加到 Map 的 `Decisions so far`。
+- 普通 Wayfinder session 一次最多解决一个非 Research ticket；Research 可按规则并行。
+
+## Publish / Fetch
+
+当 Skill 要求 “publish to the issue tracker” 时，创建 GitHub Issue；要求读取 ticket 时，从 GitHub Issue 读取，不再把 `.scratch/` 当正式 tracker。
