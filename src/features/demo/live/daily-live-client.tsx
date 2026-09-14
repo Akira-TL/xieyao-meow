@@ -31,17 +31,20 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
   const questionSnapshot = useLiveQuestionSnapshot();
   const primaryInterest = personaSnapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.interests[0];
   const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
+  const fallbackQuestions = DEMO_FIXTURE.explore.items.map((item) => ({
+    title: item.title,
+    url: item.sourceUrl,
+    summary: item.whyPicked,
+    thumbnailUrl: "",
+  }));
   const liveQuestions = questionSnapshot?.questions?.length
     ? questionSnapshot.questions
     : questionSnapshot?.question
       ? [questionSnapshot.question]
-      : DEMO_FIXTURE.explore.items.map((item) => ({
-          title: item.title,
-          url: item.sourceUrl,
-          summary: item.whyPicked,
-          thumbnailUrl: "",
-        }));
-  const questions = liveQuestions.slice(0, 3);
+      : [];
+  const questions = [...liveQuestions, ...fallbackQuestions]
+    .filter((item, index, collection) => collection.findIndex((candidate) => candidate.title === item.title) === index)
+    .slice(0, 3);
 
   return (
     <section className="explore-stage">

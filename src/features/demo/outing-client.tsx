@@ -126,14 +126,14 @@ function AtHomeStage({
     expression: Math.max(1, Math.min(5, Math.ceil((composition?.sourceCounts.contents ?? 10) / 12))),
     social: Math.max(1, Math.min(5, Math.ceil((composition?.sourceCounts.followees ?? 12) / 12))),
   };
+  const souvenirTitle = question.title.length > 22 ? `${question.title.slice(0, 22)}…` : question.title;
   return (
     <div className="home-at-home home-room-stage">
       <RoomBackdrop />
       <div className="home-hero-copy">
         <p className="stage-caption">ACT / AT HOME · 昨晚发生了一点事</p>
         <h1>昨晚，<br /><span>齿轮</span>来过。</h1>
-        <p>它和齿轮围着一个真实知乎问题聊了很久：「{question.title}」不同的表达方式，把同一个问题照出了不同侧面。</p>
-        <a className="theatre-button theatre-button-primary" href={fixture.home.heroEvent.target}>看这一幕 <span>→</span></a>
+        <p>它和齿轮围着一个真实知乎问题聊了很久：「{question.title}」两种脾气，最后把同一道题聊出了两个方向。</p>
       </div>
 
       <div className="home-hero-art">
@@ -147,15 +147,21 @@ function AtHomeStage({
         <span className="home-resting-note">吵完了。<br />但还是好朋友。</span>
       </div>
 
-      <div className="home-outing-control">
-        <BottomSheet trigger={<span className="home-outing-trigger">让它出去逛逛 →</span>} title="留张出门纸条">
-          <p>你只能影响方向，不能指定它最终看什么、遇见谁。</p>
+      <div className="home-event-actions">
+        <a className="theatre-button theatre-button-primary" href={fixture.home.heroEvent.target}>看这一幕 <span>→</span></a>
+        <BottomSheet trigger={<span className="home-outing-trigger">让它出去逛逛 <b>→</b></span>} title="留张出门纸条">
+          <p>给它一个大概方向就行。最后看什么、遇见谁，让它自己决定。</p>
           <div className="route-bias-list">
             {fixture.outing.routeBiases.map((bias) => (
               <button key={bias} onClick={() => onPrepare(bias)} type="button">{bias}</button>
             ))}
           </div>
         </BottomSheet>
+      </div>
+
+      <div className="home-context-strip">
+        <span><small>今天</small><b>还在窝里</b><em>随时可以出门。</em></span>
+        <a href="/explore?mode=app"><small>上次带回</small><b>{souvenirTitle}</b><em>去翻翻旅途票根 →</em></a>
       </div>
 
       <div className="home-growth-row">
