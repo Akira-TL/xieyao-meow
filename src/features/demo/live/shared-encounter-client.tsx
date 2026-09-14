@@ -110,7 +110,11 @@ export function SharedEncounterPanel() {
       />
       <div className="shared-encounter-hero">
         <p className="stage-caption">REAL USER · SHARED ENCOUNTER</p>
-        <h1>最近，<br />它<span>遇见</span>了<br />{encounter ? "一个有趣的灵魂。" : "一张空椅子。"}</h1>
+        <h1 className="target-lock-title">
+          <span className="target-title-line">最近，</span>
+          <span className="target-title-line">它<em>遇见</em>了</span>
+          <span className="target-title-line target-title-line--compact">{encounter ? "一个有趣的灵魂。" : "一张空椅子。"}</span>
+        </h1>
         <p>{encounter ? "不同的问题，让不同的灵魂在这里相遇。每一次对话，都会留下同一段真实历史。" : "这里不塞预置 NPC。第二个真实 Persona 出现后，第一场相遇才会真正开演。"}</p>
       </div>
 

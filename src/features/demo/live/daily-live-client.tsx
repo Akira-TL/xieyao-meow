@@ -436,7 +436,11 @@ export function LiveAtlasSection() {
     <section className="atlas-stage">
       <div className="atlas-hero-copy">
         <p className="stage-caption">ARCHIVE · PERSONA HISTORY</p>
-        <h1>它的故事，<br />也是<span>你的</span><br />另一种履历。</h1>
+        <h1 className="target-lock-title">
+          <span className="target-title-line">它的故事，</span>
+          <span className="target-title-line">也是<em>你的</em></span>
+          <span className="target-title-line">另一种履历。</span>
+        </h1>
         <p>这里收着它从你的知乎成分里长出来的性格、兴趣和关系痕迹。</p>
       </div>
 

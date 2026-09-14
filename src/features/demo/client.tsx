@@ -55,7 +55,7 @@ export function LandingActions() {
     if (connected) {
       return (
         <div className="flex flex-col gap-3 sm:flex-row">
-          <DemoFlowButton href="/home">回我的窝</DemoFlowButton>
+          <DemoFlowButton href="/home">开幕</DemoFlowButton>
         </div>
       );
     }

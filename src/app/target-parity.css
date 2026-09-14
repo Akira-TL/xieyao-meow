@@ -129,6 +129,18 @@ body {
 .public-kicker { font-size: 9px; letter-spacing: .11em; color: #d5d7da; }
 
 /* ---------- recurring theatrical typography ---------- */
+.target-lock-title .target-title-line {
+  display:block;
+  width:max-content;
+  max-width:100%;
+  white-space:nowrap;
+  color:#f7f3eb !important;
+}
+.target-lock-title em {
+  color:var(--target-blue) !important;
+  font-style:normal;
+}
+.target-title-line--compact { letter-spacing:-.065em; }
 .stage-caption {
   color: #e8e5de;
   font-size: 10px;
@@ -810,7 +822,8 @@ body {
   .landing-stage { height:calc(100dvh - 72px); min-height:690px; padding:0 14px; }
   .landing-copy { top:46px; left:14px; right:14px; width:auto; transform:none; }
   .landing-copy .stage-caption { text-align:center; }
-  .landing-copy h1 { max-width:9.5ch; margin:8px auto 0; font-size:52px; line-height:.82; text-align:center; }
+  .landing-copy h1 { max-width:none; margin:8px auto 0; font-size:44px; line-height:.84; text-align:center; }
+  .landing-copy .target-title-line { margin-inline:auto; }
   .landing-handwriting { margin-top:7px; font-size:14px; text-align:center; }
   .landing-detail { display:none; }
   .landing-stage-cast .persona-egg { width:70%; bottom:19%; }
@@ -924,7 +937,8 @@ body {
     gap:7px;
     padding:12px 14px 8px;
   }
-  .home-hero-copy h1 { max-width:6.8ch; margin-top:5px; font-size:50px; line-height:.79; }
+  .home-hero-copy h1 { max-width:none; margin-top:5px; font-size:50px; line-height:.79; }
+  .home-hero-copy .target-title-line { width:max-content; }
   .home-hero-copy > p:not(.stage-caption) { margin-top:7px; font-size:10.5px; line-height:1.5; -webkit-line-clamp:2; }
   .home-story-polaroid { width:72%; justify-self:end; padding:11px 12px; transform:rotate(1.3deg); }
   .home-story-polaroid > strong { font-size:15px; }
@@ -943,7 +957,15 @@ body {
   .home-context-strip--stats em { display:none; }
 
   /* explore */
-  .explore-stage { min-height:auto; padding:12px 14px 16px; }
+  .explore-stage,
+  .explore-stage--app,
+  .explore-stage--public {
+    min-height:auto;
+    width:100%;
+    grid-template-columns:minmax(0,1fr) !important;
+    grid-template-areas:"hero-copy" "hero-art" "cards" "log" !important;
+    padding:12px 14px 16px;
+  }
   .explore-hero-copy h1 { max-width:7.5ch; font-size:48px; line-height:.82; }
   .explore-hero-copy > p:not(.stage-caption) { font-size:10px; line-height:1.5; }
   .explore-stage--app .journey-gate-scene { min-height:230px; }
@@ -993,7 +1015,7 @@ body {
   .encounter-side-rail { display:none; }
   .encounter-audience-silhouette { right:2%; top:154px; width:124px; min-height:125px; opacity:.16; }
   .shared-encounter-hero { text-align:left; margin-bottom:10px; }
-  .shared-encounter-hero h1 { max-width:7.5ch; margin:5px 0 0; font-size:47px; line-height:.82; }
+  .shared-encounter-hero h1 { max-width:none; margin:5px 0 0; font-size:47px; line-height:.82; }
   .shared-encounter-hero > p { max-width:32ch; margin:8px 0 0; font-size:10px; line-height:1.5; }
   .shared-encounter-empty { width:100%; margin-top:10px; padding:16px; text-align:left; transform:none; }
   .shared-encounter-empty h2 { font-size:24px; }
@@ -1042,7 +1064,7 @@ body {
     padding:12px 14px 16px;
   }
   .atlas-hero-copy { text-align:left; }
-  .atlas-hero-copy h1 { max-width:8ch; margin:5px 0 0; font-size:46px; line-height:.82; }
+  .atlas-hero-copy h1 { max-width:none; margin:5px 0 0; font-size:46px; line-height:.82; }
   .atlas-hero-copy > p:not(.stage-caption) { margin:7px 0 0; font-size:10px; line-height:1.5; }
   .atlas-persona-card { min-height:0; margin:0; padding:12px; }
   .atlas-persona-card > .art-slot, .atlas-current-persona-art { max-width:105px; min-height:120px; }
