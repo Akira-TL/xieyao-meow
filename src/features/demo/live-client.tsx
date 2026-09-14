@@ -254,7 +254,7 @@ export function LiveScanningFlow() {
   const rows = useMemo(() => scanRows(snapshot), [snapshot]);
 
   useEffect(() => {
-    if (!dataReady || !born) return;
+    if (!dataReady || !born || error) return;
     const timers = rows.map((_, index) =>
       window.setTimeout(() => setCompleted(index + 1), 220 + index * 560),
     );
@@ -267,7 +267,7 @@ export function LiveScanningFlow() {
       timers.forEach(window.clearTimeout);
       window.clearTimeout(finish);
     };
-  }, [born, dataReady, router, rows]);
+  }, [born, dataReady, error, router, rows]);
 
   if (!born) return null;
 
@@ -287,10 +287,12 @@ export function LiveScanningFlow() {
         );
       })}
       <p className={`scan-footnote ${error ? "is-fallback" : "is-live"}`}>
-        {error || snapshot?.mode === "fallback" ? (
-          <>上游暂时不可用 · 本轮使用备用人格数据</>
+        {error ? (
+          <>没有读到你的知乎数据 · 请刷新重试或重新授权，不会使用测试人格代替你</>
+        ) : snapshot?.mode === "fallback" ? (
+          <>本地开发备用人格 · 公网不会使用这份数据冒充你的 Persona</>
         ) : (
-          <><CloudDoneOutlinedIcon fontSize="inherit" /> 知乎公开数据已读取 · 正在拼出你的社交气味</>
+          <><CloudDoneOutlinedIcon fontSize="inherit" /> 你的知乎公开数据已读取 · 正在拼出你的社交气味</>
         )}
       </p>
     </div>
@@ -339,6 +341,7 @@ export function LiveRevealPanel() {
     }
   }, []);
 
+  const production = process.env.NODE_ENV === "production";
   const fallback = DEMO_FIXTURE.persona;
   const species = snapshot?.persona.species ?? fallback.species;
   const personaTitle = snapshot?.persona.certifiedTitle ?? fallback.title;
@@ -377,7 +380,12 @@ export function LiveRevealPanel() {
       <p className="reveal-manifesto">你留下的问题和答案，正在变成它理解世界的方式。</p>
 
       <div className="reveal-action">
-        <DemoFlowButton href="/encounter/first?phase=match" stage="FIRST_MATCH_READY">带它出去闻闻</DemoFlowButton>
+        <DemoFlowButton
+          href={production ? "/home" : "/encounter/first?phase=match"}
+          stage={production ? "ACTIVATED" : "FIRST_MATCH_READY"}
+        >
+          {production ? "带它回窝，开始第一趟旅行" : "带它出去闻闻"}
+        </DemoFlowButton>
       </div>
     </section>
   );

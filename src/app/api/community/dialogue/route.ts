@@ -92,8 +92,15 @@ export async function POST(request: Request) {
   }
 
   const identity = await getRequestOAuthIdentity();
+  const production = process.env.NODE_ENV === "production";
+  if (!identity && production) {
+    return NextResponse.json({ error: "login required" }, { status: 401 });
+  }
   const actorId = identity ? `user:${identity.userId}` : "self-demo";
   const { actor, personaMode } = await resolveActor(actorId, identity?.oauthAccessToken);
+  if (production && personaMode !== "live") {
+    return NextResponse.json({ error: "zhihu persona unavailable" }, { status: 502 });
+  }
   const gateway = createZhihuGatewayFromEnv();
   const memory: PersonaExperienceMemory = parsed.memory;
   const round = await new SocialDialogueService(gateway).nextRound({

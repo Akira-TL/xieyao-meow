@@ -138,14 +138,14 @@ function AtHomeStage({
     summary: "",
     thumbnailUrl: "",
   };
-  const souvenirTitle = question.title.length > 22 ? `${question.title.slice(0, 22)}…` : question.title;
+  const previewTitle = question.title.length > 22 ? `${question.title.slice(0, 22)}…` : question.title;
   return (
     <div className="home-at-home home-room-stage">
       <RoomBackdrop />
       <div className="home-hero-copy">
         <p className="stage-caption">{resting ? "REST / AT HOME · 刚回来，先歇会儿" : "ACT / AT HOME · 今天还没急着出门"}</p>
         <h1><span>{catName}</span>，<br />{resting ? "刚回窝。" : "还在窝里。"}</h1>
-        <p>{resting ? (queuedRouteBias ? `下一趟的纸条已经压好了：「${queuedRouteBias}」。它歇够了会自己出门。` : "上一趟已经结算，明信片也收好了。歇够以后，它会自己再出门。") : `昨晚的东西还在慢慢消化。它刚刚又瞄了一眼「${question.title}」。`}</p>
+        <p>{resting ? (queuedRouteBias ? `下一趟的纸条已经压好了：「${queuedRouteBias}」。它歇够了会自己出门。` : "上一趟已经结算，明信片也收好了。歇够以后，它会自己再出门。") : "这是它自己的窝。你可以留一个大概方向，也可以什么都不写；第一趟会自己去看真实的知乎问题。"}</p>
         {journeyNotice ? (
           <p role="status" style={{ marginTop: 10, fontSize: 12, opacity: 0.62 }}>
             {journeyNotice}
@@ -155,14 +155,14 @@ function AtHomeStage({
 
       <div className="home-hero-art">
         <PersonaArt
-          alt={`${catName}在窝里回想昨晚的对话`}
+          alt={`${catName}在窝里准备下一趟旅途`}
           aspect="portrait"
           className="home-persona-art"
           persona={playerPersona}
           priority
           state="thinking"
         />
-        <span className="home-resting-note">吵完了。<br />但还是好朋友。</span>
+        <span className="home-resting-note">{resting ? <>刚回来。<br />先歇会儿。</> : <>等一会儿。<br />它会自己出门。</>}</span>
       </div>
 
       <div className="home-event-actions">
@@ -174,12 +174,12 @@ function AtHomeStage({
             ))}
           </div>
         </BottomSheet>
-        <a className="home-last-night-link" href={fixture.home.heroEvent.target}>看看昨晚那一幕 →</a>
+        <a className="home-last-night-link" href="/explore?mode=public">先看看知乎现在有什么 →</a>
       </div>
 
       <div className="home-context-strip">
-        <span><small>现在</small><b>在窝里发呆</b><em>想出去时，它会自己动身。</em></span>
-        <a href="/explore?mode=app"><small>上次带回</small><b>{souvenirTitle}</b><em>去翻翻旅途票根 →</em></a>
+        <span><small>现在</small><b>{resting ? "刚回到窝里" : "准备第一次出门"}</b><em>{resting ? "歇够以后，它会继续自己的旅途。" : "不用下 Prompt，它会自己决定去哪。"}</em></span>
+        <a href="/explore?mode=public"><small>知乎现在</small><b>{previewTitle}</b><em>先看看公开世界 →</em></a>
       </div>
     </div>
   );

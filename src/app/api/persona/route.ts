@@ -28,6 +28,10 @@ function persistPersonaSnapshot(
 
 export async function GET() {
   const identity = await getRequestOAuthIdentity();
+  const production = process.env.NODE_ENV === "production";
+  if (!identity && production) {
+    return NextResponse.json({ error: "login required" }, { status: 401 });
+  }
 
   try {
     const profile = await createZhihuGatewayFromEnv().getUserProfile({
@@ -51,9 +55,30 @@ export async function GET() {
     );
   } catch (error) {
     console.error(
-      "[persona] failed to build live persona; serving fallback",
+      "[persona] failed to build live persona",
       error instanceof Error ? error.message : "unknown error",
     );
+
+    if (production && identity) {
+      const cached = getSharedEncounterStore().getPersonaSnapshot(identity.userId);
+      if (cached?.source === "live") {
+        return NextResponse.json(
+          {
+            mode: "live" as const,
+            generatedAt: Math.floor(cached.updatedAt / 1000),
+            composition: cached.agent.composition,
+            persona: cached.agent.persona,
+            personaVersion: cached.version,
+            cached: true,
+          },
+          { headers: { "cache-control": "no-store" } },
+        );
+      }
+      return NextResponse.json(
+        { error: "zhihu profile unavailable" },
+        { status: 502, headers: { "cache-control": "no-store" } },
+      );
+    }
 
     const snapshot = identity
       ? persistPersonaSnapshot(

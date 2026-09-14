@@ -25,7 +25,12 @@ export async function POST(request: Request) {
   }
 
   const identity = await getRequestOAuthIdentity();
-  let experience: AnswerExperience = DEMO_FALLBACK;
+  const production = process.env.NODE_ENV === "production";
+  if (!identity && production) {
+    return NextResponse.json({ error: "login required" }, { status: 401 });
+  }
+
+  let experience: AnswerExperience;
   try {
     experience = await getAnswerExperienceService().create({
       cacheKey: identity ? `user:${identity.userId}` : "self-demo",
@@ -33,9 +38,13 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error(
-      "[community] experience runtime unavailable; using demo persona",
+      "[community] experience runtime unavailable",
       error instanceof Error ? error.message : "unknown error",
     );
+    if (production) {
+      return NextResponse.json({ error: "zhihu experience unavailable" }, { status: 502 });
+    }
+    experience = DEMO_FALLBACK;
   }
 
   const actor: SocialAgent = {

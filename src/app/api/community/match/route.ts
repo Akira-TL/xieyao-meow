@@ -39,6 +39,10 @@ export async function POST(request: Request) {
   }
 
   const identity = await getRequestOAuthIdentity();
+  const production = process.env.NODE_ENV === "production";
+  if (!identity && production) {
+    return NextResponse.json({ error: "login required" }, { status: 401 });
+  }
   const actorId = identity ? `user:${identity.userId}` : "self-demo";
   const cacheKey = `${actorId}::${residentId}`;
   const cached = matchCache.get(cacheKey);
@@ -72,9 +76,12 @@ export async function POST(request: Request) {
     personaMode = "live";
   } catch (error) {
     console.warn(
-      "[community-match] live persona unavailable; using match rules with fallback persona",
+      "[community-match] live persona unavailable",
       error instanceof Error ? error.message : "unknown error",
     );
+    if (production) {
+      return NextResponse.json({ error: "zhihu persona unavailable" }, { status: 502 });
+    }
   }
 
   const insight = personaMode === "live"

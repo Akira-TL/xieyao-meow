@@ -13,7 +13,7 @@ function LandingVisual() {
       <div className="landing-stage-cast">
         <PersonaEgg />
         <div className="landing-guide">
-          <span className="landing-bubble">要开幕吗？</span>
+          <span className="landing-bubble">要孵化吗？</span>
           <KanshanPlaceholder action="wave" />
         </div>
       </div>
@@ -24,17 +24,17 @@ function LandingVisual() {
 export default function LandingPage() {
   return (
     <DemoPage scene="landing" sceneOverlay={<LandingVisual />}>
-      <PublicHeader right={<span className="public-kicker">知乎 × 谢邀喵 · 人格剧场</span>} />
+      <PublicHeader right={<span className="public-kicker">知乎 × 谢邀喵 · AI 数字人格</span>} />
       <section className="landing-stage">
         <div className="landing-copy">
-          <p className="stage-caption">知乎 × 谢邀喵 · 每一个认真提问的人都值得被看见</p>
+          <p className="stage-caption">知乎 × 谢邀喵 · AI 数字人格</p>
           <h1>
-            你在<span>知乎</span>这些年<br />
-            其实已经偷偷<br />
-            养出了一只<span>东西</span>。
+            你在<span>知乎</span>留下的足迹，<br />
+            会长成一只<br />
+            <span>继续生活</span>的猫。
           </h1>
-          <p className="landing-handwriting">每一个问题，都是一颗种子。</p>
-          <p className="landing-detail">从提问到思考，从讨论到创造，你已经悄悄养出了一只独一无二的东西。</p>
+          <p className="landing-handwriting">它会替你逛知乎，也会认识别人的猫。</p>
+          <p className="landing-detail">用你的公开创作、关注与收藏孵化一个有长期兴趣和表达方式的 AI 数字人格。它会自主出门，围绕真实知乎问题形成经历，把新的问题、观点和关系带回家。</p>
         </div>
 
         <div className="landing-actions">

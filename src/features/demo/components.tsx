@@ -19,13 +19,20 @@ const APP_ITEMS: readonly [AppSection, string, string, string][] = [
   ["atlas", "/atlas", "图鉴", "档案"],
 ];
 
-const ACTIVATION_STEPS = [
+const DEMO_ACTIVATION_STEPS = [
   ["01", "序幕"],
   ["02", "授权"],
   ["03", "数据扫描"],
   ["04", "人格登台"],
   ["05", "首次相遇"],
   ["06", "对手戏"],
+] as const;
+
+const PRODUCT_ACTIVATION_STEPS = [
+  ["01", "认识谢邀喵"],
+  ["02", "登录知乎"],
+  ["03", "读取知乎成分"],
+  ["04", "孵化人格"],
 ] as const;
 
 function TheatreSceneArt({ overlay }: { overlay?: ReactNode }) {
@@ -71,25 +78,27 @@ export function BrandMark() {
   return (
     <Link className="theatre-brand" href="/" aria-label="谢邀喵首页">
       <span className="theatre-brand-name">谢邀喵</span>
-      <span className="theatre-brand-tagline">每一个认真提问的人，都值得被看见</span>
+      <span className="theatre-brand-tagline">把知乎足迹孵化成会继续生活的 AI 数字人格</span>
     </Link>
   );
 }
 
 export function ActivationHeader({ current, right }: { current: number; right?: ReactNode }) {
+  const steps = process.env.NODE_ENV === "production" ? PRODUCT_ACTIVATION_STEPS : DEMO_ACTIVATION_STEPS;
+  const safeCurrent = Math.min(current, steps.length);
   return (
     <header className="activation-header">
       <BrandMark />
       <nav className="activation-steps" aria-label="首访进度">
-        {ACTIVATION_STEPS.map(([number, label], index) => (
-          <span className={index + 1 === current ? "is-current" : index + 1 < current ? "is-done" : ""} key={number}>
+        {steps.map(([number, label], index) => (
+          <span className={index + 1 === safeCurrent ? "is-current" : index + 1 < safeCurrent ? "is-done" : ""} key={number}>
             <b>{number}</b> {label}
           </span>
         ))}
       </nav>
-      <div className="activation-step-mobile" aria-label={`首访进度 ${current}/6`}>
-        <span>ACT {String(current).padStart(2, "0")}</span>
-        <strong>{ACTIVATION_STEPS[current - 1]?.[1]}</strong>
+      <div className="activation-step-mobile" aria-label={`首访进度 ${safeCurrent}/${steps.length}`}>
+        <span>STEP {String(safeCurrent).padStart(2, "0")}</span>
+        <strong>{steps[safeCurrent - 1]?.[1]}</strong>
       </div>
       {right ? <div className="activation-header-right">{right}</div> : null}
     </header>

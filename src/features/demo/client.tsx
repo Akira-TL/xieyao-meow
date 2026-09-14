@@ -24,11 +24,50 @@ function persistStage(stage: DemoActivationStage) {
 }
 
 export function LandingActions() {
+  const production = process.env.NODE_ENV === "production";
   const [stage, setStage] = useState<DemoActivationStage>("VISITOR");
+  const [connected, setConnected] = useState<boolean | null>(production ? null : false);
 
   useEffect(() => {
-    setStage(currentStage());
-  }, []);
+    if (!production) {
+      setStage(currentStage());
+      return;
+    }
+
+    let cancelled = false;
+    fetch("/api/auth/zhihu/status", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("auth status unavailable");
+        return (await response.json()) as { connected?: boolean };
+      })
+      .then((status) => {
+        if (!cancelled) setConnected(Boolean(status.connected));
+      })
+      .catch(() => {
+        if (!cancelled) setConnected(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [production]);
+
+  if (production) {
+    if (connected) {
+      return (
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <DemoFlowButton href="/home">回我的窝</DemoFlowButton>
+          <DemoFlowButton href="/explore?mode=app" variant="secondary">看看它今天带回了什么</DemoFlowButton>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <DemoFlowButton href="/hatch/consent">用知乎登录，孵化我的谢邀喵</DemoFlowButton>
+        <DemoFlowButton href="/explore?mode=public" variant="secondary">先看看它会怎么生活</DemoFlowButton>
+      </div>
+    );
+  }
 
   if (stage === "ACTIVATED") {
     return (
@@ -83,23 +122,73 @@ export function DemoRouteGuard({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (developmentBypass) return;
 
-    const requested = `${window.location.pathname}${window.location.search}`;
+    let cancelled = false;
+    const pathname = window.location.pathname;
+    const requested = `${pathname}${window.location.search}`;
     const query = new URLSearchParams(window.location.search);
-    if (window.location.pathname === "/hatch/scanning" && query.get("oauth") === "connected") {
-      persistStage(advanceActivationStage(currentStage(), "PROFILE_SCANNING"));
-    }
-    const redirect = resolveRequestedDemoPath(currentStage(), requested);
-    if (redirect && redirect !== requested) {
-      router.replace(redirect);
-      return;
-    }
-    setReady(true);
+    const consentPage = pathname === "/hatch/consent";
+    const publicExplore = pathname === "/explore" && query.get("mode") === "public";
+    const appRoute =
+      pathname.startsWith("/home") ||
+      pathname.startsWith("/atlas") ||
+      pathname === "/encounter" ||
+      pathname.startsWith("/journey/") ||
+      pathname.startsWith("/relationship/") ||
+      (pathname === "/explore" && query.get("mode") === "app");
+
+    fetch("/api/auth/zhihu/status", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("auth status unavailable");
+        return (await response.json()) as { connected?: boolean };
+      })
+      .then((status) => {
+        if (cancelled) return;
+        if (!status.connected) {
+          if (!consentPage && !publicExplore) {
+            router.replace("/hatch/consent");
+            return;
+          }
+          setReady(true);
+          return;
+        }
+
+        if (consentPage) {
+          router.replace(currentStage() === "ACTIVATED" ? "/home" : "/hatch/scanning?oauth=connected");
+          return;
+        }
+
+        if (pathname === "/hatch/scanning") {
+          persistStage(advanceActivationStage(currentStage(), "PROFILE_SCANNING"));
+          setReady(true);
+          return;
+        }
+
+        if (appRoute) {
+          persistStage(advanceActivationStage(currentStage(), "ACTIVATED"));
+          setReady(true);
+          return;
+        }
+
+        const redirect = resolveRequestedDemoPath(currentStage(), requested);
+        if (redirect && redirect !== requested) {
+          router.replace(redirect);
+          return;
+        }
+        setReady(true);
+      })
+      .catch(() => {
+        if (!cancelled) router.replace("/hatch/consent");
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [developmentBypass, router]);
 
   if (!ready) {
     return (
       <div className="grid min-h-[40vh] place-items-center text-sm text-zinc-600">
-        正在恢复这只喵的状态……
+        正在确认知乎登录状态……
       </div>
     );
   }
