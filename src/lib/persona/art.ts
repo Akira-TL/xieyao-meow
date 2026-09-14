@@ -1,6 +1,6 @@
 import type { PersonaVisualVariant, PlayerPersona, ZhihuComposition } from "./types";
 
-export type PersonaArtState = "base" | "thinking" | "talking" | "walking" | "returned";
+export type PersonaArtState = "base" | "thinking" | "talking" | "walking" | "returned" | "sleeping";
 
 const VARIANT_DIR: Record<PersonaVisualVariant, string> = {
   "engineer-blue": "01_engineer_blue",

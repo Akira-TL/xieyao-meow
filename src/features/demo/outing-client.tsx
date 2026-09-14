@@ -47,7 +47,7 @@ export function DemoOutingHome() {
     }
   }, []);
 
-  const runAction = useCallback(async (body: unknown) => {
+  const runAction = useCallback(async (body: unknown): Promise<JourneyProjection | null> => {
     try {
       const response = await fetch("/api/journey", {
         method: "POST",
@@ -56,15 +56,25 @@ export function DemoOutingHome() {
       });
       if (response.status === 401) {
         setJourneyError("先完成知乎授权，这只猫才有自己的长期旅途。");
-        return;
+        return null;
       }
       if (!response.ok) throw new Error(`journey HTTP ${response.status}`);
-      setProjection((await response.json()) as JourneyProjection);
+      const next = (await response.json()) as JourneyProjection;
+      setProjection(next);
       setJourneyError(null);
+      return next;
     } catch {
       setJourneyError("这次没能把纸条交给它，再点一次就好。");
+      return null;
     }
   }, []);
+
+  const prepareJourney = useCallback(async (routeBias: string) => {
+    const next = await runAction({ action: "start", routeBias });
+    if (next?.state === "AT_HOME" && next.resting) {
+      setJourneyError(`纸条塞好了：「${routeBias}」。它还在睡，醒了会自己决定什么时候走。`);
+    }
+  }, [runAction]);
 
   useEffect(() => {
     void refreshJourney();
@@ -104,7 +114,7 @@ export function DemoOutingHome() {
       resting={projection.resting}
       queuedRouteBias={projection.queuedRouteBias}
       journeyNotice={journeyError}
-      onPrepare={(routeBias) => void runAction({ action: "start", routeBias })}
+      onPrepare={prepareJourney}
     />
   );
 }
@@ -119,7 +129,7 @@ function AtHomeStage({
   journeyNotice,
 }: {
   catName: string;
-  onPrepare: (routeBias: string) => void;
+  onPrepare: (routeBias: string) => Promise<void>;
   playerPersona: PlayerPersona;
   composition: ZhihuComposition | null;
   resting: boolean;
@@ -149,24 +159,34 @@ function AtHomeStage({
 
       <div className="home-hero-art">
         <PersonaArt
-          alt={`${catName}在窝里准备下一趟旅途`}
-          aspect="portrait"
-          className="home-persona-art"
+          alt={resting ? `${catName}刚回来，正在窝里睡觉` : `${catName}在窝里准备下一趟旅途`}
+          aspect={resting ? "wide" : "portrait"}
+          className={`home-persona-art${resting ? " is-sleeping" : ""}`}
           persona={playerPersona}
           priority
-          state="thinking"
+          state={resting ? "sleeping" : "thinking"}
         />
         <span className="home-resting-note">{resting ? <>刚回来。<br />先歇会儿。</> : <>好奇心已经<br />开始转了。</>}</span>
       </div>
 
       <div className="home-event-actions">
         <BottomSheet trigger={<span className="home-outing-trigger home-outing-primary">{resting ? "给下一趟压张纸条" : "给它准备行囊"} <b>→</b></span>} title="给行囊塞张纸条">
-          <p>你只能给一个模糊方向。纸条不会决定目的地，更不会决定它带什么回来。</p>
-          <div className="route-bias-list">
-            {fixture.outing.routeBiases.map((bias) => (
-              <button key={bias} onClick={() => onPrepare(bias)} type="button">{bias}</button>
-            ))}
-          </div>
+          {(close) => (
+            <>
+              <p>{resting ? "它刚回来，还在睡。你可以先塞一张纸条；醒了以后它会自己决定什么时候走。" : "你只能给一个模糊方向。纸条不会决定目的地，更不会决定它带什么回来。"}</p>
+              <div className="route-bias-list">
+                {fixture.outing.routeBiases.map((bias) => (
+                  <button
+                    key={bias}
+                    onClick={() => void onPrepare(bias).finally(close)}
+                    type="button"
+                  >
+                    {bias}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </BottomSheet>
         <a className="home-last-night-link" href="/explore?mode=public">先看看知乎现在有什么 →</a>
       </div>
@@ -251,8 +271,7 @@ function ReturnedStage({
 }) {
   const [opened, setOpened] = useState(false);
   const question = journey.question;
-  const interests = playerPersona.interests.slice(0, 2);
-  const thought = journey.postcard?.body ?? "它按时回来了，只是这趟没有值得带回来的新问题。";
+  const thought = journey.postcard?.body ?? "这一趟只留下了出门记录。";
   const relationTicket = journey.artifact?.type === "RELATION_TICKET";
   const artifactLabel = relationTicket
     ? "关系票根 · RELATION TICKET"
@@ -261,7 +280,7 @@ function ReturnedStage({
       : "旅途明信片 · POSTCARD";
   const artifactTitle = relationTicket
     ? journey.artifact?.title ?? "旅途中遇见了另一个 Persona"
-    : question?.title ?? "今天没碰到值得带回来的新问题";
+    : question?.title ?? journey.postcard?.headline ?? "这一页先空着。";
 
   useEffect(() => {
     setOpened(false);
@@ -271,17 +290,17 @@ function ReturnedStage({
     <div className="returned-stage home-room-stage">
       <RoomBackdrop />
       <div className="returned-copy">
-        <p className="stage-caption">RETURNED · 门自己响了</p>
-        <span>你没叫它回来。</span>
-        <h1>它回来了。</h1>
-        <p>{opened ? "现在才知道，这一趟它到底带了什么。" : "包还没拆。先别偷看。"}</p>
+        <p className="stage-caption">RETURNED · 回窝</p>
+        <span>旅包已经放在桌边。</span>
+        <h1>{catName}<br />回窝了。</h1>
+        <p>{opened ? "这一趟留下的东西，都在这里。" : "先拆包。里面是什么，打开以后才知道。"}</p>
       </div>
       <PersonaArt alt={`${catName}背着旅包回到窝里`} className="returned-persona-art" persona={playerPersona} state="returned" />
       {!opened ? (
         <PaperCard className="returned-artifact returned-artifact--sealed">
           <span>旅包 · SEALED</span>
-          <h2>包鼓鼓的。</h2>
-          <p>可能是问题票根、明信片，也可能什么稀奇东西都没有。拆开以前不告诉你。</p>
+          <h2>东西还没摊开。</h2>
+          <p>可能有问题票根、关系票根，也可能只有一张旅途札记。先拆开再看。</p>
           <div className="returned-package-mark" aria-hidden="true">?</div>
           <button className="theatre-button theatre-button-primary" onClick={() => setOpened(true)} type="button">拆开它的包 <span>→</span></button>
         </PaperCard>
@@ -289,11 +308,11 @@ function ReturnedStage({
         <PaperCard className="returned-artifact is-opened">
           <span>{artifactLabel}</span>
           <h2>{artifactTitle}</h2>
-          <p>出门方向：{journey.routeBias ?? "随便逛"}{interests.length ? ` · ${interests.join(" / ")}` : ""}</p>
+          <p>你塞的纸条：{journey.routeBias ?? "随便逛"}</p>
           <blockquote>“{thought}”</blockquote>
           <div className="returned-meta">
-            <span>内容来源 <b>{journey.contentSource === "live" ? "知乎实时公开内容" : "本趟无新内容"}</b></span>
-            <span>带回 <b>{journey.artifact ? "1 张问题票根" : "1 张明信片"}</b></span>
+            <span>这一趟 <b>{journey.contentSource === "live" ? "停在了一个真实知乎问题前" : "没有留下新的问题票根"}</b></span>
+            <span>收进包里 <b>{relationTicket ? "1 张关系票根" : journey.artifact ? "1 张问题票根" : "1 张旅途札记"}</b></span>
           </div>
           {relationTicket ? (
             <a className="home-last-night-link" href="/encounter">看它们这一幕 →</a>

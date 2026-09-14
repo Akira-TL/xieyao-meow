@@ -313,7 +313,7 @@ export function BottomSheet({
 }: {
   trigger: ReactNode;
   title: string;
-  children: ReactNode;
+  children: ReactNode | ((close: () => void) => ReactNode);
 }) {
   const [open, setOpen] = useState(false);
 
@@ -344,7 +344,7 @@ export function BottomSheet({
               <h2>{title}</h2>
               <button aria-label="关闭" onClick={() => setOpen(false)} type="button">×</button>
             </div>
-            <div className="sheet-body">{children}</div>
+            <div className="sheet-body">{typeof children === "function" ? children(() => setOpen(false)) : children}</div>
           </section>
         </div>
       ) : null}

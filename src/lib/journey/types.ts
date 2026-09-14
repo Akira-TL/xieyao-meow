@@ -85,6 +85,7 @@ export interface JourneyDiscoveryResult {
   contentSource: JourneyContentSource;
   knowledgeSource: JourneyKnowledgeSource;
   sourceFetchedAt: number;
+  postcardHeadline?: string;
   postcardBody: string;
   returnArtifact?: JourneyReturnArtifactSeed;
 }

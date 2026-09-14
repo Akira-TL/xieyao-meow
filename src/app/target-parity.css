@@ -541,6 +541,10 @@ body {
   width: min(72%, 350px);
   min-height: 320px;
 }
+.home-persona-art.is-sleeping {
+  width: min(94%, 520px);
+  min-height: 250px;
+}
 .home-event-actions {
   align-self:start;
   display:flex;
@@ -1353,6 +1357,7 @@ body {
   .home-story-polaroid > p { display:none; }
   .home-hero-art { min-height:185px; }
   .home-hero-art .art-slot, .home-persona-art { width:min(52vw,195px); min-height:185px; }
+  .home-persona-art.is-sleeping { width:min(88vw,330px); min-height:170px; }
   .home-resting-note { right:1px; bottom:4px; font-size:8px; }
   .home-event-actions { gap:4px; }
   .home-event-actions .sheet-trigger { min-width:0; }

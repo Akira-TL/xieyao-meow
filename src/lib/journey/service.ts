@@ -100,8 +100,35 @@ function journeyDurationMs(sequence: number, seed: string, timeScale: number): n
   return scaleMs(rangedMs(seed, 30 * MINUTE, 90 * MINUTE), timeScale);
 }
 
-function restDurationMs(seed: string, timeScale: number): number {
+function restDurationMs(seed: string, timeScale: number, sequence: number): number {
+  if (sequence <= 1) return scaleMs(rangedMs(`${seed}:rest`, 1 * MINUTE, 2 * MINUTE), timeScale);
+  if (sequence === 2) return scaleMs(rangedMs(`${seed}:rest`, 2 * MINUTE, 5 * MINUTE), timeScale);
+  if (sequence === 3) return scaleMs(rangedMs(`${seed}:rest`, 5 * MINUTE, 10 * MINUTE), timeScale);
   return scaleMs(rangedMs(`${seed}:rest`, 30 * MINUTE, 90 * MINUTE), timeScale);
+}
+
+function emptyPostcardFallback(seed: string, routeBias: string | null) {
+  const variants = [
+    {
+      headline: "这趟，包里没多一张票。",
+      body: "没有找到适合留下来源的问题。它没拿别的内容凑数，只把这次出门记进了旅行册。",
+    },
+    {
+      headline: "没带新问题回来。",
+      body: "这次没有能追溯到知乎原问题的新票根。空着回来，也比随便叼一张更像它。",
+    },
+    {
+      headline: "这一趟，先记个空白。",
+      body: "没有碰到值得记录成问题票根的内容。旅行照样算数，只是这一页暂时没有链接。",
+    },
+  ];
+  const selected = variants[hashString(`${seed}:empty-copy`) % variants.length]!;
+  return {
+    postcardHeadline: selected.headline,
+    postcardBody: routeBias
+      ? `${selected.body} 你塞进包里的纸条是「${routeBias}」。`
+      : selected.body,
+  };
 }
 
 function questionFromRow(row: Pick<JourneyRow, "question_title" | "question_url" | "question_summary" | "question_thumbnail_url">): JourneyQuestion | null {
@@ -151,8 +178,25 @@ export class JourneyService {
     for (let guard = 0; guard < 12; guard += 1) {
       let row = this.readCurrentRow(userId);
       if (!row) {
-        const userState = this.readUserState(userId);
+        let userState = this.readUserState(userId);
         const journeyCount = this.countJourneys(userId);
+        if (
+          journeyCount > 0 &&
+          journeyCount <= 3 &&
+          userState.queued_route_bias &&
+          userState.next_eligible_at !== null &&
+          userState.next_eligible_at > now
+        ) {
+          const warmReadyAt = now + restDurationMs(
+            `${userId}:warm-rest:${journeyCount}`,
+            this.timeScale,
+            journeyCount,
+          );
+          if (warmReadyAt < userState.next_eligible_at) {
+            this.setQueuedRouteBias(userId, userState.queued_route_bias, warmReadyAt);
+            userState = this.readUserState(userId);
+          }
+        }
         if (
           journeyCount > 0 &&
           userState.next_eligible_at !== null &&
@@ -227,7 +271,13 @@ export class JourneyService {
 
     const userState = this.readUserState(userId);
     if (userState.next_eligible_at !== null && userState.next_eligible_at > now) {
-      this.setQueuedRouteBias(userId, routeBias);
+      const warmedReadyAt = journeyCount <= 3
+        ? Math.min(
+            userState.next_eligible_at,
+            now + restDurationMs(`${userId}:queued:${journeyCount}`, this.timeScale, journeyCount),
+          )
+        : userState.next_eligible_at;
+      this.setQueuedRouteBias(userId, routeBias, warmedReadyAt);
       return this.homeProjection(userId, now);
     }
 
@@ -332,12 +382,13 @@ export class JourneyService {
         recentMemoryTopicRefs: this.readRecentMemoryTopicRefs(userId),
       });
     } catch {
+      const fallback = emptyPostcardFallback(row.plan_seed, row.route_bias);
       return {
         question: null,
         contentSource: "none",
         knowledgeSource: "none",
         sourceFetchedAt: now,
-        postcardBody: "这趟没碰到值得带回来的新问题，但它还是按时回家了。",
+        ...fallback,
       };
     }
   }
@@ -380,7 +431,7 @@ export class JourneyService {
     if (!row || row.materialized_at !== null) return;
 
     const question = result.question;
-    const headline = question ? "它叼回来一个问题。" : "它空着爪子回来了。";
+    const headline = result.postcardHeadline ?? (question ? "带回一张问题票。" : "这一页先空着。");
     const artifactSeed = result.returnArtifact ?? (question
       ? {
           type: "QUESTION_TICKET" as const,
@@ -391,7 +442,8 @@ export class JourneyService {
       : null);
     const artifactId = artifactSeed ? this.createId() : null;
     const memoryId = question ? this.createId() : null;
-    const nextEligibleAt = row.return_at + restDurationMs(row.plan_seed, this.timeScale);
+    const sequence = this.countJourneys(userId);
+    const nextEligibleAt = row.return_at + restDurationMs(row.plan_seed, this.timeScale, sequence);
 
     try {
       this.db.exec("BEGIN IMMEDIATE;");
@@ -505,15 +557,28 @@ export class JourneyService {
 
   private deferAfterCatchUp(userId: string, now: number, seed: string): void {
     this.ensureUserState(userId);
+    const sequence = this.countJourneys(userId);
     this.db.prepare(`
       UPDATE journey_user_state
       SET next_eligible_at = ?, queued_route_bias = NULL, updated_at = ?
       WHERE user_id = ?
-    `).run(now + restDurationMs(`${seed}:catch-up-cap`, this.timeScale), now, userId);
+    `).run(now + restDurationMs(`${seed}:catch-up-cap`, this.timeScale, sequence), now, userId);
   }
 
-  private setQueuedRouteBias(userId: string, routeBias: string | null): void {
+  private setQueuedRouteBias(
+    userId: string,
+    routeBias: string | null,
+    nextEligibleAt?: number,
+  ): void {
     this.ensureUserState(userId);
+    if (typeof nextEligibleAt === "number") {
+      this.db.prepare(`
+        UPDATE journey_user_state
+        SET queued_route_bias = ?, next_eligible_at = ?, updated_at = ?
+        WHERE user_id = ?
+      `).run(routeBias, nextEligibleAt, this.now(), userId);
+      return;
+    }
     this.db.prepare(`
       UPDATE journey_user_state SET queued_route_bias = ?, updated_at = ?
       WHERE user_id = ?
@@ -698,6 +763,15 @@ export class JourneyService {
         expires_at INTEGER,
         UNIQUE(user_id, type, source_event_id)
       );
+
+      UPDATE journey_logs
+      SET result_summary = '这次没有留下能追溯到知乎原问题的新票根。旅行照样发生，只是这一页没有链接。'
+      WHERE result_summary = '这趟没碰到值得带回来的新问题，但它还是按时回家了。';
+
+      UPDATE journey_postcards
+      SET headline = '这一页先空着。',
+          body = '这次没有留下能追溯到知乎原问题的新票根。旅行照样发生，只是这一页没有链接。'
+      WHERE body = '这趟没碰到值得带回来的新问题，但它还是按时回家了。';
     `);
   }
 }

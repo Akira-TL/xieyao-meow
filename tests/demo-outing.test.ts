@@ -134,8 +134,8 @@ describe("server Journey", () => {
     const first = await service.start(userId, "oauth-a", "多看看 AI");
     now = first.journey!.returnAt;
     const firstReturned = await service.getProjection(userId, "oauth-a");
-    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeGreaterThanOrEqual(30 * 60_000);
-    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeLessThanOrEqual(90 * 60_000);
+    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeGreaterThanOrEqual(60_000);
+    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeLessThanOrEqual(2 * 60_000);
 
     const resting = await service.archive(userId, "oauth-a");
     expect(resting).toMatchObject({ state: "AT_HOME", resting: true });
@@ -224,7 +224,8 @@ describe("server Journey", () => {
     expect(returned.journey?.question).toBeNull();
     expect(returned.journey?.artifact).toBeNull();
     expect(returned.journey?.contentSource).toBe("none");
-    expect(returned.journey?.postcard?.body).toContain("按时回家");
+    expect(returned.journey?.postcard?.body).not.toContain("按时回家");
+    expect(returned.journey?.postcard?.body.length).toBeGreaterThan(10);
     service.close();
   });
 });

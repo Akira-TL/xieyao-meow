@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getAccountStore } from "@/lib/auth/runtime";
+import { withHumanizerZh } from "@/lib/copy/humanizer";
 import { buildComposition, buildPersona } from "@/lib/persona";
 import { SocialDialogueService, type SocialAgent } from "@/lib/social";
 import {
@@ -37,6 +38,92 @@ function stableTieBreak(seed: string): number {
   return hash >>> 0;
 }
 
+type JourneyNarrative = { headline: string; body: string };
+
+function fallbackJourneyNarrative(input: {
+  planSeed: string;
+  routeBias: string | null;
+  actor: SocialAgent | null;
+  questionTitle?: string;
+  encounterName?: string | null;
+}): JourneyNarrative {
+  if (input.encounterName && input.questionTitle) {
+    return {
+      headline: `路上碰见了 ${input.encounterName}。`,
+      body: `它们在「${input.questionTitle}」前停在了同一个地方。你塞的纸条是「${input.routeBias ?? "随便逛"}」，但这场相遇不是你安排的。`,
+    };
+  }
+  if (input.questionTitle) {
+    const variants = [
+      { headline: "包里多了一张问题票。", body: `它在「${input.questionTitle}」前停了下来。没有替你回答，只把原问题和自己的停留记进了旅行册。` },
+      { headline: "这题，被它留了下来。", body: `「${input.questionTitle}」让它多停了一会儿。纸条只给了方向，真正停在哪一题是它自己选的。` },
+      { headline: "它给这一题留了位置。", body: `这趟留下的是「${input.questionTitle}」。它没替你下结论，只保留了原问题和这次停留。` },
+    ];
+    return variants[stableTieBreak(`${input.planSeed}:question-copy`) % variants.length]!;
+  }
+  const title = input.actor?.persona.certifiedTitle;
+  const variants = [
+    { headline: "这趟，包里没多一张票。", body: `没有新的知乎原问题被收进旅行册。${title ? `以「${title}」的脾气，它宁可空一格，也不拿无来源的东西凑数。` : "空一格，也比拿无来源的东西凑数强。"}` },
+    { headline: "这一页先空着。", body: `这次没有留下能追溯到知乎原问题的新票根。你给的是「${input.routeBias ?? "随便逛"}」，结果由它自己承担。` },
+    { headline: "没捡到新票根。", body: "旅行照样发生了，只是没有新的公开问题满足收录条件。这一趟只留下出门记录。" },
+  ];
+  return variants[stableTieBreak(`${input.planSeed}:empty-copy`) % variants.length]!;
+}
+
+function parseJourneyNarrative(raw: string, fallback: JourneyNarrative): JourneyNarrative {
+  const match = raw.replace(/```(?:json)?/gi, "").match(/\{[\s\S]*\}/);
+  if (!match) return fallback;
+  try {
+    const parsed = JSON.parse(match[0]) as { headline?: unknown; body?: unknown };
+    const headline = typeof parsed.headline === "string" ? parsed.headline.trim().slice(0, 36) : "";
+    const body = typeof parsed.body === "string" ? parsed.body.trim().slice(0, 180) : "";
+    return headline && body ? { headline, body } : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+async function createJourneyNarrative(input: {
+  gateway: ReturnType<typeof createZhihuGatewayFromEnv>;
+  planSeed: string;
+  routeBias: string | null;
+  actor: SocialAgent | null;
+  questionTitle?: string;
+  questionSummary?: string;
+  encounterName?: string | null;
+}): Promise<JourneyNarrative> {
+  const fallback = fallbackJourneyNarrative(input);
+  if (!input.actor) return fallback;
+  const facts = [
+    `纸条方向：${input.routeBias ?? "随便逛"}`,
+    input.questionTitle ? `确实带回的知乎原问题：${input.questionTitle}` : "这趟没有可收录的知乎原问题",
+    input.questionSummary ? `原问题摘要：${input.questionSummary.slice(0, 420)}` : "",
+    input.encounterName ? `途中确实遇见了：${input.encounterName}` : "途中没有已完成的 Shared Encounter",
+  ].filter(Boolean).join("\n");
+  const prompt = [
+    "你是谢邀喵 Journey 的 Persona 表达层，只负责把已给事实写成一张短旅途札记。",
+    "绝对不能新增地点、事件、人物、观点或知乎内容；没有问题就明确允许空手，不要假装看到了什么。",
+    "不要使用这些句式或近似套话：你没叫它回来、它还是按时回家了、值得带回来、今天没碰到值得带回来的新问题、按时回来。",
+    "口吻要像这只猫自己留下的便签，不像系统状态提示。标题 6–18 个中文字符；正文 30–80 个中文字符。",
+    `人格头衔：${input.actor.persona.certifiedTitle}`,
+    `性格：${input.actor.persona.personality.join("、")}`,
+    `口头禅：${input.actor.persona.catchphrase}`,
+    `回答风格：${input.actor.persona.answerStyle.tone}；${input.actor.persona.answerStyle.length}；${input.actor.persona.answerStyle.density}`,
+    "事实边界：",
+    facts,
+    '只输出 JSON：{"headline":"...","body":"..."}',
+  ].join("\n\n");
+  try {
+    const result = await input.gateway.askZhida({
+      model: "zhida-fast-1p5",
+      messages: [{ role: "user", content: withHumanizerZh(prompt) }],
+    });
+    return parseJourneyNarrative(result.content, fallback);
+  } catch {
+    return fallback;
+  }
+}
+
 const ENCOUNTER_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 function shouldTryEncounter(planSeed: string, routeBias: string | null): boolean {
@@ -55,17 +142,6 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
 }) => {
   const gateway = createZhihuGatewayFromEnv();
   const fetchedAt = Date.now();
-  const hotItems = await gateway.getHotList(30);
-  const questions = hotItems.filter((item) => isQuestion(item.url));
-  if (!questions.length) {
-    return {
-      question: null,
-      contentSource: "none",
-      knowledgeSource: "none",
-      sourceFetchedAt: fetchedAt,
-      postcardBody: "今天的公开候选里没有合适的问题，它转了一圈就回来了。",
-    };
-  }
 
   let interests: string[] = [];
   let actor: SocialAgent | null = null;
@@ -84,6 +160,29 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   } catch {
     interests = [];
     actor = null;
+  }
+
+  let questions: Awaited<ReturnType<typeof gateway.getHotList>> = [];
+  try {
+    questions = (await gateway.getHotList(30)).filter((item) => isQuestion(item.url));
+  } catch {
+    questions = [];
+  }
+  if (!questions.length) {
+    const narrative = await createJourneyNarrative({
+      gateway,
+      planSeed,
+      routeBias,
+      actor,
+    });
+    return {
+      question: null,
+      contentSource: "none",
+      knowledgeSource: "none",
+      sourceFetchedAt: fetchedAt,
+      postcardHeadline: narrative.headline,
+      postcardBody: narrative.body,
+    };
   }
 
   const interestTerms = interests.flatMap((interest) => INTEREST_TERMS[interest] ?? []);
@@ -166,6 +265,16 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     }
   }
 
+  const narrative = await createJourneyNarrative({
+    gateway,
+    planSeed,
+    routeBias,
+    actor,
+    questionTitle: selected.title,
+    questionSummary: selected.summary,
+    encounterName,
+  });
+
   return {
     question: {
       title: selected.title,
@@ -176,9 +285,8 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     contentSource: "live",
     knowledgeSource: "template",
     sourceFetchedAt: fetchedAt,
-    postcardBody: encounterName
-      ? `它在「${selected.title}」前停了一会儿，还碰见了 ${encounterName}。你不在场，但两只 Persona 已经把这一幕聊完了。`
-      : `它在「${selected.title}」前停了一会儿。没有替你下结论，只觉得这题值得叼回来。`,
+    postcardHeadline: narrative.headline,
+    postcardBody: narrative.body,
     ...(returnArtifact ? { returnArtifact } : {}),
   };
 };
