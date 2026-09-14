@@ -319,8 +319,9 @@ export function LiveRevealPanel() {
       <div className="reveal-main">
         <PetStage
           name="本喵"
+          persona={snapshot?.persona ?? fallback}
           species={`${species} · ${secondary}`}
-          slot="persona/reveal-main"
+          state="base"
         />
         <blockquote>“{catchphrase}”</blockquote>
       </div>

@@ -15,6 +15,7 @@ import {
   isDemoActivationStage,
   type DemoActivationStage,
 } from "./activation";
+import { ArtSlot, PersonaArt } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import {
   LIVE_EXPERIENCE_STORAGE_KEY,
@@ -297,6 +298,7 @@ export function FirstMatchInteraction() {
   const [index, setIndex] = useState(0);
   const candidate = candidates[index % candidates.length];
   const selfPersona = snapshot?.persona;
+  const playerPersona = selfPersona ?? DEMO_FIXTURE.persona;
   const selfInterests = selfPersona?.interests ?? DEMO_FIXTURE.persona.interests;
   const candidateInterestSet = new Set<string>(candidate.interests);
   const sharedInterests = selfInterests.filter((interest: string) => candidateInterestSet.has(interest));
@@ -321,7 +323,7 @@ export function FirstMatchInteraction() {
 
       <div className="match-stage-grid">
         <div className="match-persona">
-          <div className="match-art-slot" data-art-slot="persona/self-match">本喵</div>
+          <PersonaArt alt="本喵第一次遇见候选 Persona" className="match-self-persona-art" persona={playerPersona} state="thinking" />
           <strong>{selfPersona?.certifiedTitle ?? DEMO_FIXTURE.persona.title}</strong>
           <span>{selfStyle}</span>
           <q>{selfPersona?.catchphrase ?? DEMO_FIXTURE.persona.catchphrase}</q>
@@ -415,6 +417,7 @@ export function EncounterPlayback() {
   const candidate = DEMO_FIXTURE.residents.find((resident) => resident.id === residentId) ?? DEMO_FIXTURE.residents[0];
   const topic = experience?.question ?? questionSnapshot?.question ?? DEMO_FIXTURE.encounter.topic;
   const selfPersona = snapshot?.persona ?? experience?.persona;
+  const playerPersona = selfPersona ?? DEMO_FIXTURE.persona;
   const selfTitle = selfPersona?.certifiedTitle ?? DEMO_FIXTURE.persona.title;
   const selfDescriptor = selfPersona?.personality[0] ?? DEMO_FIXTURE.persona.archetype;
   const selfInterests = selfPersona?.interests ?? DEMO_FIXTURE.persona.interests;
@@ -468,7 +471,7 @@ export function EncounterPlayback() {
 
       <div className="encounter-actors">
         <div className="encounter-actor">
-          <div className="encounter-art" data-art-slot="persona/self-encounter">本喵</div>
+          <PersonaArt alt="本喵正在和社区居民对话" className="encounter-playback-self-art" persona={playerPersona} state="talking" />
           <strong>{selfTitle}</strong>
           <span>{selfDescriptor}</span>
         </div>
@@ -519,6 +522,26 @@ export function EncounterPlayback() {
       <button className="match-switch" onClick={() => router.push("/encounter/first?phase=match")} type="button">
         再看一个
       </button>
+    </div>
+  );
+}
+
+export function ShareRelationshipVisual() {
+  const snapshot = usePersonaSnapshot();
+  const playerPersona = snapshot?.persona ?? DEMO_FIXTURE.persona;
+  const [residentName, setResidentName] = useState<string>(DEMO_FIXTURE.match.candidate.displayName);
+
+  useEffect(() => {
+    const residentId = window.sessionStorage.getItem(SELECTED_RESIDENT_STORAGE_KEY);
+    const resident = DEMO_FIXTURE.residents.find((item) => item.id === residentId);
+    if (resident) setResidentName(resident.displayName);
+  }, []);
+
+  return (
+    <div className="share-live-visual">
+      <PersonaArt alt="本喵完成第一次相遇" className="share-player-persona" persona={playerPersona} state="returned" />
+      <span className="share-live-mark">×</span>
+      <ArtSlot name="share/first-resident" label={residentName} aspect="portrait" className="share-resident-art" />
     </div>
   );
 }

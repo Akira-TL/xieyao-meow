@@ -4,8 +4,11 @@ import Diversity3RoundedIcon from "@mui/icons-material/Diversity3Rounded";
 import ExploreRoundedIcon from "@mui/icons-material/ExploreRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+
+import { resolvePersonaArt, type PersonaArtState, type PlayerPersona } from "@/lib/persona";
 
 export type AppSection = "home" | "explore" | "encounter" | "atlas";
 
@@ -36,8 +39,11 @@ export function DemoPage({
   scene?: "default" | "landing" | "casting" | "reveal" | "encounter" | "archive";
   activation?: boolean;
 }) {
+  const usesTheatreScenery = scene === "landing" || scene === "casting" || scene === "reveal" || scene === "encounter";
+
   return (
     <main className={`theatre-page theatre-page--${scene}${activation ? " theatre-page--activation" : ""}`}>
+      {usesTheatreScenery ? <div className="theatre-scene-art" aria-hidden="true" /> : null}
       <div className="theatre-grain" aria-hidden="true" />
       <div className={`relative z-10 mx-auto w-full ${width}`}>{children}</div>
     </main>
@@ -170,6 +176,39 @@ export function ArtSlot({
   );
 }
 
+export function PersonaArt({
+  persona,
+  state = "base",
+  alt,
+  aspect = "portrait",
+  className = "",
+  priority = false,
+}: {
+  persona: Pick<PlayerPersona, "visualVariant">;
+  state?: PersonaArtState;
+  alt: string;
+  aspect?: "portrait" | "square" | "wide" | "avatar";
+  className?: string;
+  priority?: boolean;
+}) {
+  return (
+    <div
+      className={`persona-art persona-art--${aspect} ${className}`}
+      data-persona-state={state}
+      data-persona-variant={persona.visualVariant}
+    >
+      <Image
+        alt={alt}
+        className="persona-art-image"
+        fill
+        priority={priority}
+        sizes={aspect === "avatar" ? "88px" : aspect === "wide" ? "(max-width: 760px) 92vw, 600px" : "(max-width: 760px) 70vw, 360px"}
+        src={resolvePersonaArt(persona, state)}
+      />
+    </div>
+  );
+}
+
 export function PetStage({
   name,
   species,
@@ -177,6 +216,8 @@ export function PetStage({
   size = "large",
   demoResident = false,
   slot = "persona/self",
+  persona,
+  state = "base",
 }: {
   name?: string;
   species: string;
@@ -184,10 +225,22 @@ export function PetStage({
   size?: "small" | "large";
   demoResident?: boolean;
   slot?: string;
+  persona?: Pick<PlayerPersona, "visualVariant">;
+  state?: PersonaArtState;
 }) {
   return (
     <div className={`pet-stage pet-stage--${size}`}>
-      <ArtSlot name={slot} label={name ?? species} aspect={size === "large" ? "portrait" : "avatar"} />
+      {persona ? (
+        <PersonaArt
+          alt={name ?? species}
+          aspect={size === "large" ? "portrait" : "avatar"}
+          persona={persona}
+          priority={size === "large"}
+          state={state}
+        />
+      ) : (
+        <ArtSlot name={slot} label={name ?? species} aspect={size === "large" ? "portrait" : "avatar"} />
+      )}
       {name ? <p className="pet-stage-name">{name}</p> : null}
       <p className="pet-stage-species">{species}</p>
       {title ? <p className="pet-stage-title">{title}</p> : null}

@@ -5,7 +5,7 @@ import {
   PublicHeader,
 } from "@/features/demo/components";
 import { DEMO_FIXTURE } from "@/features/demo/fixtures";
-import { ShareSceneButton } from "@/features/demo/interaction-client";
+import { ShareRelationshipVisual, ShareSceneButton } from "@/features/demo/interaction-client";
 
 export default function SharePage() {
   return (
@@ -17,7 +17,7 @@ export default function SharePage() {
 
         <div className="share-relationship-visual">
           <div className="share-actors">
-            <ArtSlot name="share/first-relationship" label="两只 Persona 击掌 / 合照" aspect="wide" />
+            <ShareRelationshipVisual />
           </div>
           <div className="share-polaroid">
             <ArtSlot name="share/polaroid" label="第一段关系纪念照" aspect="polaroid" />

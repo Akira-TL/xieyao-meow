@@ -1,4 +1,4 @@
-import type { Persona, ZhihuComposition } from "@/lib/persona";
+import type { PlayerPersona, ZhihuComposition } from "@/lib/persona";
 import type {
   GetUserProfileInput,
   UserProfile,
@@ -38,7 +38,7 @@ export interface AnswerExperience {
   mode: "live" | "fallback";
   generatedAt: number;
   composition: ZhihuComposition;
-  persona: Persona;
+  persona: PlayerPersona;
   question: QuestionCandidate;
   knowledge: KnowledgeContext;
   card: AnswerCard;

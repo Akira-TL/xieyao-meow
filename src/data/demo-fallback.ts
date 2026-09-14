@@ -23,7 +23,8 @@ export const DEMO_FALLBACK = {
     }
   },
   "persona": {
-    "species": "英短",
+    "species": "黑猫",
+    "visualVariant": "engineer-blue",
     "appearance": [
       "工程护目镜",
       "齿轮吊牌"

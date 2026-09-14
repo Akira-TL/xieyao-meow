@@ -48,7 +48,8 @@ const fallback: AnswerExperience = {
     sourceCounts: { contents: 0, followees: 0, collections: 0, favlists: 0 },
   },
   persona: {
-    species: "中华田园猫",
+    species: "黑猫",
+    visualVariant: "traveler-blue",
     appearance: ["问号吊牌"],
     personality: ["杂食"],
     catchphrase: "谢邀，这题本喵恰好路过。",
@@ -150,7 +151,8 @@ describe("AnswerExperienceService", () => {
     const experience = await service.create({ cacheKey: "demo-user" });
 
     expect(experience.mode).toBe("live");
-    expect(experience.persona.species).toBe("英短");
+    expect(experience.persona.species).toBe("黑猫");
+    expect(experience.persona.visualVariant).toBe("engineer-blue");
     expect(experience.question.url).toBe("https://www.zhihu.com/question/123");
     expect(experience.knowledge).toEqual({
       source: "zhihu-question-answers+zhida",

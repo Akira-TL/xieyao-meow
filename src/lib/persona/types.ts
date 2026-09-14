@@ -9,6 +9,7 @@ export type InterestName =
 
 export type WritingLength = "short" | "medium" | "long";
 export type Chronotype = "夜猫子" | "早起鸟" | "日间活跃" | "未知";
+export type PersonaVisualVariant = "engineer-blue" | "analyst-black" | "thinker-red" | "observer-canvas" | "traveler-blue";
 
 export interface InterestScore {
   name: InterestName;
@@ -44,4 +45,9 @@ export interface Persona {
     density: "light" | "balanced" | "dense";
   };
   easterEggs: string[];
+}
+
+export interface PlayerPersona extends Persona {
+  species: "黑猫";
+  visualVariant: PersonaVisualVariant;
 }

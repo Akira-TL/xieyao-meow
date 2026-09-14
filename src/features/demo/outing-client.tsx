@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { ArtSlot, GrowthStrip, PaperCard } from "./components";
+import { GrowthStrip, PaperCard, PersonaArt } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import { BottomSheet } from "./interaction-client";
 import {
@@ -70,8 +70,8 @@ export function DemoOutingHome() {
   if (!ready) {
     return <div className="outing-loading">正在看它在不在家……</div>;
   }
-  if (outing.state === "PREPARING") return <PreparingStage routeBias={outing.routeBias} />;
-  if (outing.state === "AWAY") return <AwayStage routeBias={outing.routeBias} />;
+  if (outing.state === "PREPARING") return <PreparingStage personaSnapshot={personaSnapshot} routeBias={outing.routeBias} />;
+  if (outing.state === "AWAY") return <AwayStage personaSnapshot={personaSnapshot} routeBias={outing.routeBias} />;
   if (outing.state === "RETURNED") {
     return (
       <ReturnedStage
@@ -108,6 +108,7 @@ function AtHomeStage({
     thumbnailUrl: "",
   };
   const composition = personaSnapshot?.composition;
+  const playerPersona = personaSnapshot?.persona ?? fixture.persona;
   const growth = {
     knowledge: Math.max(1, Math.min(5, composition?.interests.length ?? fixture.home.growth.knowledge)),
     expression: Math.max(1, Math.min(5, Math.ceil((composition?.sourceCounts.contents ?? 10) / 12))),
@@ -123,7 +124,13 @@ function AtHomeStage({
       </div>
 
       <div className="home-hero-art">
-        <ArtSlot name="home/last-night-gear" label="昨晚齿轮来过 / 房间场景" aspect="wide" />
+        <PersonaArt
+          alt="本喵在窝里回想昨晚的对话"
+          aspect="wide"
+          className="home-persona-art"
+          persona={playerPersona}
+          state="thinking"
+        />
         <span className="home-resting-note">吵完了。<br />但还是好朋友。</span>
       </div>
 
@@ -145,11 +152,19 @@ function AtHomeStage({
   );
 }
 
-function PreparingStage({ routeBias }: { routeBias: string | null }) {
+function PreparingStage({
+  routeBias,
+  personaSnapshot,
+}: {
+  routeBias: string | null;
+  personaSnapshot: LivePersonaSnapshot | null;
+}) {
+  const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
   return (
     <div className="outing-empty-stage">
       <p className="stage-caption">BACKSTAGE / PREPARING</p>
       <h1>它在后台<br />收东西。</h1>
+      <PersonaArt alt="本喵收拾出门装备" className="outing-state-persona" persona={playerPersona} state="thinking" />
       <PaperCard className="outing-note-card">
         <span>今天的纸条</span>
         <strong>「{routeBias ?? "随便逛"}」</strong>
@@ -159,12 +174,20 @@ function PreparingStage({ routeBias }: { routeBias: string | null }) {
   );
 }
 
-function AwayStage({ routeBias }: { routeBias: string | null }) {
+function AwayStage({
+  routeBias,
+  personaSnapshot,
+}: {
+  routeBias: string | null;
+  personaSnapshot: LivePersonaSnapshot | null;
+}) {
+  const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
   return (
     <div className="outing-empty-stage outing-away-stage">
       <p className="stage-caption">ACT / AWAY</p>
       <h1>它不在。</h1>
       <p>大概又跑去看别人为什么吵架了。</p>
+      <PersonaArt alt="本喵正在外出探索" className="outing-state-persona" persona={playerPersona} state="walking" />
       <PaperCard className="outing-note-card">
         <span>桌上压着一张纸</span>
         <strong>“{DEMO_FIXTURE.outing.note}”</strong>
@@ -194,6 +217,7 @@ function ReturnedStage({
     summary: "",
     thumbnailUrl: "",
   };
+  const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
   const interests = personaSnapshot?.persona.interests.slice(0, 2) ?? artifact.places;
   const thought = question.summary?.trim()
     ? `${question.summary.replace(/\s+/g, " ").trim().slice(0, 72)}${question.summary.length > 72 ? "…" : ""}`
@@ -206,6 +230,7 @@ function ReturnedStage({
         <h1>它回来了。</h1>
         <p>而且好像有话要说。</p>
       </div>
+      <PersonaArt alt="本喵带着旅途札记回到窝里" className="returned-persona-art" persona={playerPersona} state="returned" />
       <PaperCard className="returned-artifact">
         <span>{artifact.label}</span>
         <h2>{question.title}</h2>

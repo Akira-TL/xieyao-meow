@@ -8,7 +8,7 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import Link from "next/link";
 
 import { DemoFlowButton } from "../client";
-import { ArtSlot, PaperCard } from "../components";
+import { ArtSlot, PaperCard, PersonaArt } from "../components";
 import { DEMO_FIXTURE } from "../fixtures";
 import { useLivePersonaSnapshot, useLiveQuestionSnapshot } from "../live-client";
 
@@ -28,6 +28,7 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
   const personaSnapshot = useLivePersonaSnapshot();
   const questionSnapshot = useLiveQuestionSnapshot();
   const primaryInterest = personaSnapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.interests[0];
+  const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
   const liveQuestions = questionSnapshot?.questions?.length
     ? questionSnapshot.questions
     : questionSnapshot?.question
@@ -49,7 +50,11 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
       </div>
 
       <div className="explore-hero-art">
-        <ArtSlot name={appMode ? "explore/hero-journey" : "explore/public-world"} label={appMode ? "本喵背包出发 / 知乎入口" : "多个 Persona 在舞台相遇"} aspect="wide" />
+        {appMode ? (
+          <PersonaArt alt="本喵背着包出门逛知乎" aspect="wide" className="explore-persona-art" persona={playerPersona} state="walking" />
+        ) : (
+          <ArtSlot name="explore/public-world" label="多个 Persona 在舞台相遇" aspect="wide" />
+        )}
       </div>
 
       <div className="explore-cards">
@@ -94,6 +99,7 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
   const personaSnapshot = useLivePersonaSnapshot();
   const questionSnapshot = useLiveQuestionSnapshot();
   const persona = personaSnapshot?.persona;
+  const playerPersona = persona ?? DEMO_FIXTURE.persona;
   const selfInterests = persona?.interests ?? DEMO_FIXTURE.persona.interests;
   const question = questionSnapshot?.question ?? {
     title: DEMO_FIXTURE.encounter.topic.title,
@@ -123,7 +129,7 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
           <a href={question.url} rel="noreferrer" target="_blank">查看知乎原问题 <OpenInNewRoundedIcon fontSize="inherit" /></a>
         </PaperCard>
         <div className="daily-dialogue-stage">
-          <ArtSlot name="encounter/daily-self" label={selfTitle} aspect="portrait" />
+          <PersonaArt alt={selfTitle} className="encounter-self-art" persona={playerPersona} state="talking" />
           <div className="daily-dialogue-lines">
             <p><b>本喵</b>：{persona?.catchphrase ?? DEMO_FIXTURE.persona.catchphrase} 先别急着站队，这题要先看谁在承担真正的代价。</p>
             <p className="is-other"><b>{latest.displayName}</b>：{latest.catchphrase} 你负责拆结构，我先问普通人的感受是不是被漏掉了。</p>
@@ -143,7 +149,7 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
         <p className="stage-caption">MORE ENCOUNTERS · PERSONA RELATIONSHIPS</p>
         <h1>最近，<br />它<span>遇见</span>了<br />这些有趣的灵魂。</h1>
         <p>每段关系都从共同兴趣、表达差异和一个真实问题开始。</p>
-        <ArtSlot name="encounter/audience-hero" label="本喵坐在剧场看相遇" aspect="wide" />
+        <PersonaArt alt="本喵坐在剧场回看最近的相遇" aspect="wide" className="encounter-audience-persona" persona={playerPersona} state="thinking" />
       </div>
 
       <PaperCard className="latest-encounter-card">
@@ -186,6 +192,7 @@ export function LiveJourneyDetail() {
     thumbnailUrl: "",
   };
   const primaryInterest = personaSnapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.interests[0];
+  const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
   const summary = compact(question.summary, 180);
 
   return (
@@ -210,7 +217,7 @@ export function LiveJourneyDetail() {
         </PaperCard>
 
         <div className="journey-art-and-topic">
-          <ArtSlot name="journey/persona-travelling" label="本喵旅途中" aspect="portrait" />
+          <PersonaArt alt="本喵旅途中" className="journey-persona-art" persona={playerPersona} state="walking" />
           <PaperCard className="journey-topic-paper">
             <span>带回的问题 · 知乎</span>
             <h2>{question.title}</h2>
@@ -258,6 +265,7 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
   const personaSnapshot = useLivePersonaSnapshot();
   const questionSnapshot = useLiveQuestionSnapshot();
   const persona = personaSnapshot?.persona;
+  const playerPersona = persona ?? DEMO_FIXTURE.persona;
   const selfInterests = persona?.interests ?? DEMO_FIXTURE.persona.interests;
   const residentIndex = relationshipId === "neighbor" ? 1 : 0;
   const candidate = DEMO_FIXTURE.residents[residentIndex] ?? DEMO_FIXTURE.residents[0];
@@ -282,7 +290,7 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
 
       <div className="relationship-pair-stage">
         <div>
-          <ArtSlot name="relationship/self" label={selfTitle} aspect="portrait" />
+          <PersonaArt alt={selfTitle} className="relationship-self-art" persona={playerPersona} state="thinking" />
           <strong>{selfTitle}</strong><span>{selfDescriptor} · {selfInterests.slice(0, 2).join(" × ")}</span>
         </div>
         <i>♡</i>
@@ -349,6 +357,7 @@ export function LiveAtlasSection() {
   const persona = snapshot?.persona;
   const composition = snapshot?.composition;
   const fallback = DEMO_FIXTURE.persona;
+  const playerPersona = persona ?? fallback;
   const species = persona?.species ?? fallback.species;
   const title = persona?.certifiedTitle ?? fallback.title;
   const catchphrase = persona?.catchphrase ?? fallback.catchphrase;
@@ -374,7 +383,7 @@ export function LiveAtlasSection() {
 
       <PaperCard className="atlas-persona-card">
         <span>当前人格 · CURRENT PERSONA</span>
-        <ArtSlot name="atlas/current-persona" label={`当前人格 / ${species}`} aspect="portrait" />
+        <PersonaArt alt={`当前人格 / ${species}`} className="atlas-current-persona-art" persona={playerPersona} state="base" />
         <h2>{species}</h2>
         <h3>{(persona?.personality[0] ?? fallback.archetype).toUpperCase()} · {title}</h3>
         <blockquote>“{catchphrase}”</blockquote>

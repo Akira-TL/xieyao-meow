@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildComposition, buildPersona } from "@/lib/persona";
+import { buildComposition, buildPersona, resolvePersonaArt } from "@/lib/persona";
 import type { UserProfile } from "@/lib/zhihu";
 
 const HOUR = 60 * 60;
@@ -103,12 +103,22 @@ describe("PersonaEngine", () => {
     const composition = buildComposition(profile);
     const persona = buildPersona(composition);
 
-    expect(persona.species).toBe("英短");
+    expect(persona.species).toBe("黑猫");
+    expect(persona.visualVariant).toBe("engineer-blue");
     expect(persona.appearance).toContain("圆框眼镜");
     expect(persona.personality).toContain("工程脑");
     expect(persona.catchphrase.length).toBeGreaterThan(5);
     expect(persona.interests[0]).toBe("AI 与数码");
     expect(persona.answerStyle.length).toBe("short");
     expect(persona.easterEggs.some((item) => item.includes("收藏夹"))).toBe(true);
+    expect(resolvePersonaArt(persona, "walking")).toBe("/art/personas/generated-v1/01_engineer_blue/walking.png");
+  });
+
+  it("keeps the visual mapping deterministic across archetypes", () => {
+    const base = buildComposition(profile);
+    expect(buildPersona({ ...base, primaryInterest: "科学" }).visualVariant).toBe("analyst-black");
+    expect(buildPersona({ ...base, primaryInterest: "文化与生活", writingLength: "long" }).visualVariant).toBe("thinker-red");
+    expect(buildPersona({ ...base, primaryInterest: "文化与生活", writingLength: "medium" }).visualVariant).toBe("observer-canvas");
+    expect(buildPersona({ ...base, primaryInterest: "综合" }).visualVariant).toBe("traveler-blue");
   });
 });

@@ -1,10 +1,11 @@
 import type { UserProfile } from "@/lib/zhihu";
+import { resolvePersonaVisualVariant } from "./art";
 
 import type {
   Chronotype,
   InterestName,
   InterestScore,
-  Persona,
+  PlayerPersona,
   WritingLength,
   ZhihuComposition,
 } from "./types";
@@ -34,52 +35,52 @@ const INTEREST_KEYWORDS: Record<Exclude<InterestName, "综合">, string[]> = {
   文化与生活: ["电影", "文学", "历史", "音乐", "旅行", "生活", "摄影", "艺术", "美食"],
 };
 
-const PERSONA_PRESETS: Record<InterestName, Omit<Persona, "interests" | "chronotype" | "answerStyle" | "easterEggs">> = {
+const PERSONA_PRESETS: Record<InterestName, Omit<PlayerPersona, "interests" | "chronotype" | "answerStyle" | "easterEggs" | "visualVariant">> = {
   "AI 与数码": {
-    species: "英短",
-    appearance: ["圆框眼镜", "银灰短毛", "发光终端项圈"],
+    species: "黑猫",
+    appearance: ["炭黑短毛", "圆框眼镜", "知乎蓝工具包"],
     personality: ["工程脑", "好奇", "爱抬杠"],
     catchphrase: "这个问题，我先从底层逻辑扒两层。",
     certifiedTitle: "知乎盐选级工具猫",
   },
   宠物: {
-    species: "橘猫",
-    appearance: ["橘色虎斑", "肉垫徽章", "零食挂包"],
+    species: "黑猫",
+    appearance: ["炭黑短毛", "肉垫徽章", "帆布零食挂包"],
     personality: ["亲人", "护短", "嘴馋"],
     catchphrase: "先别急，本喵闻一闻这个问题。",
     certifiedTitle: "铲屎官认证 · 资深纸箱测评员",
   },
   科学: {
-    species: "布偶",
-    appearance: ["实验护目镜", "白色长毛", "数据板尾牌"],
+    species: "黑猫",
+    appearance: ["炭黑短毛", "窄框眼镜", "数据夹"],
     personality: ["考据党", "冷静", "证据优先"],
     catchphrase: "先看证据，再决定要不要炸毛。",
     certifiedTitle: "同行评审级严谨猫",
   },
   职场与创业: {
-    species: "狸花猫",
-    appearance: ["工牌项圈", "深色虎斑", "便签耳夹"],
+    species: "黑猫",
+    appearance: ["炭黑短毛", "工牌领饰", "深色工具包"],
     personality: ["现实派", "行动快", "会算账"],
     catchphrase: "可以画饼，但先把账算明白。",
     certifiedTitle: "工位巡视委员会主任",
   },
   游戏: {
-    species: "暹罗猫",
-    appearance: ["像素护目镜", "手柄吊坠", "深色耳尖"],
+    species: "黑猫",
+    appearance: ["炭黑短毛", "像素护目镜", "手柄吊坠"],
     personality: ["胜负欲", "反应快", "梗很多"],
     catchphrase: "这题先过一遍机制，再开打。",
     certifiedTitle: "连续在线但拒绝承认熬夜",
   },
   文化与生活: {
-    species: "三花猫",
-    appearance: ["胶片相机挂件", "三色花纹", "票根胸牌"],
+    species: "黑猫",
+    appearance: ["炭黑短毛", "胶片相机挂件", "帆布斜挎包"],
     personality: ["感性", "会观察", "叙事欲强"],
     catchphrase: "这事儿有点意思，容本喵展开讲讲。",
     certifiedTitle: "生活观察局常驻猫员",
   },
   综合: {
-    species: "中华田园猫",
-    appearance: ["杂色短毛", "问号吊牌", "百宝袋"],
+    species: "黑猫",
+    appearance: ["炭黑短毛", "问号吊牌", "知乎蓝旅行包"],
     personality: ["杂食", "适应力强", "什么都想看一眼"],
     catchphrase: "谢邀，这题本喵恰好路过。",
     certifiedTitle: "知乎在逃百科猫",
@@ -213,13 +214,14 @@ export function buildComposition(profile: UserProfile): ZhihuComposition {
   };
 }
 
-export function buildPersona(composition: ZhihuComposition): Persona {
+export function buildPersona(composition: ZhihuComposition): PlayerPersona {
   const preset = PERSONA_PRESETS[composition.primaryInterest];
   const density = composition.writingLength === "long" ? "dense" : composition.writingLength === "short" ? "light" : "balanced";
   const tone = composition.influenceLevel >= 60 ? "笃定吐槽" : composition.primaryInterest === "科学" ? "冷静考据" : "理性玩梗";
 
   return {
     ...preset,
+    visualVariant: resolvePersonaVisualVariant(composition),
     interests: composition.interests.slice(0, 3).map((item) => item.name),
     chronotype: composition.chronotype,
     answerStyle: {

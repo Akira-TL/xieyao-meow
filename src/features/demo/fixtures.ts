@@ -4,7 +4,8 @@ import { DEMO_FALLBACK } from "@/data/demo-fallback";
 const selfPersona = {
   id: "demo-self",
   displayName: "本喵",
-  species: "英短",
+  species: "黑猫",
+  visualVariant: "engineer-blue" as const,
   archetype: "工程脑",
   title: "盐选级工具猫",
   catchphrase: "别急，让本喵先拆成三个模块。",
