@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { resolveP0Art } from "@/lib/art/p0";
 import type { PlayerPersona } from "@/lib/persona";
 
-import { GrowthStrip, PaperCard, PersonaArt } from "./components";
+import { PaperCard, PersonaArt } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import { BottomSheet } from "./interaction-client";
 import { useCatProfile } from "./profile/client";
@@ -131,20 +131,14 @@ function AtHomeStage({
     summary: "",
     thumbnailUrl: "",
   };
-  const composition = personaSnapshot?.composition;
-  const growth = {
-    knowledge: Math.max(1, Math.min(5, composition?.interests.length ?? fixture.home.growth.knowledge)),
-    expression: Math.max(1, Math.min(5, Math.ceil((composition?.sourceCounts.contents ?? 10) / 12))),
-    social: Math.max(1, Math.min(5, Math.ceil((composition?.sourceCounts.followees ?? 12) / 12))),
-  };
   const souvenirTitle = question.title.length > 22 ? `${question.title.slice(0, 22)}…` : question.title;
   return (
     <div className="home-at-home home-room-stage">
       <RoomBackdrop />
       <div className="home-hero-copy">
-        <p className="stage-caption">ACT / AT HOME · 昨晚发生了一点事</p>
-        <h1>昨晚，<br /><span>齿轮</span>来过。</h1>
-        <p>它和齿轮围着一个真实知乎问题聊了很久：「{question.title}」两种脾气，最后把同一道题聊出了两个方向。</p>
+        <p className="stage-caption">ACT / AT HOME · 今天还没急着出门</p>
+        <h1><span>{catName}</span>，<br />还在窝里。</h1>
+        <p>昨晚齿轮来过。它们围着「{question.title}」聊了很久，今天这家伙还在慢慢消化。</p>
       </div>
 
       <div className="home-hero-art">
@@ -160,8 +154,7 @@ function AtHomeStage({
       </div>
 
       <div className="home-event-actions">
-        <a className="theatre-button theatre-button-primary" href={fixture.home.heroEvent.target}>看这一幕 <span>→</span></a>
-        <BottomSheet trigger={<span className="home-outing-trigger">让它出去逛逛 <b>→</b></span>} title="留张出门纸条">
+        <BottomSheet trigger={<span className="home-outing-trigger home-outing-primary">留张出门纸条 <b>→</b></span>} title="留张出门纸条">
           <p>给它一个大概方向就行。最后看什么、遇见谁，让它自己决定。</p>
           <div className="route-bias-list">
             {fixture.outing.routeBiases.map((bias) => (
@@ -169,15 +162,12 @@ function AtHomeStage({
             ))}
           </div>
         </BottomSheet>
+        <a className="home-last-night-link" href={fixture.home.heroEvent.target}>看看昨晚那一幕 →</a>
       </div>
 
       <div className="home-context-strip">
-        <span><small>今天</small><b>还在窝里</b><em>随时可以出门。</em></span>
+        <span><small>现在</small><b>在窝里发呆</b><em>想出去时，它会自己动身。</em></span>
         <a href="/explore?mode=app"><small>上次带回</small><b>{souvenirTitle}</b><em>去翻翻旅途票根 →</em></a>
-      </div>
-
-      <div className="home-growth-row">
-        <GrowthStrip knowledge={growth.knowledge} expression={growth.expression} social={growth.social} />
       </div>
     </div>
   );
