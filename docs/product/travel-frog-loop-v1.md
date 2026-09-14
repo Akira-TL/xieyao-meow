@@ -55,6 +55,12 @@ Persona 需要分三层持久化：根人格（由长期知乎行为推导，变
 
 P0 需要服务端持久化 user、cat profile、persona root/delta、game state、journey、postcard、artifact、inventory、persona memory、relationship、visitor event。浏览器存储只保留短期 UI 缓存，不能再承担游戏真相。
 
+## 长期游戏化 MVP 验收线
+
+首版只有在真实用户能完成 `稳定 Persona → 自主 Journey → 真实知乎内容 → 回家明信片/旅途记录 → 长期资产可回看 → 再次出门` 的服务端闭环时，才算长期游戏化成立；同时至少需要一场两名真实用户 Persona 之间的 Shared Encounter，并形成持久 PersonaRelationship。
+
+Push/邮件、完整装备解锁、完整陌生人网络、排行榜、复杂经济、真人实时聊天和自动发布知乎内容都不阻塞这一验收线。Persona 演化只要求记忆证据与版本护栏成立，不要求为了 Demo 强行快速改人格。
+
 ## 实施顺序
 
 `稳定账号身份 → 用户归属数据库 → Journey 状态机 → 明信片/回家结果 → 收藏 → 来访/关系 → Persona 演化`
