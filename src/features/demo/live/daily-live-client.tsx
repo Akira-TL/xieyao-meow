@@ -336,7 +336,7 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
   return (
     <section className="relationship-detail-stage">
       <p className="stage-caption">关系详情 · PERSONA RELATIONSHIP</p>
-      <h1>为什么同一个问题，<br />你们总能聊出<span>两个方向</span>？</h1>
+      <h1>为什么同一个问题，<br />你们总能聊出<br className="relationship-mobile-break" /><span>两个方向</span>？</h1>
       <p className="relationship-subtitle">关系不是一个抽象百分比，而是共同兴趣和表达差异叠出来的结果。</p>
 
       <div className="relationship-pair-stage">
