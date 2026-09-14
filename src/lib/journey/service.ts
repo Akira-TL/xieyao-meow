@@ -4,11 +4,15 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
 import type {
+  JourneyAtlasEntry,
+  JourneyAtlasView,
   JourneyDiscoverer,
   JourneyDiscoveryResult,
+  JourneyPostcard,
   JourneyProjection,
   JourneyQuestion,
   JourneyView,
+  PersonaMemoryView,
   ReturnArtifact,
 } from "./types";
 
@@ -44,6 +48,31 @@ interface JourneyRow {
   artifact_source_url: string | null;
 }
 
+interface JourneyUserStateRow {
+  next_eligible_at: number | null;
+  queued_route_bias: string | null;
+}
+
+interface AtlasRow {
+  journey_id: string;
+  route_bias: string | null;
+  completed_at: number;
+  content_source: "live" | "none";
+  question_title: string | null;
+  question_url: string | null;
+  question_summary: string | null;
+  question_thumbnail_url: string | null;
+  postcard_headline: string;
+  postcard_body: string;
+  artifact_id: string | null;
+  artifact_type: ReturnArtifact["type"] | null;
+  artifact_title: string | null;
+  artifact_source_url: string | null;
+}
+
+const MINUTE = 60_000;
+const MAX_OFFLINE_COMPLETIONS = 3;
+
 function hashString(value: string): number {
   let hash = 2166136261;
   for (const character of value) {
@@ -53,7 +82,22 @@ function hashString(value: string): number {
   return hash >>> 0;
 }
 
-function questionFromRow(row: JourneyRow): JourneyQuestion | null {
+function rangedMs(seed: string, minMs: number, maxMs: number): number {
+  return minMs + (hashString(seed) % (maxMs - minMs + 1));
+}
+
+function journeyDurationMs(sequence: number, seed: string): number {
+  if (sequence <= 1) return rangedMs(seed, 3 * MINUTE, 5 * MINUTE);
+  if (sequence === 2) return rangedMs(seed, 10 * MINUTE, 20 * MINUTE);
+  if (sequence === 3) return rangedMs(seed, 20 * MINUTE, 40 * MINUTE);
+  return rangedMs(seed, 30 * MINUTE, 90 * MINUTE);
+}
+
+function restDurationMs(seed: string): number {
+  return rangedMs(`${seed}:rest`, 30 * MINUTE, 90 * MINUTE);
+}
+
+function questionFromRow(row: Pick<JourneyRow, "question_title" | "question_url" | "question_summary" | "question_thumbnail_url">): JourneyQuestion | null {
   if (!row.question_title || !row.question_url) return null;
   return {
     title: row.question_title,
@@ -63,7 +107,7 @@ function questionFromRow(row: JourneyRow): JourneyQuestion | null {
   };
 }
 
-function artifactFromRow(row: JourneyRow): ReturnArtifact | null {
+function artifactFromRow(row: Pick<JourneyRow, "artifact_id" | "artifact_type" | "artifact_title" | "artifact_source_url">): ReturnArtifact | null {
   if (!row.artifact_id || !row.artifact_type || !row.artifact_title || !row.artifact_source_url) {
     return null;
   }
@@ -92,42 +136,69 @@ export class JourneyService {
   }
 
   async getProjection(userId: string, oauthAccessToken: string): Promise<JourneyProjection> {
-    let row = this.readCurrentRow(userId);
-    if (!row) return { state: "AT_HOME", journey: null };
-
     const now = this.now();
-    if (row.state === "PREPARING" && now >= row.depart_at) {
-      this.db.prepare(`
-        UPDATE journeys SET state = 'AWAY'
-        WHERE id = ? AND user_id = ? AND state = 'PREPARING'
-      `).run(row.id, userId);
-      row = this.readCurrentRow(userId) ?? row;
-    }
+    let completedThisRequest = 0;
 
-    if (now >= row.return_at && row.materialized_at === null) {
-      let result: JourneyDiscoveryResult;
-      try {
-        result = await this.options.discover({
-          userId,
-          oauthAccessToken,
-          routeBias: row.route_bias,
-          planSeed: row.plan_seed,
-        });
-      } catch {
-        result = {
-          question: null,
-          contentSource: "none",
-          knowledgeSource: "none",
-          sourceFetchedAt: now,
-          postcardBody: "这趟没碰到值得带回来的新问题，但它还是按时回家了。",
-        };
+    for (let guard = 0; guard < 12; guard += 1) {
+      let row = this.readCurrentRow(userId);
+      if (!row) {
+        const userState = this.readUserState(userId);
+        const journeyCount = this.countJourneys(userId);
+        if (
+          journeyCount > 0 &&
+          userState.next_eligible_at !== null &&
+          userState.next_eligible_at <= now
+        ) {
+          this.createJourney(userId, userState.queued_route_bias, userState.next_eligible_at);
+          continue;
+        }
+        return this.homeProjection(userId, now);
       }
-      this.materialize(row.id, userId, result, now);
-      row = this.readCurrentRow(userId) ?? row;
+
+      if (row.state === "PREPARING" && now >= row.depart_at) {
+        this.db.prepare(`
+          UPDATE journeys SET state = 'AWAY'
+          WHERE id = ? AND user_id = ? AND state = 'PREPARING'
+        `).run(row.id, userId);
+        row = this.readCurrentRow(userId) ?? row;
+      }
+
+      if (now >= row.return_at && row.materialized_at === null) {
+        const result = await this.discoverOrEmpty(userId, oauthAccessToken, row, now);
+        this.materialize(row.id, userId, result, now);
+        completedThisRequest += 1;
+        row = this.readCurrentRow(userId) ?? row;
+
+        if (completedThisRequest >= MAX_OFFLINE_COMPLETIONS) {
+          this.archiveJourney(row.id, userId, now);
+          this.deferAfterCatchUp(userId, now, row.plan_seed);
+          return this.homeProjection(userId, now);
+        }
+      }
+
+      if (row.state === "RETURNED") {
+        const userState = this.readUserState(userId);
+        if (
+          userState.next_eligible_at !== null &&
+          userState.next_eligible_at <= now
+        ) {
+          this.archiveJourney(row.id, userId, userState.next_eligible_at);
+          this.createJourney(userId, userState.queued_route_bias, userState.next_eligible_at);
+          continue;
+        }
+      }
+
+      const userState = this.readUserState(userId);
+      return {
+        state: row.state,
+        journey: this.toView(row),
+        resting: false,
+        queuedRouteBias: userState.queued_route_bias,
+        nextJourneyAt: userState.next_eligible_at,
+      };
     }
 
-    const view = this.toView(row);
-    return { state: view.state, journey: view };
+    throw new Error("Journey catch-up exceeded safety guard");
   }
 
   async start(
@@ -139,42 +210,27 @@ export class JourneyService {
     if (current.state !== "AT_HOME") return current;
 
     const now = this.now();
-    const id = this.createId();
-    const planSeed = `${id}:journey-v1`;
-    const hash = hashString(planSeed);
-    const durationMs = 180_000 + (hash % 120_001);
-    const preparingMs = 15_000 + (hash % 15_001);
-
-    try {
-      this.db.prepare(`
-        INSERT INTO journeys (
-          id, user_id, state, route_bias, created_at, depart_at, return_at,
-          plan_seed, engine_version
-        ) VALUES (?, ?, 'PREPARING', ?, ?, ?, ?, ?, 'journey-v1')
-      `).run(
-        id,
-        userId,
-        routeBias,
-        now,
-        now + preparingMs,
-        now + durationMs,
-        planSeed,
-      );
-    } catch (error) {
-      if (!String(error).includes("UNIQUE constraint failed")) throw error;
+    const journeyCount = this.countJourneys(userId);
+    if (journeyCount === 0) {
+      this.createJourney(userId, routeBias, now);
+      return this.getProjection(userId, oauthAccessToken);
     }
 
+    const userState = this.readUserState(userId);
+    if (userState.next_eligible_at !== null && userState.next_eligible_at > now) {
+      this.setQueuedRouteBias(userId, routeBias);
+      return this.homeProjection(userId, now);
+    }
+
+    this.createJourney(userId, routeBias, now);
     return this.getProjection(userId, oauthAccessToken);
   }
 
   async archive(userId: string, oauthAccessToken: string): Promise<JourneyProjection> {
     const current = await this.getProjection(userId, oauthAccessToken);
     if (current.state !== "RETURNED" || !current.journey) return current;
-    this.db.prepare(`
-      UPDATE journeys SET archived_at = ?
-      WHERE id = ? AND user_id = ? AND state = 'RETURNED' AND archived_at IS NULL
-    `).run(this.now(), current.journey.id, userId);
-    return { state: "AT_HOME", journey: null };
+    this.archiveJourney(current.journey.id, userId, this.now());
+    return this.getProjection(userId, oauthAccessToken);
   }
 
   async getJourney(
@@ -187,8 +243,122 @@ export class JourneyService {
     return row ? this.toView(row) : null;
   }
 
+  async getAtlas(userId: string, oauthAccessToken: string): Promise<JourneyAtlasView> {
+    await this.getProjection(userId, oauthAccessToken);
+    const rows = this.db.prepare(`
+      SELECT
+        j.id AS journey_id, j.route_bias,
+        l.completed_at, l.content_source,
+        l.question_title, l.question_url, l.question_summary, l.question_thumbnail_url,
+        p.headline AS postcard_headline, p.body AS postcard_body,
+        a.id AS artifact_id, a.type AS artifact_type,
+        a.title AS artifact_title, a.source_url AS artifact_source_url
+      FROM journey_logs l
+      JOIN journeys j ON j.id = l.journey_id
+      JOIN journey_postcards p ON p.journey_id = l.journey_id
+      LEFT JOIN return_artifacts a ON a.origin_journey_id = l.journey_id
+      WHERE l.user_id = ?
+      ORDER BY l.completed_at DESC
+      LIMIT 30
+    `).all(userId) as unknown as AtlasRow[];
+
+    const journeys: JourneyAtlasEntry[] = rows.map((row) => {
+      const question = questionFromRow(row);
+      const postcard: JourneyPostcard = {
+        headline: row.postcard_headline,
+        body: row.postcard_body,
+        question,
+      };
+      return {
+        journeyId: row.journey_id,
+        completedAt: row.completed_at,
+        routeBias: row.route_bias,
+        postcard,
+        artifact: artifactFromRow(row),
+        contentSource: row.content_source,
+      };
+    });
+
+    const memoryRows = this.db.prepare(`
+      SELECT id, source_event_id, topic_ref, observation, created_at
+      FROM persona_memories
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+      LIMIT 30
+    `).all(userId) as unknown as Array<{
+      id: string;
+      source_event_id: string;
+      topic_ref: string | null;
+      observation: string;
+      created_at: number;
+    }>;
+    const memories: PersonaMemoryView[] = memoryRows.map((row) => ({
+      id: row.id,
+      sourceEventId: row.source_event_id,
+      topicRef: row.topic_ref,
+      observation: row.observation,
+      createdAt: row.created_at,
+    }));
+
+    return { journeys, memories };
+  }
+
   close(): void {
     this.db.close();
+  }
+
+  private async discoverOrEmpty(
+    userId: string,
+    oauthAccessToken: string,
+    row: JourneyRow,
+    now: number,
+  ): Promise<JourneyDiscoveryResult> {
+    try {
+      return await this.options.discover({
+        userId,
+        oauthAccessToken,
+        routeBias: row.route_bias,
+        planSeed: row.plan_seed,
+        recentQuestionUrls: this.readRecentQuestionUrls(userId),
+        recentMemoryTopicRefs: this.readRecentMemoryTopicRefs(userId),
+      });
+    } catch {
+      return {
+        question: null,
+        contentSource: "none",
+        knowledgeSource: "none",
+        sourceFetchedAt: now,
+        postcardBody: "这趟没碰到值得带回来的新问题，但它还是按时回家了。",
+      };
+    }
+  }
+
+  private createJourney(userId: string, routeBias: string | null, scheduledAt: number): void {
+    const sequence = this.countJourneys(userId) + 1;
+    const id = this.createId();
+    const planSeed = `${id}:journey-v1:${sequence}`;
+    const durationMs = journeyDurationMs(sequence, planSeed);
+    const preparingMs = rangedMs(`${planSeed}:prepare`, 15_000, 30_000);
+
+    this.db.prepare(`
+      INSERT INTO journeys (
+        id, user_id, state, route_bias, created_at, depart_at, return_at,
+        plan_seed, engine_version
+      ) VALUES (?, ?, 'PREPARING', ?, ?, ?, ?, ?, 'journey-v1')
+    `).run(
+      id,
+      userId,
+      routeBias,
+      scheduledAt,
+      scheduledAt + preparingMs,
+      scheduledAt + durationMs,
+      planSeed,
+    );
+    this.ensureUserState(userId);
+    this.db.prepare(`
+      UPDATE journey_user_state SET queued_route_bias = NULL, updated_at = ?
+      WHERE user_id = ?
+    `).run(this.now(), userId);
   }
 
   private materialize(
@@ -203,6 +373,8 @@ export class JourneyService {
     const question = result.question;
     const headline = question ? "它叼回来一个问题。" : "它空着爪子回来了。";
     const artifactId = question ? this.createId() : null;
+    const memoryId = question ? this.createId() : null;
+    const nextEligibleAt = row.return_at + restDurationMs(row.plan_seed);
 
     try {
       this.db.exec("BEGIN IMMEDIATE;");
@@ -266,11 +438,35 @@ export class JourneyService {
         );
       }
 
+      if (question && memoryId) {
+        this.db.prepare(`
+          INSERT OR IGNORE INTO persona_memories (
+            id, user_id, type, source_event_id, topic_ref,
+            observation, weight, created_at
+          ) VALUES (?, ?, 'JOURNEY_TOPIC', ?, ?, ?, 1, ?)
+        `).run(
+          memoryId,
+          userId,
+          journeyId,
+          question.url,
+          `在一次旅途中停在「${question.title}」前。`,
+          latest.return_at,
+        );
+      }
+
       this.db.prepare(`
         UPDATE journeys
         SET state = 'RETURNED', materialized_at = ?, returned_at = ?
         WHERE id = ? AND user_id = ? AND materialized_at IS NULL
       `).run(materializedAt, latest.return_at, journeyId, userId);
+
+      this.db.prepare(`
+        INSERT INTO journey_user_state (user_id, next_eligible_at, updated_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+          next_eligible_at = excluded.next_eligible_at,
+          updated_at = excluded.updated_at
+      `).run(userId, nextEligibleAt, materializedAt);
       this.db.exec("COMMIT;");
     } catch (error) {
       try {
@@ -280,6 +476,81 @@ export class JourneyService {
       }
       throw error;
     }
+  }
+
+  private archiveJourney(journeyId: string, userId: string, archivedAt: number): void {
+    this.db.prepare(`
+      UPDATE journeys SET archived_at = ?
+      WHERE id = ? AND user_id = ? AND state = 'RETURNED' AND archived_at IS NULL
+    `).run(archivedAt, journeyId, userId);
+  }
+
+  private deferAfterCatchUp(userId: string, now: number, seed: string): void {
+    this.ensureUserState(userId);
+    this.db.prepare(`
+      UPDATE journey_user_state
+      SET next_eligible_at = ?, queued_route_bias = NULL, updated_at = ?
+      WHERE user_id = ?
+    `).run(now + restDurationMs(`${seed}:catch-up-cap`), now, userId);
+  }
+
+  private setQueuedRouteBias(userId: string, routeBias: string | null): void {
+    this.ensureUserState(userId);
+    this.db.prepare(`
+      UPDATE journey_user_state SET queued_route_bias = ?, updated_at = ?
+      WHERE user_id = ?
+    `).run(routeBias, this.now(), userId);
+  }
+
+  private ensureUserState(userId: string): void {
+    this.db.prepare(`
+      INSERT OR IGNORE INTO journey_user_state (user_id, next_eligible_at, updated_at)
+      VALUES (?, NULL, ?)
+    `).run(userId, this.now());
+  }
+
+  private readUserState(userId: string): JourneyUserStateRow {
+    this.ensureUserState(userId);
+    return this.db.prepare(`
+      SELECT next_eligible_at, queued_route_bias
+      FROM journey_user_state WHERE user_id = ?
+    `).get(userId) as unknown as JourneyUserStateRow;
+  }
+
+  private homeProjection(userId: string, now: number): JourneyProjection {
+    const state = this.readUserState(userId);
+    return {
+      state: "AT_HOME",
+      journey: null,
+      resting: state.next_eligible_at !== null && state.next_eligible_at > now,
+      queuedRouteBias: state.queued_route_bias,
+      nextJourneyAt: state.next_eligible_at,
+    };
+  }
+
+  private readRecentQuestionUrls(userId: string): string[] {
+    return (this.db.prepare(`
+      SELECT question_url FROM journey_logs
+      WHERE user_id = ? AND question_url IS NOT NULL
+      ORDER BY completed_at DESC
+      LIMIT 8
+    `).all(userId) as unknown as Array<{ question_url: string }>).map((row) => row.question_url);
+  }
+
+  private readRecentMemoryTopicRefs(userId: string): string[] {
+    return (this.db.prepare(`
+      SELECT topic_ref FROM persona_memories
+      WHERE user_id = ? AND topic_ref IS NOT NULL
+      ORDER BY created_at DESC
+      LIMIT 8
+    `).all(userId) as unknown as Array<{ topic_ref: string }>).map((row) => row.topic_ref);
+  }
+
+  private countJourneys(userId: string): number {
+    const row = this.db.prepare(`
+      SELECT COUNT(*) AS count FROM journeys WHERE user_id = ?
+    `).get(userId) as { count: number };
+    return Number(row.count);
   }
 
   private toView(row: JourneyRow): JourneyView {
@@ -297,11 +568,7 @@ export class JourneyService {
       question,
       postcard:
         row.postcard_headline && row.postcard_body
-          ? {
-              headline: row.postcard_headline,
-              body: row.postcard_body,
-              question,
-            }
+          ? { headline: row.postcard_headline, body: row.postcard_body, question }
           : null,
       artifact: artifactFromRow(row),
     };
@@ -392,6 +659,26 @@ export class JourneyService {
         source_key TEXT NOT NULL,
         created_at INTEGER NOT NULL,
         UNIQUE(owner_user_id, type, source_key)
+      );
+
+      CREATE TABLE IF NOT EXISTS journey_user_state (
+        user_id TEXT PRIMARY KEY REFERENCES app_users(id) ON DELETE CASCADE,
+        next_eligible_at INTEGER,
+        queued_route_bias TEXT,
+        updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS persona_memories (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        type TEXT NOT NULL,
+        source_event_id TEXT NOT NULL,
+        topic_ref TEXT,
+        observation TEXT NOT NULL,
+        weight REAL NOT NULL DEFAULT 1,
+        created_at INTEGER NOT NULL,
+        expires_at INTEGER,
+        UNIQUE(user_id, type, source_event_id)
       );
     `);
   }

@@ -96,13 +96,85 @@ describe("server Journey", () => {
 
     const a = await service.start(userA, "oauth-a", "随便逛");
     expect(a.journey?.id).toBe("journey-1");
-    expect(await service.getProjection(userB, "oauth-b")).toEqual({
+    expect(await service.getProjection(userB, "oauth-b")).toMatchObject({
       state: "AT_HOME",
       journey: null,
+      resting: false,
     });
     const b = await service.start(userB, "oauth-b", "去陌生地方");
     expect(b.journey?.id).toBe("journey-2");
     expect(a.journey?.id).not.toBe(b.journey?.id);
+    service.close();
+  });
+
+  it("uses warm-up bands, rests, consumes one route bias, and caps offline catch-up at three", async () => {
+    const dbPath = createDbPath();
+    const userId = createUser(dbPath, "subject-a", "user-a");
+    const otherUserId = createUser(dbPath, "subject-b", "user-b");
+    let now = 10_000;
+    let sequence = 0;
+    const discover = vi.fn(async () => ({
+      question: {
+        title: "重复遇见的真实问题",
+        url: "https://www.zhihu.com/question/999",
+        summary: "同一问题可以重复路过，但票根不重复掉落。",
+      },
+      contentSource: "live" as const,
+      knowledgeSource: "template" as const,
+      sourceFetchedAt: now,
+      postcardBody: "又路过了这个问题。",
+    }));
+    const service = new JourneyService({
+      dbPath,
+      now: () => now,
+      createId: () => `id-${++sequence}`,
+      discover,
+    });
+
+    const first = await service.start(userId, "oauth-a", "多看看 AI");
+    now = first.journey!.returnAt;
+    const firstReturned = await service.getProjection(userId, "oauth-a");
+    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeGreaterThanOrEqual(30 * 60_000);
+    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeLessThanOrEqual(90 * 60_000);
+
+    const resting = await service.archive(userId, "oauth-a");
+    expect(resting).toMatchObject({ state: "AT_HOME", resting: true });
+    const queued = await service.start(userId, "oauth-a", "去陌生地方");
+    expect(queued).toMatchObject({
+      state: "AT_HOME",
+      resting: true,
+      queuedRouteBias: "去陌生地方",
+    });
+
+    now = queued.nextJourneyAt!;
+    const second = await service.getProjection(userId, "oauth-a");
+    expect(second.state).toBe("PREPARING");
+    expect(second.journey?.routeBias).toBe("去陌生地方");
+    expect(second.journey!.returnAt - second.journey!.createdAt).toBeGreaterThanOrEqual(10 * 60_000);
+    expect(second.journey!.returnAt - second.journey!.createdAt).toBeLessThanOrEqual(20 * 60_000);
+
+    now = second.journey!.returnAt;
+    const secondReturned = await service.getProjection(userId, "oauth-a");
+    await service.archive(userId, "oauth-a");
+    now = secondReturned.nextJourneyAt!;
+    const third = await service.getProjection(userId, "oauth-a");
+    expect(third.journey?.routeBias).toBeNull();
+    expect(third.journey!.returnAt - third.journey!.createdAt).toBeGreaterThanOrEqual(20 * 60_000);
+    expect(third.journey!.returnAt - third.journey!.createdAt).toBeLessThanOrEqual(40 * 60_000);
+
+    now = third.journey!.createdAt + 24 * 60 * 60_000;
+    const caughtUp = await service.getProjection(userId, "oauth-a");
+    expect(caughtUp).toMatchObject({ state: "AT_HOME", resting: true });
+    expect(discover).toHaveBeenCalledTimes(5);
+    await service.getProjection(userId, "oauth-a");
+    expect(discover).toHaveBeenCalledTimes(5);
+
+    const atlas = await service.getAtlas(userId, "oauth-a");
+    expect(atlas.journeys).toHaveLength(5);
+    expect(atlas.journeys.filter((entry) => entry.artifact)).toHaveLength(1);
+    expect(atlas.memories).toHaveLength(5);
+    expect(atlas.memories[0]?.sourceEventId).toBeTruthy();
+    expect(await service.getAtlas(otherUserId, "oauth-b")).toEqual({ journeys: [], memories: [] });
     service.close();
   });
 

@@ -34,6 +34,8 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   oauthAccessToken,
   routeBias,
   planSeed,
+  recentQuestionUrls,
+  recentMemoryTopicRefs,
 }) => {
   const gateway = createZhihuGatewayFromEnv();
   const fetchedAt = Date.now();
@@ -60,6 +62,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
 
   const interestTerms = interests.flatMap((interest) => INTEREST_TERMS[interest] ?? []);
   const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
+  const recentRefs = new Set([...recentQuestionUrls, ...recentMemoryTopicRefs]);
   const ranked = questions
     .map((item) => {
       const haystack = `${item.title} ${item.summary}`.toLocaleLowerCase("zh-CN");
@@ -68,6 +71,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
         0,
       );
       let score = interestHits * 4;
+      if (recentRefs.has(item.url)) score -= 20;
       if (route.includes("ai")) {
         score += INTEREST_TERMS["AI 与数码"].some((term) => haystack.includes(term)) ? 8 : 0;
       }

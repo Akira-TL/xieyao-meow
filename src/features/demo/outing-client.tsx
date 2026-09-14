@@ -11,7 +11,6 @@ import { DEMO_FIXTURE } from "./fixtures";
 import { BottomSheet } from "./interaction-client";
 import { useCatProfile } from "./profile/client";
 import {
-  type LivePersonaSnapshot,
   type LiveQuestionSnapshot,
   useLivePersonaSnapshot,
   useLiveQuestionSnapshot,
@@ -41,7 +40,7 @@ export function DemoOutingHome() {
       const response = await fetch("/api/journey", { cache: "no-store" });
       if (response.status === 401) {
         setJourneyError("先完成知乎授权，这只猫才有自己的长期旅途。");
-        setProjection({ state: "AT_HOME", journey: null });
+        setProjection({ state: "AT_HOME", journey: null, resting: false, queuedRouteBias: null, nextJourneyAt: null });
         return;
       }
       if (!response.ok) throw new Error(`journey HTTP ${response.status}`);
@@ -49,7 +48,7 @@ export function DemoOutingHome() {
       setJourneyError(null);
     } catch {
       setJourneyError("旅途状态暂时没读到，刷新页面再试一次。");
-      setProjection((current) => current ?? { state: "AT_HOME", journey: null });
+      setProjection((current) => current ?? { state: "AT_HOME", journey: null, resting: false, queuedRouteBias: null, nextJourneyAt: null });
     }
   }, []);
 
@@ -107,9 +106,10 @@ export function DemoOutingHome() {
       {journeyError ? <div className="outing-loading">{journeyError}</div> : null}
       <AtHomeStage
         catName={catName}
-        personaSnapshot={personaSnapshot}
         playerPersona={playerPersona}
         questionSnapshot={questionSnapshot}
+        resting={projection.resting}
+        queuedRouteBias={projection.queuedRouteBias}
         onPrepare={(routeBias) => void runAction({ action: "start", routeBias })}
       />
     </>
@@ -119,15 +119,17 @@ export function DemoOutingHome() {
 function AtHomeStage({
   catName,
   onPrepare,
-  personaSnapshot,
   playerPersona,
   questionSnapshot,
+  resting,
+  queuedRouteBias,
 }: {
   catName: string;
   onPrepare: (routeBias: string) => void;
-  personaSnapshot: LivePersonaSnapshot | null;
   playerPersona: PlayerPersona;
   questionSnapshot: LiveQuestionSnapshot | null;
+  resting: boolean;
+  queuedRouteBias: string | null;
 }) {
   const fixture = DEMO_FIXTURE;
   const question = questionSnapshot?.question ?? {
@@ -141,9 +143,9 @@ function AtHomeStage({
     <div className="home-at-home home-room-stage">
       <RoomBackdrop />
       <div className="home-hero-copy">
-        <p className="stage-caption">ACT / AT HOME · 今天还没急着出门</p>
-        <h1><span>{catName}</span>，<br />还在窝里。</h1>
-        <p>昨晚齿轮来过。它们围着「{question.title}」聊了很久，今天这家伙还在慢慢消化。</p>
+        <p className="stage-caption">{resting ? "REST / AT HOME · 刚回来，先歇会儿" : "ACT / AT HOME · 今天还没急着出门"}</p>
+        <h1><span>{catName}</span>，<br />{resting ? "刚回窝。" : "还在窝里。"}</h1>
+        <p>{resting ? (queuedRouteBias ? `下一趟的纸条已经压好了：「${queuedRouteBias}」。它歇够了会自己出门。` : "上一趟已经结算，明信片也收好了。歇够以后，它会自己再出门。") : `昨晚的东西还在慢慢消化。它刚刚又瞄了一眼「${question.title}」。`}</p>
       </div>
 
       <div className="home-hero-art">
@@ -159,7 +161,7 @@ function AtHomeStage({
       </div>
 
       <div className="home-event-actions">
-        <BottomSheet trigger={<span className="home-outing-trigger home-outing-primary">留张出门纸条 <b>→</b></span>} title="留张出门纸条">
+        <BottomSheet trigger={<span className="home-outing-trigger home-outing-primary">{resting ? "给下一趟留纸条" : "留张出门纸条"} <b>→</b></span>} title="留张出门纸条">
           <p>给它一个大概方向就行。最后看什么、遇见谁，让它自己决定。</p>
           <div className="route-bias-list">
             {fixture.outing.routeBiases.map((bias) => (

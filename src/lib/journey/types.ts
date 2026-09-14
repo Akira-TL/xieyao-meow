@@ -46,6 +46,31 @@ export interface JourneyView {
 export interface JourneyProjection {
   state: JourneyState;
   journey: JourneyView | null;
+  resting: boolean;
+  queuedRouteBias: string | null;
+  nextJourneyAt: number | null;
+}
+
+export interface JourneyAtlasEntry {
+  journeyId: string;
+  completedAt: number;
+  routeBias: string | null;
+  postcard: JourneyPostcard;
+  artifact: ReturnArtifact | null;
+  contentSource: JourneyContentSource;
+}
+
+export interface PersonaMemoryView {
+  id: string;
+  sourceEventId: string;
+  topicRef: string | null;
+  observation: string;
+  createdAt: number;
+}
+
+export interface JourneyAtlasView {
+  journeys: JourneyAtlasEntry[];
+  memories: PersonaMemoryView[];
 }
 
 export interface JourneyDiscoveryResult {
@@ -61,6 +86,8 @@ export interface JourneyDiscoveryInput {
   oauthAccessToken: string;
   routeBias: string | null;
   planSeed: string;
+  recentQuestionUrls: string[];
+  recentMemoryTopicRefs: string[];
 }
 
 export type JourneyDiscoverer = (input: JourneyDiscoveryInput) => Promise<JourneyDiscoveryResult>;
