@@ -47,6 +47,10 @@
 
 授权前的临时猫资料，只保存猫名与外观偏好，不属于长期用户资产。绑定正式 `User` 时最多迁移一次，若正式资料已存在则不得覆盖。
 
+### Game State
+
+稳定 `User` 的服务端长期运行状态总称，覆盖激活进度、当前 Journey/Outing、Persona 演化与记忆、收藏资产、Encounter / Relationship 及 Daily Event 等会影响后续体验的事实。浏览器只能缓存短生命周期 view-model、交互状态和 optimistic projection，不能成为 Game State 的唯一真相。
+
 ### Knowledge Layer
 
 负责提供与问题相关的事实、背景、知乎内容或直答结果，目标是保证回答的信息基础。
