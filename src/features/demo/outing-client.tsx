@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { resolveP0Art } from "@/lib/art/p0";
+
 import { GrowthStrip, PaperCard, PersonaArt } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import { BottomSheet } from "./interaction-client";
@@ -33,6 +35,16 @@ function loadOuting(): DemoOutingState {
 
 function saveOuting(state: DemoOutingState) {
   window.localStorage.setItem(DEMO_OUTING_STORAGE_KEY, JSON.stringify(state));
+}
+
+function RoomBackdrop({ empty = false }: { empty?: boolean }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="home-room-backdrop"
+      style={{ backgroundImage: `url(${resolveP0Art(empty ? "room-empty-night" : "room-home-night")})` }}
+    />
+  );
 }
 
 export function DemoOutingHome() {
@@ -71,7 +83,7 @@ export function DemoOutingHome() {
     return <div className="outing-loading">正在看它在不在家……</div>;
   }
   if (outing.state === "PREPARING") return <PreparingStage personaSnapshot={personaSnapshot} routeBias={outing.routeBias} />;
-  if (outing.state === "AWAY") return <AwayStage personaSnapshot={personaSnapshot} routeBias={outing.routeBias} />;
+  if (outing.state === "AWAY") return <AwayStage routeBias={outing.routeBias} />;
   if (outing.state === "RETURNED") {
     return (
       <ReturnedStage
@@ -115,7 +127,8 @@ function AtHomeStage({
     social: Math.max(1, Math.min(5, Math.ceil((composition?.sourceCounts.followees ?? 12) / 12))),
   };
   return (
-    <div className="home-at-home">
+    <div className="home-at-home home-room-stage">
+      <RoomBackdrop />
       <div className="home-hero-copy">
         <p className="stage-caption">ACT / AT HOME · 昨晚发生了一点事</p>
         <h1>昨晚，<br /><span>齿轮</span>来过。</h1>
@@ -161,7 +174,8 @@ function PreparingStage({
 }) {
   const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
   return (
-    <div className="outing-empty-stage">
+    <div className="outing-empty-stage home-room-stage">
+      <RoomBackdrop />
       <p className="stage-caption">BACKSTAGE / PREPARING</p>
       <h1>它在后台<br />收东西。</h1>
       <PersonaArt alt="本喵收拾出门装备" className="outing-state-persona" persona={playerPersona} state="thinking" />
@@ -174,20 +188,13 @@ function PreparingStage({
   );
 }
 
-function AwayStage({
-  routeBias,
-  personaSnapshot,
-}: {
-  routeBias: string | null;
-  personaSnapshot: LivePersonaSnapshot | null;
-}) {
-  const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
+function AwayStage({ routeBias }: { routeBias: string | null }) {
   return (
-    <div className="outing-empty-stage outing-away-stage">
+    <div className="outing-empty-stage outing-away-stage home-room-stage">
+      <RoomBackdrop empty />
       <p className="stage-caption">ACT / AWAY</p>
       <h1>它不在。</h1>
       <p>大概又跑去看别人为什么吵架了。</p>
-      <PersonaArt alt="本喵正在外出探索" className="outing-state-persona" persona={playerPersona} state="walking" />
       <PaperCard className="outing-note-card">
         <span>桌上压着一张纸</span>
         <strong>“{DEMO_FIXTURE.outing.note}”</strong>
@@ -223,7 +230,8 @@ function ReturnedStage({
     ? `${question.summary.replace(/\s+/g, " ").trim().slice(0, 72)}${question.summary.length > 72 ? "…" : ""}`
     : "这题不一定和你最像，但值得带回来多问一步。";
   return (
-    <div className="returned-stage">
+    <div className="returned-stage home-room-stage">
+      <RoomBackdrop />
       <div className="returned-copy">
         <p className="stage-caption">LIGHTS UP / RETURNED</p>
         <span>门响了一下。</span>

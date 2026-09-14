@@ -287,10 +287,15 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.055);
-  background:
+  background-image:
+    var(--art-slot-image, linear-gradient(transparent, transparent)),
     radial-gradient(circle at 50% 32%, rgba(255,239,202,.09), transparent 30%),
     linear-gradient(145deg, rgba(255,255,255,.025), rgba(22,119,255,.018) 58%, rgba(0,0,0,.10));
+  background-position: center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-size: cover, auto, auto;
 }
+.art-slot--fit-contain { background-size: contain, auto, auto; }
 .art-slot::after {
   content: "";
   position: absolute;
@@ -302,8 +307,19 @@ a { color: inherit; text-decoration: none; }
 .art-slot--portrait { min-height: 320px; aspect-ratio: 4 / 5; }
 .art-slot--square { aspect-ratio: 1; }
 .art-slot--wide { aspect-ratio: 16 / 9; }
-.art-slot--polaroid { aspect-ratio: 4 / 5; border: 10px solid var(--paper); color: #24446c; background: #cdd8e5; transform: rotate(-2deg); }
+.art-slot--polaroid { aspect-ratio: 4 / 5; border: 10px solid var(--paper); color: #24446c; background-color: #cdd8e5; transform: rotate(-2deg); }
 .art-slot--avatar { width: 88px; height: 88px; border-radius: 50%; }
+
+.kanshan-art {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+.kanshan-art-image { object-fit: contain; object-position: center bottom; }
+.kanshan-art--casting { width: 118px; height: 118px; }
+.kanshan-art--privacy { width: min(34vw, 300px); height: min(34vw, 300px); margin: auto; }
 
 .persona-art {
   position: relative;
@@ -331,21 +347,18 @@ a { color: inherit; text-decoration: none; }
 
 .persona-egg {
   position: relative;
-  width: clamp(150px, 22vw, 260px);
-  aspect-ratio: .76;
-  display: grid;
-  place-items: center;
-  border: 1px dashed rgba(255,245,218,.45);
-  border-radius: 50% 50% 44% 44%;
-  background:
-    radial-gradient(circle at 30% 22%, rgba(255,255,255,.2), transparent 14%),
-    radial-gradient(circle, rgba(111,98,73,.25) 0 2px, transparent 3px) 0 0/19px 19px,
-    linear-gradient(180deg, #d8d2c4, #837a68);
-  box-shadow: 0 0 70px rgba(255,232,190,.12);
-  color: #17191d;
+  width: clamp(168px, 23vw, 286px);
+  aspect-ratio: 1122 / 1402;
+  filter: drop-shadow(0 24px 38px rgba(0,0,0,.42));
 }
-.persona-egg span { font-size: 56px; font-weight: 900; }
-.persona-egg small { position: absolute; bottom: 18px; font-size: 8px; letter-spacing: .2em; }
+.persona-egg-image { object-fit: contain; object-position: center bottom; }
+.persona-egg[data-egg-state="scanning"] { animation: egg-scan-pulse 1.7s ease-in-out infinite; }
+.persona-egg[data-egg-state="glowing"],
+.persona-egg[data-egg-state="cracking"] { filter: drop-shadow(0 0 28px rgba(111,171,255,.32)) drop-shadow(0 24px 38px rgba(0,0,0,.42)); }
+@keyframes egg-scan-pulse {
+  0%, 100% { transform: translateY(0); filter: drop-shadow(0 24px 38px rgba(0,0,0,.42)); }
+  50% { transform: translateY(-4px); filter: drop-shadow(0 0 24px rgba(111,171,255,.28)) drop-shadow(0 24px 38px rgba(0,0,0,.42)); }
+}
 
 .pet-stage { text-align: center; }
 .pet-stage--large .art-slot, .pet-stage--large .persona-art { width: min(100%, 340px); margin: auto; }
@@ -984,12 +997,31 @@ a { color: inherit; text-decoration: none; }
   min-height: calc(100dvh - 125px);
   display: grid;
   align-items: center;
+  overflow: hidden;
   border: 1px solid rgba(255,255,255,.08);
   background:
     radial-gradient(ellipse at 72% 18%, rgba(255,235,190,.09), transparent 30%),
     linear-gradient(180deg, rgba(12,14,17,.42), rgba(8,9,11,.72));
   padding: clamp(20px, 2.6vw, 34px);
 }
+.home-room-stage { position: relative; isolation: isolate; overflow: hidden; }
+.home-room-backdrop {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: .62;
+  filter: saturate(.86) brightness(.78);
+}
+.home-room-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(7,9,12,.88) 0%, rgba(7,9,12,.54) 42%, rgba(7,9,12,.18) 72%, rgba(7,9,12,.52) 100%);
+}
+.home-room-stage > :not(.home-room-backdrop) { position: relative; z-index: 1; }
 .outing-loading { min-height: 460px; display: grid; place-items: center; color: #6f757d; font-size: 12px; }
 .home-at-home {
   min-height: min(620px, calc(100dvh - 205px));
@@ -1091,6 +1123,49 @@ a { color: inherit; text-decoration: none; }
 .explore-hero-copy > p:not(.stage-caption) { max-width: 42ch; margin: 14px 0 0; color: #9aa0a7; font-size: 13px; line-height: 1.8; }
 .explore-hero-art { grid-area: hero-art; display: flex; justify-content: center; margin: 0; }
 .explore-hero-art .art-slot, .explore-persona-art { width: min(100%, 430px); min-height: clamp(240px, 29dvh, 330px); }
+.journey-gate-scene {
+  position: relative;
+  width: min(100%, 560px);
+  min-height: clamp(270px, 33dvh, 370px);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.1);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: inset 0 -100px 120px rgba(4,6,9,.62), 0 24px 80px rgba(0,0,0,.22);
+}
+.journey-gate-scene::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(7,9,13,.04) 48%, rgba(7,9,13,.54) 100%);
+}
+.journey-gate-scene.is-app .explore-persona-art {
+  position: absolute;
+  z-index: 2;
+  right: 3%;
+  bottom: -8%;
+  width: 48%;
+  min-height: 86%;
+}
+.public-world-ensemble {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+.public-world-resident { position: absolute; bottom: 8px; width: 36%; text-align: center; }
+.public-world-resident--1 { left: 4%; z-index: 2; }
+.public-world-resident--2 { left: 32%; bottom: 2px; z-index: 3; width: 38%; }
+.public-world-resident--3 { right: 4%; z-index: 2; }
+.public-world-resident .art-slot { width: 100%; min-height: 230px; border: 0; background-color: transparent; }
+.public-world-resident span { display: block; margin-top: -12px; color: #f5f0e7; font-size: 11px; font-weight: 800; }
+.public-world-resident small { display: block; margin-top: 2px; color: #8e949d; font-size: 8px; }
 .explore-cards { grid-area: cards; margin-top: 2px; display: grid; grid-template-columns: 1.2fr .9fr .9fr; gap: 12px; }
 .explore-card { position: relative; overflow: hidden; padding: 22px; }
 .explore-card-number { color: var(--blue); font-size: 24px; font-weight: 950; }
@@ -1112,6 +1187,11 @@ a { color: inherit; text-decoration: none; }
   .explore-hero-copy h1 { margin-top: 8px; font-size: 46px; }
   .explore-hero-copy > p:not(.stage-caption) { margin-top: 8px; font-size: 11px; line-height: 1.55; }
   .explore-hero-art .art-slot, .explore-persona-art { min-height: 170px; }
+  .journey-gate-scene { min-height: 205px; }
+  .journey-gate-scene.is-app .explore-persona-art { width: 52%; min-height: 88%; }
+  .public-world-ensemble { min-height: 100%; }
+  .public-world-resident .art-slot { min-height: 150px; }
+  .public-world-resident span { margin-top: -7px; font-size: 9px; }
   .explore-cards { margin-top: 0; grid-template-columns: 1fr; gap: 8px; }
   .explore-card.is-featured { padding: 14px; }
   .explore-card.is-featured h2 { font-size: 19px; }
@@ -1260,6 +1340,10 @@ a { color: inherit; text-decoration: none; }
 .atlas-stats { margin-top: 14px; display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
 .atlas-stats b { color: #176fd2; font-size: 26px; }
 .atlas-stats small { display: block; margin-top: 2px; color: #6a655e; font-size: 8px; font-weight: 400; }
+.atlas-collection-strip { margin-top: 14px; display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.atlas-collection-strip span { border: 1px solid rgba(0,0,0,.12); background: rgba(255,255,255,.24); padding: 10px; text-align: center; }
+.atlas-collection-strip b { display: block; color: #176fd2; font-size: 22px; }
+.atlas-collection-strip small { display: block; margin-top: 2px; color: #6a655e; font-size: 8px; }
 .atlas-grid .art-slot--wide { margin-top: 14px; }
 .atlas-relationship-polaroids { margin-top: 14px; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
 .atlas-relationship-polaroids .art-slot { width: 100%; }
@@ -1316,6 +1400,23 @@ a { color: inherit; text-decoration: none; }
 .journey-meta span { border: 1px solid rgba(0,0,0,.12); padding: 10px; color: #6b665e; font-size: 9px; }
 .journey-meta b { display: block; margin-top: 2px; color: #242628; font-size: 12px; }
 .journey-art-and-topic { margin-top: 16px; display: grid; grid-template-columns: .8fr 1.2fr; gap: 14px; align-items: stretch; }
+.journey-scene-visual {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.1);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: inset 0 -90px 120px rgba(4,6,9,.62);
+}
+.journey-scene-visual .journey-persona-art {
+  position: absolute;
+  right: 4%;
+  bottom: -7%;
+  width: 56%;
+  min-height: 84%;
+}
 .journey-art-and-topic > .art-slot, .journey-persona-art { width: 100%; max-height: 420px; }
 .journey-topic-paper h2 { margin: 10px 0 0; font-size: clamp(28px, 3.6vw, 44px); line-height: 1.05; }
 .journey-topic-paper > p { color: #625e57; font-size: 12px; line-height: 1.7; }
@@ -1374,6 +1475,8 @@ a { color: inherit; text-decoration: none; }
   .journey-title-paper h1 { font-size: 44px; }
   .journey-meta { grid-template-columns: 1fr; }
   .journey-art-and-topic { grid-template-columns: 1fr; }
+  .journey-scene-visual { min-height: 250px; }
+  .journey-scene-visual .journey-persona-art { right: 2%; width: 54%; min-height: 88%; }
   .journey-art-and-topic > .art-slot, .journey-persona-art { max-width: 230px; margin: auto; }
   .journey-timeline { grid-template-columns: repeat(4,1fr); gap: 6px; }
   .journey-timeline i { display: none; }

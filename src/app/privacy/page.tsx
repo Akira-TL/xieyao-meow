@@ -1,6 +1,6 @@
 import {
-  ArtSlot,
   DemoPage,
+  KanshanPlaceholder,
   PublicHeader,
 } from "@/features/demo/components";
 
@@ -33,7 +33,7 @@ const cards = [
 
 export default function PrivacyPage() {
   return (
-    <DemoPage scene="archive">
+    <DemoPage scene="landing">
       <PublicHeader right={<a className="public-kicker" href="/">返回序幕</a>} />
       <section className="privacy-stage">
         <div className="privacy-hero-copy">
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
           <p>我们尊重你的隐私，只在你授权的范围内，用公开的内容，帮助你孵化另一个更像你的自己。</p>
         </div>
         <div className="privacy-hero-art">
-          <ArtSlot name="privacy/guide" label="刘看山 / 隐私说明" aspect="portrait" />
+          <KanshanPlaceholder action="wander" className="kanshan-art--privacy" />
         </div>
         <div className="privacy-card-grid">
           {cards.map((card) => (

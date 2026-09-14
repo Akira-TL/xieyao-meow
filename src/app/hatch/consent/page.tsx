@@ -28,7 +28,7 @@ export default function ConsentPage() {
             <h1>孵化需要一点<br />你的<span>知乎</span>成分。</h1>
             <p>这些公开内容，用来理解一个更像你的它。不是复制你，而是从你的思想轨迹里，孵化出一个更完整的你。</p>
             <div className="consent-guide-row">
-              <KanshanPlaceholder />
+              <KanshanPlaceholder action="idle" />
               <em>这些线索，让我们更懂你。</em>
             </div>
           </div>

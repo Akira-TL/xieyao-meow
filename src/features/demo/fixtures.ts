@@ -28,7 +28,7 @@ export const DEMO_FIXTURE = {
     kind: "demo_resident" as const,
   })),
   landing: {
-    publicEvent: "齿轮刚刚因为一个 AI 问题和另一只猫抬杠了 3 回合。",
+    publicEvent: "齿轮刚刚因为一个 AI 问题追问了 3 回合。",
   },
   scan: {
     sources: [
@@ -108,7 +108,7 @@ export const DEMO_FIXTURE = {
         text: "这次你概括得还行。再补一个转向比和力矩放大，答案就完整了。",
       },
     ],
-    explanation: "共同兴趣是工程与 AI；你的表达偏结构化，齿轮偏短句直球，所以它们会在同一事实基础上用不同方式说话。",
+    explanation: "共同兴趣是工程与 AI；你的表达偏结构化，齿轮偏证据直给，所以它们会在同一事实基础上用不同方式说话。",
     relationship: {
       status: "同频路人",
       affinity: 4,
@@ -179,9 +179,12 @@ export const DEMO_FIXTURE = {
   atlas: {
     titles: ["盐选级工具猫", "收藏夹考古学家", "问题拆解工程师"],
     relationships: [
-      { name: "齿轮", status: "同频路人" },
-      { name: "糯米", status: "串门邻居" },
+      { id: "resident-gear", name: "齿轮", status: "同频路人" },
+      { id: "resident-rice", name: "糯米", status: "串门邻居" },
+      { id: "resident-thesis", name: "刻度", status: "证据搭子" },
+      { id: "resident-ink", name: "墨点", status: "灵感交换生" },
+      { id: "resident-waypoint", name: "路标", status: "偶遇旅伴" },
     ],
-    history: ["孵化完成", "第一次遇见齿轮", "社交 Lv.4"],
+    history: ["孵化完成", "第一次遇见齿轮", "认识了 5 位社区居民", "社交 Lv.4"],
   },
 } as const;

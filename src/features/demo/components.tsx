@@ -6,8 +6,9 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
+import { resolveP0Art, type PersonaEggState } from "@/lib/art/p0";
 import { resolvePersonaArt, type PersonaArtState, type PlayerPersona } from "@/lib/persona";
 
 export type AppSection = "home" | "explore" | "encounter" | "atlas";
@@ -161,17 +162,27 @@ export function ArtSlot({
   label,
   aspect = "stage",
   className = "",
+  src,
+  fit = "cover",
 }: {
   name: string;
   label?: string;
   aspect?: "stage" | "portrait" | "square" | "wide" | "polaroid" | "avatar";
   className?: string;
+  src?: string;
+  fit?: "cover" | "contain";
 }) {
+  const assetSrc = src?.trim() || (name.startsWith("npc/") ? `/art/slots/${name}.png` : undefined);
+  const style = assetSrc
+    ? ({ "--art-slot-image": `url(${JSON.stringify(assetSrc)})` } as CSSProperties & { "--art-slot-image": string })
+    : undefined;
+
   return (
     <div
-      className={`art-slot art-slot--${aspect} ${className}`}
+      className={`art-slot art-slot--${aspect} art-slot--fit-${fit} ${className}`}
       data-art-slot={name}
-      aria-label={`${label ?? name} 图片位置`}
+      aria-label={label ?? name}
+      style={style}
     />
   );
 }
@@ -249,15 +260,41 @@ export function PetStage({
   );
 }
 
-export function KanshanPlaceholder() {
-  return <ArtSlot name="official/liukanshan" label="刘看山" aspect="avatar" />;
+type KanshanAction = "idle" | "wave" | "wander" | "computer" | "sleepy" | "ball";
+
+export function KanshanPlaceholder({
+  action = "idle",
+  className = "",
+}: {
+  action?: KanshanAction;
+  className?: string;
+}) {
+  return (
+    <div className={`kanshan-art ${className}`} data-kanshan-action={action}>
+      <Image
+        alt={`刘看山 · ${action}`}
+        className="kanshan-art-image"
+        fill
+        sizes="(max-width: 760px) 96px, 128px"
+        src={`/art/official/liukanshan/${action}.gif`}
+        unoptimized
+      />
+    </div>
+  );
 }
 
-export function PersonaEgg() {
+export function PersonaEgg({ state = "idle" }: { state?: PersonaEggState }) {
   return (
-    <div className="persona-egg" data-art-slot="hatch/persona-egg" aria-label="人格蛋图片占位">
-      <span>?</span>
-      <small>PERSONA EGG</small>
+    <div className="persona-egg" data-egg-state={state} aria-label={`人格蛋 · ${state}`}>
+      <Image
+        alt=""
+        aria-hidden="true"
+        className="persona-egg-image"
+        fill
+        priority={state === "idle"}
+        sizes="(max-width: 760px) 190px, 280px"
+        src={resolveP0Art(`egg-${state}`)}
+      />
     </div>
   );
 }

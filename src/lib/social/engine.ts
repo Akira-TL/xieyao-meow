@@ -118,7 +118,7 @@ function renderEvent(
 
   if (action === "debate") {
     return {
-      narrative: `${actor.displayName} 顺着「${topic}」的话题闯进了 ${target.displayName} 的窝，两只猫因为回答风格差太大，当场开始友好对线。`,
+      narrative: `${actor.displayName} 顺着「${topic}」的话题闯进了 ${target.displayName} 的窝，两个 Persona 因为回答风格差太大，当场开始友好对线。`,
       comment: `${actor.persona.catchphrase} 同一个话题你这么讲，本喵得从另一个角度拆一拆。`,
     };
   }
@@ -129,7 +129,7 @@ function renderEvent(
     };
   }
   return {
-    narrative: `${actor.displayName} 发现 ${target.displayName} 平时混的是「${topic}」区，虽然不熟，还是先过去串门踩了个猫爪。`,
+    narrative: `${actor.displayName} 发现 ${target.displayName} 平时混的是「${topic}」区，虽然不熟，还是先过去串门留了个脚印。`,
     comment: `${actor.persona.catchphrase} 路过围观一下，你这个坑本喵还没研究过。`,
   };
 }

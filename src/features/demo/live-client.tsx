@@ -9,7 +9,7 @@ import type { AnswerExperience } from "@/lib/experience";
 
 import { DEMO_STAGE_STORAGE_KEY, advanceActivationStage, isDemoActivationStage } from "./activation";
 import { DemoFlowButton, EvidenceList } from "./client";
-import { PetStage } from "./components";
+import { PersonaEgg, PetStage } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 
 export interface LivePersonaSnapshot {
@@ -146,6 +146,21 @@ function scanRows(snapshot: LivePersonaSnapshot | null) {
       finding: `收藏倾向 ${composition.hoardingLevel}% · 用留下来的内容补全长期偏好`,
     },
   ];
+}
+
+export function ScanningEggSequence() {
+  const [state, setState] = useState<"scanning" | "glowing" | "cracking" | "opened">("scanning");
+
+  useEffect(() => {
+    const steps = [
+      window.setTimeout(() => setState("glowing"), 900),
+      window.setTimeout(() => setState("cracking"), 1850),
+      window.setTimeout(() => setState("opened"), 2800),
+    ];
+    return () => steps.forEach(window.clearTimeout);
+  }, []);
+
+  return <PersonaEgg state={state} />;
 }
 
 export function LiveScanningFlow() {

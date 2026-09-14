@@ -338,7 +338,13 @@ export function FirstMatchInteraction() {
           </div>
         </div>
         <div className="match-persona">
-          <div className="match-art-slot" data-art-slot={`persona/${candidate.id}`}>{candidate.displayName}</div>
+          <ArtSlot
+            name={`npc/${candidate.id}/meeting`}
+            label={candidate.displayName}
+            aspect="portrait"
+            className="match-art-slot"
+            fit="contain"
+          />
           <strong>{candidate.displayName}</strong>
           <span>{candidate.title}</span>
           <q>{candidate.catchphrase}</q>
@@ -481,7 +487,13 @@ export function EncounterPlayback() {
           <a href={topic.url} rel="noreferrer" target="_blank">查看原问题 ↗</a>
         </article>
         <div className="encounter-actor">
-          <div className="encounter-art" data-art-slot={`persona/${candidate.id}`}>{candidate.displayName}</div>
+          <ArtSlot
+            name={`npc/${candidate.id}/talking`}
+            label={candidate.displayName}
+            aspect="portrait"
+            className="encounter-art"
+            fit="contain"
+          />
           <strong>{candidate.displayName}</strong>
           <span>{candidate.personality[0]}</span>
         </div>
@@ -529,19 +541,27 @@ export function EncounterPlayback() {
 export function ShareRelationshipVisual() {
   const snapshot = usePersonaSnapshot();
   const playerPersona = snapshot?.persona ?? DEMO_FIXTURE.persona;
-  const [residentName, setResidentName] = useState<string>(DEMO_FIXTURE.match.candidate.displayName);
+  const [residentId, setResidentId] = useState<string>(DEMO_FIXTURE.match.candidate.id);
+  const resident = DEMO_FIXTURE.residents.find((item) => item.id === residentId) ?? DEMO_FIXTURE.match.candidate;
 
   useEffect(() => {
-    const residentId = window.sessionStorage.getItem(SELECTED_RESIDENT_STORAGE_KEY);
-    const resident = DEMO_FIXTURE.residents.find((item) => item.id === residentId);
-    if (resident) setResidentName(resident.displayName);
+    const storedResidentId = window.sessionStorage.getItem(SELECTED_RESIDENT_STORAGE_KEY);
+    if (storedResidentId && DEMO_FIXTURE.residents.some((item) => item.id === storedResidentId)) {
+      setResidentId(storedResidentId);
+    }
   }, []);
 
   return (
     <div className="share-live-visual">
       <PersonaArt alt="本喵完成第一次相遇" className="share-player-persona" persona={playerPersona} state="returned" />
       <span className="share-live-mark">×</span>
-      <ArtSlot name="share/first-resident" label={residentName} aspect="portrait" className="share-resident-art" />
+      <ArtSlot
+        name={`npc/${resident.id}/meeting`}
+        label={resident.displayName}
+        aspect="portrait"
+        className="share-resident-art"
+        fit="contain"
+      />
     </div>
   );
 }

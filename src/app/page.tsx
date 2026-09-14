@@ -27,7 +27,7 @@ export default function LandingPage() {
           <PersonaEgg />
           <div className="landing-guide">
             <span className="landing-bubble">要开幕吗？</span>
-            <KanshanPlaceholder />
+            <KanshanPlaceholder action="wave" />
           </div>
         </div>
 

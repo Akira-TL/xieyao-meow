@@ -4,7 +4,7 @@ import { LiveExploreSection } from "@/features/demo/live/daily-live-client";
 
 function ExploreContent({ appMode }: { appMode: boolean }) {
   return (
-    <DemoPage scene="default">
+    <DemoPage scene={appMode ? "default" : "encounter"}>
       {appMode ? <AppHeader active="explore" /> : <PublicHeader right={<span className="public-kicker">PUBLIC EXPLORE</span>} />}
       <LiveExploreSection appMode={appMode} />
       {appMode ? <AppBottomNav active="explore" /> : null}

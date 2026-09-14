@@ -7,6 +7,8 @@ import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import Link from "next/link";
 
+import { resolveP0Art } from "@/lib/art/p0";
+
 import { DemoFlowButton } from "../client";
 import { ArtSlot, PaperCard, PersonaArt } from "../components";
 import { DEMO_FIXTURE } from "../fixtures";
@@ -50,11 +52,24 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
       </div>
 
       <div className="explore-hero-art">
-        {appMode ? (
-          <PersonaArt alt="本喵背着包出门逛知乎" aspect="wide" className="explore-persona-art" persona={playerPersona} state="walking" />
-        ) : (
-          <ArtSlot name="explore/public-world" label="多个 Persona 在舞台相遇" aspect="wide" />
-        )}
+        <div
+          className={`journey-gate-scene${appMode ? " is-app" : " is-public"}`}
+          style={{ backgroundImage: `url(${resolveP0Art("journey-zhihu-gate")})` }}
+        >
+          {appMode ? (
+            <PersonaArt alt="本喵背着包走进知乎知识世界" aspect="portrait" className="explore-persona-art" persona={playerPersona} state="walking" />
+          ) : (
+            <div className="public-world-ensemble" aria-label="社区居民群像">
+              {DEMO_FIXTURE.residents.slice(0, 3).map((resident, index) => (
+                <div className={`public-world-resident public-world-resident--${index + 1}`} key={resident.id}>
+                  <ArtSlot name={`npc/${resident.id}/idle`} label={resident.displayName} aspect="portrait" fit="contain" />
+                  <span>{resident.displayName}</span>
+                  <small>{resident.species}</small>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="explore-cards">
@@ -64,7 +79,12 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
             <span className="explore-card-badge">{index === 0 ? "今天先看" : index === 1 ? "顺路闻到" : "陌生领域"}</span>
             <h2>{item.title}</h2>
             <p>{compact(item.summary)}</p>
-            <ArtSlot name={`explore/card-${index + 1}`} label={`旅途卡 ${index + 1}`} aspect="wide" />
+            <ArtSlot
+              name={`journey/question-${index + 1}`}
+              label={`旅途卡 ${index + 1}`}
+              aspect="wide"
+              src={item.thumbnailUrl || undefined}
+            />
             <div className="explore-why">
               <b>为什么带回来：</b>{appMode ? questionReason(index, primaryInterest) : "来自当前知乎公开内容，用来展示不同问题如何触发不同 Persona 的注意。"}
             </div>
@@ -93,6 +113,10 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
 function residentScore(selfInterests: string[], residentInterests: readonly string[]) {
   const overlap = selfInterests.filter((item) => residentInterests.includes(item)).length;
   return Math.min(96, 64 + overlap * 14);
+}
+
+function relationshipSlug(residentId: string) {
+  return residentId.replace(/^resident-/, "");
 }
 
 export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }) {
@@ -135,10 +159,10 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
             <p className="is-other"><b>{latest.displayName}</b>：{latest.catchphrase} 你负责拆结构，我先问普通人的感受是不是被漏掉了。</p>
             <p><b>本喵</b>：{summary}</p>
           </div>
-          <ArtSlot name="encounter/daily-other" label={latest.displayName} aspect="portrait" />
+          <ArtSlot name={`npc/${latest.id}/talking`} label={latest.displayName} aspect="portrait" fit="contain" />
         </div>
         <p className="encounter-subtitle">{selfDescriptor} × {latest.personality[0]} · 契合度 {latest.score}%</p>
-        <Link className="theatre-button theatre-button-primary daily-relationship-link" href="/relationship/gear">看看这段关系 <span>→</span></Link>
+        <Link className="theatre-button theatre-button-primary daily-relationship-link" href={`/relationship/${relationshipSlug(latest.id)}`}>看看这段关系 <span>→</span></Link>
       </div>
     );
   }
@@ -154,7 +178,7 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
 
       <PaperCard className="latest-encounter-card">
         <div className="latest-encounter-art">
-          <ArtSlot name={`encounter/latest-${latest.id}`} label={`最近相遇 / ${latest.displayName}`} aspect="square" />
+          <ArtSlot name={`npc/${latest.id}/meeting`} label={`最近相遇 / ${latest.displayName}`} aspect="square" fit="contain" />
         </div>
         <div className="latest-encounter-copy">
           <span>最近的相遇 · LATEST ENCOUNTER</span>
@@ -169,9 +193,9 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
       <section className="more-encounters">
         <div className="section-heading-row"><h2>关系簿</h2><span>RELATIONSHIPS</span></div>
         <div className="relationship-card-grid">
-          {residents.map((item, index) => (
-            <Link className="relationship-mini-card" href={`/relationship/${index === 0 ? "gear" : "neighbor"}`} key={item.id}>
-              <ArtSlot name={`encounter/${item.id}`} label={item.displayName} aspect="avatar" />
+          {residents.map((item) => (
+            <Link className="relationship-mini-card" href={`/relationship/${relationshipSlug(item.id)}`} key={item.id}>
+              <ArtSlot name={`npc/${item.id}/idle`} label={item.displayName} aspect="avatar" fit="contain" />
               <div><strong>{item.displayName}</strong><span>{item.personality[0]} · {item.interests.join(" / ")}</span><b>{item.score}%</b></div>
               <small>查看关系 →</small>
             </Link>
@@ -194,6 +218,9 @@ export function LiveJourneyDetail() {
   const primaryInterest = personaSnapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.interests[0];
   const playerPersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
   const summary = compact(question.summary, 180);
+  const galleryQuestions = questionSnapshot?.questions?.length
+    ? questionSnapshot.questions.slice(0, 3)
+    : [question];
 
   return (
     <section className="journey-detail-stage">
@@ -217,7 +244,12 @@ export function LiveJourneyDetail() {
         </PaperCard>
 
         <div className="journey-art-and-topic">
-          <PersonaArt alt="本喵旅途中" className="journey-persona-art" persona={playerPersona} state="walking" />
+          <div
+            className="journey-scene-visual"
+            style={{ backgroundImage: `url(${resolveP0Art("journey-zhihu-gate")})` }}
+          >
+            <PersonaArt alt="本喵穿过知乎知识世界" className="journey-persona-art" persona={playerPersona} state="walking" />
+          </div>
           <PaperCard className="journey-topic-paper">
             <span>带回的问题 · 知乎</span>
             <h2>{question.title}</h2>
@@ -243,9 +275,15 @@ export function LiveJourneyDetail() {
           <div>
             <h2>路上的一些画面</h2>
             <div className="journey-gallery">
-              <ArtSlot name="journey/photo-01" label="旅途照片 01" aspect="polaroid" />
-              <ArtSlot name="journey/photo-02" label="旅途照片 02" aspect="polaroid" />
-              <ArtSlot name="journey/photo-03" label="旅途照片 03" aspect="polaroid" />
+              {galleryQuestions.map((item, index) => (
+                <ArtSlot
+                  key={`${item.url}-${index}`}
+                  name={`journey/photo-${String(index + 1).padStart(2, "0")}`}
+                  label={`旅途照片 ${String(index + 1).padStart(2, "0")}`}
+                  aspect="polaroid"
+                  src={item.thumbnailUrl || undefined}
+                />
+              ))}
             </div>
           </div>
           <PaperCard>
@@ -267,8 +305,8 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
   const persona = personaSnapshot?.persona;
   const playerPersona = persona ?? DEMO_FIXTURE.persona;
   const selfInterests = persona?.interests ?? DEMO_FIXTURE.persona.interests;
-  const residentIndex = relationshipId === "neighbor" ? 1 : 0;
-  const candidate = DEMO_FIXTURE.residents[residentIndex] ?? DEMO_FIXTURE.residents[0];
+  const legacyResidentId = relationshipId === "neighbor" ? "resident-rice" : `resident-${relationshipId}`;
+  const candidate = DEMO_FIXTURE.residents.find((resident) => resident.id === legacyResidentId) ?? DEMO_FIXTURE.residents[0];
   const score = residentScore(selfInterests, candidate.interests);
   const candidateInterestSet = new Set<string>(candidate.interests);
   const shared = selfInterests.filter((item) => candidateInterestSet.has(item));
@@ -295,7 +333,7 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
         </div>
         <i>♡</i>
         <div>
-          <ArtSlot name="relationship/other" label={candidate.displayName} aspect="portrait" />
+          <ArtSlot name={`npc/${candidate.id}/meeting`} label={candidate.displayName} aspect="portrait" fit="contain" />
           <strong>{candidate.displayName}</strong><span>{candidate.personality[0]} · {candidate.interests.join(" × ")}</span>
         </div>
       </div>
@@ -332,7 +370,12 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
 
         <PaperCard className="relationship-latest-scene">
           <h2>最新一幕</h2>
-          <ArtSlot name="relationship/latest-scene" label="最近一次真实问题对手戏" aspect="wide" />
+          <ArtSlot
+            name="relationship/latest-scene"
+            label="最近一次真实问题对手戏"
+            aspect="wide"
+            src={question.thumbnailUrl || undefined}
+          />
           <h3>“{question.title}”</h3>
           <p>{compact(question.summary, 120)}</p>
           <a href="/encounter?view=featured">看最新一幕 →</a>
@@ -430,7 +473,11 @@ export function LiveAtlasSection() {
             <b>{counts?.collections ?? 0}<small><BookmarkBorderRoundedIcon fontSize="inherit" /> 近期收藏</small></b>
             <b>{counts?.favlists ?? 0}<small><AutoAwesomeRoundedIcon fontSize="inherit" /> 收藏夹</small></b>
           </div>
-          <ArtSlot name="atlas/journey-collection" label="知乎成分与旅途收藏" aspect="wide" />
+          <div className="atlas-collection-strip" aria-label="旅途收藏摘要">
+            <span><b>14</b><small>幕间札记</small></span>
+            <span><b>9</b><small>问题票根</small></span>
+            <span><b>{DEMO_FIXTURE.atlas.relationships.length}</b><small>关系票根</small></span>
+          </div>
         </PaperCard>
       </div>
 
@@ -438,9 +485,9 @@ export function LiveAtlasSection() {
         <PaperCard>
           <div className="section-heading-row"><h2>关系图鉴</h2><a href="/encounter">查看全部 →</a></div>
           <div className="atlas-relationship-polaroids">
-            {DEMO_FIXTURE.atlas.relationships.map((item, index) => (
-              <a href={`/relationship/${index === 0 ? "gear" : "neighbor"}`} key={item.name}>
-                <ArtSlot name={`atlas/relation-${index + 1}`} label={item.name} aspect="polaroid" />
+            {DEMO_FIXTURE.atlas.relationships.map((item) => (
+              <a href={`/relationship/${relationshipSlug(item.id)}`} key={item.name}>
+                <ArtSlot name={`npc/${item.id}/idle`} label={item.name} aspect="polaroid" fit="contain" />
                 <span>{item.status}</span>
               </a>
             ))}
