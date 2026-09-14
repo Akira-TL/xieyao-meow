@@ -20,6 +20,7 @@ interface JourneyServiceOptions {
   dbPath?: string;
   now?: () => number;
   createId?: () => string;
+  timeScale?: number;
   discover: JourneyDiscoverer;
 }
 
@@ -86,15 +87,19 @@ function rangedMs(seed: string, minMs: number, maxMs: number): number {
   return minMs + (hashString(seed) % (maxMs - minMs + 1));
 }
 
-function journeyDurationMs(sequence: number, seed: string): number {
-  if (sequence <= 1) return rangedMs(seed, 3 * MINUTE, 5 * MINUTE);
-  if (sequence === 2) return rangedMs(seed, 10 * MINUTE, 20 * MINUTE);
-  if (sequence === 3) return rangedMs(seed, 20 * MINUTE, 40 * MINUTE);
-  return rangedMs(seed, 30 * MINUTE, 90 * MINUTE);
+function scaleMs(value: number, timeScale: number): number {
+  return Math.max(1_000, Math.round(value * timeScale));
 }
 
-function restDurationMs(seed: string): number {
-  return rangedMs(`${seed}:rest`, 30 * MINUTE, 90 * MINUTE);
+function journeyDurationMs(sequence: number, seed: string, timeScale: number): number {
+  if (sequence <= 1) return scaleMs(rangedMs(seed, 3 * MINUTE, 5 * MINUTE), timeScale);
+  if (sequence === 2) return scaleMs(rangedMs(seed, 10 * MINUTE, 20 * MINUTE), timeScale);
+  if (sequence === 3) return scaleMs(rangedMs(seed, 20 * MINUTE, 40 * MINUTE), timeScale);
+  return scaleMs(rangedMs(seed, 30 * MINUTE, 90 * MINUTE), timeScale);
+}
+
+function restDurationMs(seed: string, timeScale: number): number {
+  return scaleMs(rangedMs(`${seed}:rest`, 30 * MINUTE, 90 * MINUTE), timeScale);
 }
 
 function questionFromRow(row: Pick<JourneyRow, "question_title" | "question_url" | "question_summary" | "question_thumbnail_url">): JourneyQuestion | null {
@@ -123,12 +128,14 @@ export class JourneyService {
   private readonly db: DatabaseSync;
   private readonly now: () => number;
   private readonly createId: () => string;
+  private readonly timeScale: number;
 
   constructor(private readonly options: JourneyServiceOptions) {
     const dbPath = options.dbPath ?? path.join(process.cwd(), "data", "xieyao.sqlite");
     if (dbPath !== ":memory:") mkdirSync(path.dirname(dbPath), { recursive: true });
     this.now = options.now ?? Date.now;
     this.createId = options.createId ?? randomUUID;
+    this.timeScale = Math.min(1, Math.max(0.01, options.timeScale ?? 1));
     this.db = new DatabaseSync(dbPath);
     this.db.exec("PRAGMA journal_mode = WAL;");
     this.db.exec("PRAGMA foreign_keys = ON;");
@@ -337,8 +344,8 @@ export class JourneyService {
     const sequence = this.countJourneys(userId) + 1;
     const id = this.createId();
     const planSeed = `${id}:journey-v1:${sequence}`;
-    const durationMs = journeyDurationMs(sequence, planSeed);
-    const preparingMs = rangedMs(`${planSeed}:prepare`, 15_000, 30_000);
+    const durationMs = journeyDurationMs(sequence, planSeed, this.timeScale);
+    const preparingMs = scaleMs(rangedMs(`${planSeed}:prepare`, 15_000, 30_000), this.timeScale);
 
     this.db.prepare(`
       INSERT INTO journeys (
@@ -374,7 +381,7 @@ export class JourneyService {
     const headline = question ? "它叼回来一个问题。" : "它空着爪子回来了。";
     const artifactId = question ? this.createId() : null;
     const memoryId = question ? this.createId() : null;
-    const nextEligibleAt = row.return_at + restDurationMs(row.plan_seed);
+    const nextEligibleAt = row.return_at + restDurationMs(row.plan_seed, this.timeScale);
 
     try {
       this.db.exec("BEGIN IMMEDIATE;");
@@ -491,7 +498,7 @@ export class JourneyService {
       UPDATE journey_user_state
       SET next_eligible_at = ?, queued_route_bias = NULL, updated_at = ?
       WHERE user_id = ?
-    `).run(now + restDurationMs(`${seed}:catch-up-cap`), now, userId);
+    `).run(now + restDurationMs(`${seed}:catch-up-cap`, this.timeScale), now, userId);
   }
 
   private setQueuedRouteBias(userId: string, routeBias: string | null): void {

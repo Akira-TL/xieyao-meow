@@ -178,6 +178,32 @@ describe("server Journey", () => {
     service.close();
   });
 
+  it("supports a server-only rehearsal time scale without changing Journey semantics", async () => {
+    const dbPath = createDbPath();
+    const userId = createUser(dbPath, "subject-a", "user-a");
+    let now = 1_000;
+    const service = new JourneyService({
+      dbPath,
+      now: () => now,
+      timeScale: 0.02,
+      createId: () => "journey-demo",
+      discover: async () => ({
+        question: null,
+        contentSource: "none",
+        knowledgeSource: "none",
+        sourceFetchedAt: now,
+        postcardBody: "排练模式也按同一状态机回来。",
+      }),
+    });
+
+    const started = await service.start(userId, "oauth-a", null);
+    expect(started.journey!.returnAt - started.journey!.createdAt).toBeGreaterThanOrEqual(3_600);
+    expect(started.journey!.returnAt - started.journey!.createdAt).toBeLessThanOrEqual(6_000);
+    now = started.journey!.returnAt;
+    expect((await service.getProjection(userId, "oauth-a")).state).toBe("RETURNED");
+    service.close();
+  });
+
   it("returns on schedule without fabricating content when discovery fails", async () => {
     const dbPath = createDbPath();
     const userId = createUser(dbPath, "subject-a", "user-a");

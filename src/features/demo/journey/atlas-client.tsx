@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 
 import type { JourneyAtlasView } from "@/lib/journey/types";
 
-import { PaperCard } from "./components";
-import { LiveAtlasSection } from "./live/daily-live-client";
+import { PaperCard } from "../components";
+import { LiveAtlasSection } from "../live/daily-live-client";
 
 function formatJourneyTime(value: number) {
   return new Intl.DateTimeFormat("zh-CN", {

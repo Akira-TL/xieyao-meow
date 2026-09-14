@@ -106,6 +106,13 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   };
 };
 
+function rehearsalTimeScale(): number {
+  const raw = process.env.XIEYAO_REHEARSAL_JOURNEY_TIME_SCALE?.trim();
+  if (!raw) return 1;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(1, Math.max(0.01, parsed)) : 1;
+}
+
 type JourneyGlobal = typeof globalThis & {
   __xieyaoJourneyService?: JourneyService;
 };
@@ -115,6 +122,7 @@ const journeyGlobal = globalThis as JourneyGlobal;
 export function getJourneyService(): JourneyService {
   journeyGlobal.__xieyaoJourneyService ??= new JourneyService({
     discover: discoverJourneyContent,
+    timeScale: rehearsalTimeScale(),
   });
   return journeyGlobal.__xieyaoJourneyService;
 }
