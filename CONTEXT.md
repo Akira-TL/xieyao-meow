@@ -51,6 +51,10 @@
 
 稳定 `User` 的服务端长期运行状态总称，覆盖激活进度、当前 Journey/Outing、Persona 演化与记忆、收藏资产、Encounter / Relationship 及 Daily Event 等会影响后续体验的事实。浏览器只能缓存短生命周期 view-model、交互状态和 optimistic projection，不能成为 Game State 的唯一真相。
 
+### Journey
+
+一趟由谢邀喵自主完成的有限旅途，是长期循环的服务端持久化事件单元；现有 ADR/PoC 中的 `Outing` 指同一领域概念。用户最多提供弱路线倾向，最终内容、相遇与产物由 Persona、近期记忆、旅途历史和当时的知乎候选共同决定；主生命周期保持 `AT_HOME / PREPARING / AWAY / RETURNED`。
+
 ### Knowledge Layer
 
 负责提供与问题相关的事实、背景、知乎内容或直答结果，目标是保证回答的信息基础。
