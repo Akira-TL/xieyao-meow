@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import type { AnswerExperience } from "@/lib/experience";
-import type { SocialEvent } from "@/lib/social";
+import type { SocialEvent, SocialMatchInsight } from "@/lib/social";
 
 import {
   DEMO_STAGE_STORAGE_KEY,
@@ -314,24 +314,56 @@ export function FirstMatchInteraction() {
   const snapshot = usePersonaSnapshot();
   const candidates = useMemo(() => DEMO_FIXTURE.residents, []);
   const [index, setIndex] = useState(0);
+  const [matchInsight, setMatchInsight] = useState<SocialMatchInsight | null>(null);
+  const [matchLoading, setMatchLoading] = useState(false);
   const candidate = candidates[index % candidates.length];
   const selfPersona = snapshot?.persona;
   const playerPersona = selfPersona ?? DEMO_FIXTURE.persona;
   const selfInterests = selfPersona?.interests ?? DEMO_FIXTURE.persona.interests;
   const candidateInterestSet = new Set<string>(candidate.interests);
   const sharedInterests = selfInterests.filter((interest: string) => candidateInterestSet.has(interest));
-  const score = Math.min(95, 72 + sharedInterests.length * 8 + (index === 0 ? 3 : 0));
+  const fallbackScore = Math.min(95, 72 + sharedInterests.length * 8 + (index === 0 ? 3 : 0));
+  const score = matchInsight?.score ?? fallbackScore;
   const selfStyle = snapshot?.composition.writingLength === "long"
     ? "长答工程脑"
     : snapshot?.composition.writingLength === "short"
       ? "短句直给型"
       : "结构化表达型";
   const primaryInterest = snapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.archetype;
-  const prediction = sharedInterests.length > 0
+  const fallbackPrediction = sharedInterests.length > 0
     ? candidate.answerStyle.length === "short" && snapshot?.composition.writingLength === "long"
       ? "很可能边吵边加好友"
       : "很可能聊着聊着就互相关注"
     : "暂时陌生，但值得再碰一次";
+  const prediction = matchInsight?.prediction ?? fallbackPrediction;
+  const bridge = matchInsight?.bridge ?? sharedInterests[1] ?? candidate.interests[0];
+
+  useEffect(() => {
+    let cancelled = false;
+    setMatchInsight(null);
+    setMatchLoading(true);
+    fetch("/api/community/match", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ residentId: candidate.id }),
+      cache: "no-store",
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("match request failed");
+        return (await response.json()) as SocialMatchInsight;
+      })
+      .then((next) => {
+        if (!cancelled) setMatchInsight(next);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setMatchLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [candidate.id]);
 
   return (
     <div className="first-match-shell">
@@ -352,7 +384,7 @@ export function FirstMatchInteraction() {
           <div className="match-common-grid">
             <div><b>共同兴趣</b><em>{sharedInterests[0] ?? primaryInterest}</em><small>你的长期偏好</small></div>
             <i>♥</i>
-            <div><b>{sharedInterests[1] ? "共同兴趣" : "对方气味"}</b><em>{sharedInterests[1] ?? candidate.interests[0]}</em><small>决定第一场对手戏</small></div>
+            <div><b>连接话题</b><em>{bridge}</em><small>{matchInsight?.mode === "zhida" ? "知乎直答找到的连接点" : "决定第一场对手戏"}</small></div>
           </div>
         </div>
         <div className="match-persona">
@@ -375,6 +407,16 @@ export function FirstMatchInteraction() {
         <span>{candidate.personality[0]} <small>{candidate.interests.join(" · ")}</small></span>
       </div>
       <p className="match-prediction">关系预测：{prediction}</p>
+      <p className="match-reason">
+        {matchLoading ? "正在比较两种思考方式…" : matchInsight?.reason ?? "先从共同兴趣和表达差异建立第一条连接。"}
+        <span className={matchInsight?.mode === "zhida" ? "is-live" : ""}>
+          {matchLoading
+            ? "匹配中"
+            : matchInsight?.mode === "zhida"
+              ? "知乎直答 + 谢邀喵匹配规则"
+              : "谢邀喵匹配规则"}
+        </span>
+      </p>
 
       <button
         className="theatre-button theatre-button-primary match-main-cta"

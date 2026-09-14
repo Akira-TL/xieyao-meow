@@ -24,7 +24,7 @@ function pairKey(left: string, right: string): string {
   return [left, right].sort().join("::");
 }
 
-function buildSignals(actor: SocialAgent, target: SocialAgent): SocialSignals {
+export function buildSocialSignals(actor: SocialAgent, target: SocialAgent): SocialSignals {
   const sharedInterests = actor.persona.interests.filter((interest) =>
     target.persona.interests.includes(interest),
   );
@@ -146,7 +146,7 @@ export class SocialCommunity {
 
     const key = pairKey(actor.id, target.id);
     const affinityBefore = this.affinities.get(key) ?? 0;
-    const signals = buildSignals(actor, target);
+    const signals = buildSocialSignals(actor, target);
     const action = chooseAction(signals);
     const delta = affinityDelta(action, signals);
     const affinityAfter = affinityBefore + delta;
