@@ -237,6 +237,39 @@ export function PersonaArt({
   );
 }
 
+export type ResidentArtState = "idle" | "talking" | "meeting" | "reaction";
+
+export function ResidentArt({
+  residentId,
+  state = "idle",
+  alt,
+  className = "",
+  priority = false,
+}: {
+  residentId: string;
+  state?: ResidentArtState;
+  alt: string;
+  className?: string;
+  priority?: boolean;
+}) {
+  return (
+    <div
+      className={`resident-art ${className}`}
+      data-resident-id={residentId}
+      data-resident-state={state}
+    >
+      <Image
+        alt={alt}
+        className="resident-art-image"
+        fill
+        priority={priority}
+        sizes="(max-width: 760px) 44vw, 360px"
+        src={`/art/slots/npc/${residentId}/${state}.png`}
+      />
+    </div>
+  );
+}
+
 export function PetStage({
   name,
   species,

@@ -398,6 +398,12 @@ a { color: inherit; text-decoration: none; }
 .persona-art--avatar { width: 88px; height: 88px; border-radius: 50%; overflow: hidden; }
 .persona-art-image { object-fit: contain; object-position: center bottom; }
 .persona-art--avatar .persona-art-image { object-position: center 24%; transform: scale(1.55); }
+.resident-art {
+  position: relative;
+  aspect-ratio: 1122 / 1402;
+  overflow: visible;
+}
+.resident-art-image { object-fit: contain; object-position: center bottom; }
 
 .persona-egg {
   position: relative;
@@ -603,16 +609,7 @@ a { color: inherit; text-decoration: none; }
   gap: 18px;
 }
 .match-persona { min-width: 0; }
-.match-art-slot {
-  min-height: 250px;
-  display: grid;
-  place-items: center;
-  border: 1px dashed rgba(98,159,255,.45);
-  background: linear-gradient(180deg, rgba(22,119,255,.08), rgba(255,255,255,.01));
-  color: #c2d8ff;
-  font-weight: 800;
-}
-.match-art-slot small { color: #65738a; font-size: 8px; font-weight: 400; }
+.match-resident-art { width: min(100%, 370px); min-height: 250px; margin: 0 auto; }
 .match-self-persona-art { width: min(100%, 320px); min-height: 250px; margin: 0 auto; }
 .match-persona strong { display: block; margin-top: 10px; font-size: 20px; }
 .match-persona > span { display: block; margin-top: 3px; color: #a1a6ae; font-size: 12px; }
@@ -712,8 +709,7 @@ a { color: inherit; text-decoration: none; }
   }
   .match-title { font-size: 54px; }
   .match-stage-grid { grid-template-columns: 1fr 96px 1fr; gap: 8px; }
-  .match-art-slot { min-height: 150px; font-size: 12px; }
-  .match-self-persona-art { min-height: 150px; }
+  .match-resident-art, .match-self-persona-art { min-height: 150px; }
   .match-persona strong { font-size: 15px; }
   .match-persona q { display: none; }
   .match-score-block > strong { font-size: 58px; }

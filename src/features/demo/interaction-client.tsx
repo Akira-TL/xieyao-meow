@@ -15,7 +15,7 @@ import {
   isDemoActivationStage,
   type DemoActivationStage,
 } from "./activation";
-import { ArtSlot, PersonaArt } from "./components";
+import { ArtSlot, PersonaArt, ResidentArt } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import {
   LIVE_EXPERIENCE_STORAGE_KEY,
@@ -356,12 +356,12 @@ export function FirstMatchInteraction() {
           </div>
         </div>
         <div className="match-persona">
-          <ArtSlot
-            name={`npc/${candidate.id}/meeting`}
-            label={candidate.displayName}
-            aspect="portrait"
-            className="match-art-slot"
-            fit="contain"
+          <ResidentArt
+            alt={`${candidate.displayName} · ${candidate.species}`}
+            className="match-resident-art"
+            priority
+            residentId={candidate.id}
+            state="meeting"
           />
           <strong>{candidate.displayName}</strong>
           <span>{candidate.title}</span>
