@@ -92,7 +92,7 @@ export async function POST(request: Request) {
   }
 
   const identity = await getRequestOAuthIdentity();
-  const actorId = identity ? `oauth:${identity.sessionId}` : "self-demo";
+  const actorId = identity ? `user:${identity.userId}` : "self-demo";
   const { actor, personaMode } = await resolveActor(actorId, identity?.oauthAccessToken);
   const gateway = createZhihuGatewayFromEnv();
   const memory: PersonaExperienceMemory = parsed.memory;

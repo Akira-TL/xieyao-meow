@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { OAUTH_SESSION_COOKIE } from "@/lib/auth/request-session";
-import { getOAuthSessionStore } from "@/lib/auth/runtime";
+import { getAccountStore } from "@/lib/auth/runtime";
+import { ANONYMOUS_PROFILE_COOKIE } from "@/lib/profile/cookies";
 import { createZhihuGatewayFromEnv } from "@/lib/zhihu/env";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,13 @@ function externalUrl(request: Request, pathname: string): URL {
 
   if (host) return new URL(pathname, `${proto}://${host}`);
   return new URL(pathname, request.url);
+}
+
+function cookieValue(request: Request, name: string): string | null {
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${escaped}=([^;]+)`));
+  return match?.[1] ? decodeURIComponent(match[1]) : null;
 }
 
 function callbackReadyResponse() {
@@ -51,8 +59,26 @@ export async function GET(request: Request) {
   }
 
   try {
-    const oauth = await createZhihuGatewayFromEnv().exchangeAuthorizationCode(authorizationCode);
-    const session = getOAuthSessionStore().create(oauth.accessToken, oauth.expiresIn);
+    const gateway = createZhihuGatewayFromEnv();
+    const oauth = await gateway.exchangeAuthorizationCode(authorizationCode);
+    const providerIdentity = await gateway.getOAuthUserIdentity(oauth.accessToken);
+    const store = getAccountStore();
+    const userId = store.resolveOrCreateOAuthUser("zhihu", providerIdentity.providerSubject);
+
+    const anonymousId = cookieValue(request, ANONYMOUS_PROFILE_COOKIE);
+    if (anonymousId) {
+      const claim = store.claimAnonymousProfile(anonymousId, userId);
+      if (claim === "conflict") {
+        console.warn("[oauth] anonymous profile was already consumed by another user");
+      }
+    }
+
+    const previousSessionId = cookieValue(request, OAUTH_SESSION_COOKIE);
+    const session = store.createSession(userId, oauth.accessToken, oauth.expiresIn);
+    if (previousSessionId && previousSessionId !== session.id) {
+      store.deleteSession(previousSessionId);
+    }
+
     const response = NextResponse.redirect(externalUrl(request, "/hatch/scanning?oauth=connected"));
     response.cookies.set(OAUTH_SESSION_COOKIE, session.id, {
       httpOnly: true,
@@ -61,10 +87,17 @@ export async function GET(request: Request) {
       path: "/",
       maxAge: oauth.expiresIn,
     });
+    response.cookies.set(ANONYMOUS_PROFILE_COOKIE, "", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 0,
+    });
     return response;
   } catch (error) {
     console.error(
-      "[oauth] authorization code exchange failed",
+      "[oauth] authorization flow failed",
       error instanceof Error ? error.message : "unknown error",
     );
     return NextResponse.redirect(externalUrl(request, "/hatch/consent?oauth=error"));

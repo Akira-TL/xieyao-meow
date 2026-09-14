@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   let experience: AnswerExperience = DEMO_FALLBACK;
   try {
     experience = await getAnswerExperienceService().create({
-      cacheKey: identity ? `oauth:${identity.sessionId}` : "self-demo",
+      cacheKey: identity ? `user:${identity.userId}` : "self-demo",
       oauthAccessToken: identity?.oauthAccessToken,
     });
   } catch (error) {
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   }
 
   const actor: SocialAgent = {
-    id: identity ? `oauth:${identity.sessionId}` : "self-demo",
+    id: identity ? `user:${identity.userId}` : "self-demo",
     displayName: "本喵",
     composition: experience.composition,
     persona: experience.persona,

@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getRequestOAuthIdentity } from "@/lib/auth/request-session";
+import { getAccountStore } from "@/lib/auth/runtime";
 import {
   CAT_APPEARANCE_VARIANTS,
   CAT_NAME_MAX_LENGTH,
@@ -12,13 +13,13 @@ import {
   normalizeCatName,
   type CatProfilePatch,
 } from "@/lib/profile";
-import { getCatProfileStore } from "@/lib/profile/runtime";
+import {
+  ANONYMOUS_PROFILE_COOKIE,
+  ANONYMOUS_PROFILE_MAX_AGE_SECONDS,
+} from "@/lib/profile/cookies";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-const PROFILE_COOKIE = "xieyao_profile_id";
-const ONE_YEAR_SECONDS = 365 * 24 * 60 * 60;
 
 const patchSchema = z.object({
   catName: z.string().transform(normalizeCatName).refine(isValidCatName, {
@@ -29,36 +30,52 @@ const patchSchema = z.object({
   message: "没有可更新的资料",
 });
 
-async function resolveSubject() {
+type ProfileOwner =
+  | { kind: "user"; userId: string; anonymousId: null }
+  | { kind: "anonymous"; userId: null; anonymousId: string; setCookie: boolean };
+
+async function resolveOwner(): Promise<ProfileOwner> {
   const identity = await getRequestOAuthIdentity();
-  if (identity) return { subjectId: `oauth:${identity.sessionId}`, anonymousId: null };
+  if (identity) {
+    return { kind: "user", userId: identity.userId, anonymousId: null };
+  }
 
   const cookieStore = await cookies();
-  const existing = cookieStore.get(PROFILE_COOKIE)?.value?.trim();
-  if (existing) return { subjectId: `anon:${existing}`, anonymousId: null };
+  const existing = cookieStore.get(ANONYMOUS_PROFILE_COOKIE)?.value?.trim();
+  if (existing) {
+    return { kind: "anonymous", userId: null, anonymousId: existing, setCookie: false };
+  }
 
-  const anonymousId = randomUUID();
-  return { subjectId: `anon:${anonymousId}`, anonymousId };
+  return {
+    kind: "anonymous",
+    userId: null,
+    anonymousId: randomUUID(),
+    setCookie: true,
+  };
 }
 
-function withProfileCookie(response: NextResponse, anonymousId: string | null) {
-  if (!anonymousId) return response;
-  response.cookies.set(PROFILE_COOKIE, anonymousId, {
+function withAnonymousCookie(response: NextResponse, owner: ProfileOwner) {
+  if (owner.kind !== "anonymous" || !owner.setCookie) return response;
+  response.cookies.set(ANONYMOUS_PROFILE_COOKIE, owner.anonymousId, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    maxAge: ONE_YEAR_SECONDS,
+    maxAge: ANONYMOUS_PROFILE_MAX_AGE_SECONDS,
     path: "/",
   });
   return response;
 }
 
 export async function GET() {
-  const { subjectId, anonymousId } = await resolveSubject();
-  const profile = getCatProfileStore().get(subjectId);
-  return withProfileCookie(
+  const owner = await resolveOwner();
+  const store = getAccountStore();
+  const profile = owner.kind === "user"
+    ? store.getUserProfile(owner.userId)
+    : store.getAnonymousProfile(owner.anonymousId);
+
+  return withAnonymousCookie(
     NextResponse.json({ profile }, { headers: { "cache-control": "no-store" } }),
-    anonymousId,
+    owner,
   );
 }
 
@@ -78,10 +95,15 @@ export async function PATCH(request: Request) {
     );
   }
 
-  const { subjectId, anonymousId } = await resolveSubject();
-  const profile = getCatProfileStore().update(subjectId, parsed.data as CatProfilePatch);
-  return withProfileCookie(
+  const owner = await resolveOwner();
+  const store = getAccountStore();
+  const patch = parsed.data as CatProfilePatch;
+  const profile = owner.kind === "user"
+    ? store.updateUserProfile(owner.userId, patch)
+    : store.updateAnonymousProfile(owner.anonymousId, patch);
+
+  return withAnonymousCookie(
     NextResponse.json({ profile }, { headers: { "cache-control": "no-store" } }),
-    anonymousId,
+    owner,
   );
 }

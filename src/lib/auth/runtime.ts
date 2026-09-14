@@ -1,10 +1,14 @@
 import "server-only";
 
-import { OAuthSessionStore } from "./session-store";
+import { AccountStore } from "./account-store";
 
-let store: OAuthSessionStore | undefined;
+type AccountGlobal = typeof globalThis & {
+  __xieyaoAccountStore?: AccountStore;
+};
 
-export function getOAuthSessionStore(): OAuthSessionStore {
-  store ??= new OAuthSessionStore();
-  return store;
+const accountGlobal = globalThis as AccountGlobal;
+
+export function getAccountStore(): AccountStore {
+  accountGlobal.__xieyaoAccountStore ??= new AccountStore();
+  return accountGlobal.__xieyaoAccountStore;
 }

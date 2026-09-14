@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   let experience: AnswerExperience = DEMO_FALLBACK;
   try {
     experience = await getAnswerExperienceService().create({
-      cacheKey: identity ? `oauth:${identity.sessionId}` : "self-demo",
+      cacheKey: identity ? `user:${identity.userId}` : "self-demo",
       oauthAccessToken: identity?.oauthAccessToken,
       forceRefresh,
     });

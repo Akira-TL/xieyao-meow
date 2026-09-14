@@ -71,6 +71,14 @@ export interface OAuthSession {
   expiresIn: number;
 }
 
+export interface ZhihuOAuthUserIdentity {
+  providerSubject: string;
+  name?: string;
+  avatarUrl?: string;
+  headline?: string;
+  url?: string;
+}
+
 export interface ZhihuOAuthConfig {
   appId: string;
   appKey: string;

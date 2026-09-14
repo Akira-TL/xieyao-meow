@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   }
 
   const identity = await getRequestOAuthIdentity();
-  const actorId = identity ? `oauth:${identity.sessionId}` : "self-demo";
+  const actorId = identity ? `user:${identity.userId}` : "self-demo";
   const cacheKey = `${actorId}::${residentId}`;
   const cached = matchCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) {

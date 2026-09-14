@@ -1,22 +1,28 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { OAUTH_SESSION_COOKIE } from "@/lib/auth/request-session";
-import { getOAuthSessionStore } from "@/lib/auth/runtime";
+import { getAccountStore } from "@/lib/auth/runtime";
+import { ANONYMOUS_PROFILE_COOKIE } from "@/lib/profile/cookies";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: Request) {
-  const cookieHeader = request.headers.get("cookie") ?? "";
-  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${OAUTH_SESSION_COOKIE}=([^;]+)`));
-  if (match?.[1]) getOAuthSessionStore().delete(decodeURIComponent(match[1]));
+export async function POST() {
+  const cookieStore = await cookies();
+  const sessionId = cookieStore.get(OAUTH_SESSION_COOKIE)?.value;
+  if (sessionId) getAccountStore().deleteSession(sessionId);
 
-  const response = NextResponse.json({ status: "logged-out" });
-  response.cookies.set(OAUTH_SESSION_COOKIE, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 0,
-  });
+  const response = NextResponse.json(
+    { status: "logged-out", clearClientState: true },
+    {
+      headers: {
+        "cache-control": "no-store",
+        "clear-site-data": "\"cache\", \"storage\"",
+      },
+    },
+  );
+
+  response.cookies.delete(OAUTH_SESSION_COOKIE);
+  response.cookies.delete(ANONYMOUS_PROFILE_COOKIE);
   return response;
 }
