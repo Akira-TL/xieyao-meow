@@ -3,7 +3,6 @@ import AutoStoriesRoundedIcon from "@mui/icons-material/AutoStoriesRounded";
 import Diversity3RoundedIcon from "@mui/icons-material/Diversity3Rounded";
 import ExploreRoundedIcon from "@mui/icons-material/ExploreRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
@@ -102,17 +101,14 @@ export function AppHeader({ active, right }: { active: AppSection; right?: React
     <header className="app-header">
       <BrandMark />
       <nav className="app-top-nav" aria-label="主导航">
-        {APP_ITEMS.map(([key, href, , desktopLabel]) => (
+        {APP_ITEMS.map(([key, href, mobileLabel]) => (
           <Link className={active === key ? "is-active" : ""} href={href} key={key}>
-            {desktopLabel}
+            {mobileLabel}
           </Link>
         ))}
-        <Link href="/about">关于</Link>
+        <Link className="app-about-link" href="/about">关于</Link>
       </nav>
       <div className="app-header-right">
-        <Link className="header-icon-link" href="/explore?mode=app" aria-label="探索">
-          <SearchRoundedIcon fontSize="small" />
-        </Link>
         <Link className="header-icon-link" href="/atlas" aria-label="我的人格档案">
           <AccountCircleRoundedIcon fontSize="small" />
         </Link>
