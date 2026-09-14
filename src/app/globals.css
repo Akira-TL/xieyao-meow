@@ -1155,7 +1155,7 @@ a { color: inherit; text-decoration: none; }
     width: auto;
   }
   .landing-copy .stage-caption { text-align: center; font-size: 8px; }
-  .landing-copy h1 { margin-top: 16px; max-width: 100%; font-size: clamp(42px, 13vw, 60px); text-align: left; }
+  .landing-copy h1 { margin-top: 16px; max-width: 100%; font-size: clamp(38px, 11.8vw, 54px); text-align: left; }
   .landing-handwriting { font-size: 17px; }
   .landing-detail { display: none; }
   .landing-stage-cast .persona-egg { width: 50%; }
@@ -1838,7 +1838,10 @@ a { color: inherit; text-decoration: none; }
 .section-heading-row h2, .section-heading-row h1 { margin: 0; }
 .section-heading-row h2 { font-size: 24px; }
 .section-heading-row span, .section-heading-row > a { color: #7e848d; font-size: 10px; letter-spacing: .12em; }
-.relationship-card-grid { margin-top: 12px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; }
+.relationship-card-grid { margin-top: 12px; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; }
+@media (min-width: 761px) and (max-width: 1100px) {
+  .relationship-card-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
 .relationship-mini-card { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.035); padding: 12px; }
 .relationship-mini-card .art-slot { width: 64px; height: 64px; }
 .relationship-mini-card strong { display: block; font-size: 13px; }
