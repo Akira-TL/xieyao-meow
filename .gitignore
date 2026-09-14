@@ -12,3 +12,4 @@ out/
 !.env.example
 
 logs/
+data/
