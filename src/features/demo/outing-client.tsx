@@ -10,11 +10,7 @@ import { PaperCard, PersonaArt } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import { BottomSheet } from "./interaction-client";
 import { useCatProfile } from "./profile/client";
-import {
-  type LiveQuestionSnapshot,
-  useLivePersonaSnapshot,
-  useLiveQuestionSnapshot,
-} from "./live-client";
+import { useLivePersonaSnapshot } from "./live-client";
 
 function RoomBackdrop({ empty = false }: { empty?: boolean }) {
   return (
@@ -30,7 +26,6 @@ export function DemoOutingHome() {
   const [projection, setProjection] = useState<JourneyProjection | null>(null);
   const [journeyError, setJourneyError] = useState<string | null>(null);
   const personaSnapshot = useLivePersonaSnapshot();
-  const questionSnapshot = useLiveQuestionSnapshot();
   const basePersona = (personaSnapshot?.persona ?? DEMO_FIXTURE.persona) as PlayerPersona;
   const { profile, persona: playerPersona } = useCatProfile(basePersona);
   const catName = profile.catName;
@@ -88,7 +83,7 @@ export function DemoOutingHome() {
     return <PreparingStage catName={catName} playerPersona={playerPersona} routeBias={projection.journey.routeBias} />;
   }
   if (projection.state === "AWAY" && projection.journey) {
-    return <AwayStage routeBias={projection.journey.routeBias} />;
+    return <AwayStage journey={projection.journey} />;
   }
   if (projection.state === "RETURNED" && projection.journey) {
     return (
@@ -105,7 +100,6 @@ export function DemoOutingHome() {
     <AtHomeStage
       catName={catName}
       playerPersona={playerPersona}
-      questionSnapshot={questionSnapshot}
       composition={personaSnapshot?.composition ?? null}
       resting={projection.resting}
       queuedRouteBias={projection.queuedRouteBias}
@@ -119,7 +113,6 @@ function AtHomeStage({
   catName,
   onPrepare,
   playerPersona,
-  questionSnapshot,
   composition,
   resting,
   queuedRouteBias,
@@ -128,38 +121,30 @@ function AtHomeStage({
   catName: string;
   onPrepare: (routeBias: string) => void;
   playerPersona: PlayerPersona;
-  questionSnapshot: LiveQuestionSnapshot | null;
   composition: ZhihuComposition | null;
   resting: boolean;
   queuedRouteBias: string | null;
   journeyNotice: string | null;
 }) {
   const fixture = DEMO_FIXTURE;
-  const question = questionSnapshot?.question ?? {
-    title: fixture.encounter.topic.title,
-    url: fixture.encounter.topic.url,
-    summary: "",
-    thumbnailUrl: "",
-  };
-  const previewTitle = question.title.length > 22 ? `${question.title.slice(0, 22)}…` : question.title;
   return (
     <div className="home-at-home home-room-stage">
       <RoomBackdrop />
       <div className="home-hero-copy">
-        <p className="stage-caption">{resting ? "LIGHTS DOWN · 刚回来，先歇会儿" : "ACT / AT HOME · 第一趟马上开场"}</p>
+        <p className="stage-caption">{resting ? "LIGHTS DOWN · 刚回来，先睡一会儿" : "AT HOME · 先替它准备一点东西"}</p>
         <h1 className="target-lock-title">
-          <span className="target-title-line"><em>{resting ? "刚刚" : "今晚"}</em>，</span>
-          <span className="target-title-line">{resting ? "它回窝了。" : "它要出门。"}</span>
+          <span className="target-title-line"><em>{resting ? "睡着" : "它还"}</em>，</span>
+          <span className="target-title-line">{resting ? "以后会再走。" : "在窝里。"}</span>
         </h1>
-        <p>{resting ? (queuedRouteBias ? `下一趟的纸条已经压好了：「${queuedRouteBias}」。它歇够了会自己出门。` : "上一趟已经结算，明信片也收好了。歇够以后，它会自己再出门。") : "它会从你的真实知乎兴趣出发，自己挑问题、自己决定停在哪里，再把这一趟带回家。"}</p>
+        <p>{resting ? (queuedRouteBias ? `下一趟的纸条已经压好了：「${queuedRouteBias}」。它醒了以后会自己决定什么时候出门。` : "它刚从外面回来。你可以什么都不做，等它睡醒以后自己再走。") : "你只负责把纸条放进它的行囊。什么时候出门、去哪、会看见什么，都是它自己的决定。"}</p>
         {journeyNotice ? <p className="home-status-note" role="status">{journeyNotice}</p> : null}
       </div>
 
       <PaperCard className="home-story-polaroid">
-        <span>知乎现在 · REAL QUESTION</span>
-        <strong>{previewTitle}</strong>
-        <p>这一题正在真实知乎世界里发生。它可能会路过，也可能完全不理。</p>
-        <a href={question.url} rel="noreferrer" target="_blank">先看这一题 →</a>
+        <span>旅行册 · TRAVEL BOOK</span>
+        <strong>{resting ? "上一趟已经收进旅行册。" : "第一张明信片，还没有回来。"}</strong>
+        <p>{queuedRouteBias ? `下一趟纸条：「${queuedRouteBias}」` : "不要提前知道它会去哪。回来以后再拆包，才知道它看见了什么。"}</p>
+        <a href="/atlas">翻一翻旅行册 →</a>
       </PaperCard>
 
       <div className="home-hero-art">
@@ -175,8 +160,8 @@ function AtHomeStage({
       </div>
 
       <div className="home-event-actions">
-        <BottomSheet trigger={<span className="home-outing-trigger home-outing-primary">{resting ? "给下一趟留纸条" : "带它出去闻闻"} <b>→</b></span>} title="留张出门纸条">
-          <p>给它一个大概方向就行。最后看什么、遇见谁，让它自己决定。</p>
+        <BottomSheet trigger={<span className="home-outing-trigger home-outing-primary">{resting ? "给下一趟压张纸条" : "给它准备行囊"} <b>→</b></span>} title="给行囊塞张纸条">
+          <p>你只能给一个模糊方向。纸条不会决定目的地，更不会决定它带什么回来。</p>
           <div className="route-bias-list">
             {fixture.outing.routeBiases.map((bias) => (
               <button key={bias} onClick={() => onPrepare(bias)} type="button">{bias}</button>
@@ -208,33 +193,46 @@ function PreparingStage({
   return (
     <div className="outing-empty-stage home-room-stage">
       <RoomBackdrop />
-      <p className="stage-caption">BACKSTAGE / PREPARING</p>
-      <h1>它在后台<br />收东西。</h1>
+      <p className="stage-caption">PACKING · 别催，它自己决定什么时候走</p>
+      <h1>它开始<br />收行囊了。</h1>
       <PersonaArt alt={`${catName}收拾出门装备`} className="outing-state-persona" persona={playerPersona} state="thinking" />
       <PaperCard className="outing-note-card">
-        <span>今天的纸条</span>
+        <span>行囊里唯一由你放进去的东西</span>
         <strong>「{routeBias ?? "随便逛"}」</strong>
-        <p>看见了。至于听不听，是它的事。</p>
+        <p>纸条看见了。接下来不用点“出发”，它会自己把门带上。</p>
+        <div className="outing-pack-steps" aria-label="出门准备">
+          <span className="is-done">纸条收好</span>
+          <span className="is-current">自己收包</span>
+          <span>自己出门</span>
+        </div>
       </PaperCard>
     </div>
   );
 }
 
-function AwayStage({ routeBias }: { routeBias: string | null }) {
+function awayMood(journey: JourneyView): string {
+  const total = Math.max(1, journey.returnAt - journey.departAt);
+  const progress = Math.min(1, Math.max(0, (Date.now() - journey.departAt) / total));
+  if (progress < 0.22) return "刚出门。门口的脚印还很新。";
+  if (progress < 0.68) return "已经走远了。现在不知道它在哪。";
+  return "外面安静了很久。也许快回来了。";
+}
+
+function AwayStage({ journey }: { journey: JourneyView }) {
   return (
     <div className="outing-empty-stage outing-away-stage home-room-stage">
       <RoomBackdrop empty />
-      <p className="stage-caption">ACT / AWAY</p>
-      <h1>它不在。</h1>
-      <p>大概又跑去看别人为什么吵架了。</p>
+      <p className="stage-caption">AWAY · THE ROOM IS EMPTY</p>
+      <h1>窝空了。</h1>
+      <p>{awayMood(journey)}</p>
       <PaperCard className="outing-note-card">
-        <span>桌上压着一张纸</span>
-        <strong>“{DEMO_FIXTURE.outing.note}”</strong>
-        <p>你留的方向：{routeBias ?? "随便逛"}</p>
+        <span>它带走的纸条</span>
+        <strong>「{journey.routeBias ?? "随便逛"}」</strong>
+        <p>这只是一个方向。你不会看到倒计时，也不能把它叫回来。</p>
       </PaperCard>
       <div className="outing-away-actions">
-        <a href="/explore?mode=app">看看它上次带回来的东西 →</a>
-        <span>不用催，它逛够了会自己回来。</span>
+        <a href="/atlas">翻翻以前的旅行册 →</a>
+        <span>等门自己响。</span>
       </div>
     </div>
   );
@@ -251,31 +249,47 @@ function ReturnedStage({
   onArchive: () => void;
   playerPersona: PlayerPersona;
 }) {
+  const [opened, setOpened] = useState(false);
   const question = journey.question;
   const interests = playerPersona.interests.slice(0, 2);
   const thought = journey.postcard?.body ?? "它按时回来了，只是这趟没有值得带回来的新问题。";
+
+  useEffect(() => {
+    setOpened(false);
+  }, [journey.id]);
+
   return (
     <div className="returned-stage home-room-stage">
       <RoomBackdrop />
       <div className="returned-copy">
-        <p className="stage-caption">LIGHTS UP / RETURNED</p>
-        <span>门响了一下。</span>
+        <p className="stage-caption">RETURNED · 门自己响了</p>
+        <span>你没叫它回来。</span>
         <h1>它回来了。</h1>
-        <p>{question ? "而且叼回来一个真实问题。" : "这趟空着爪子，但没有迟到。"}</p>
+        <p>{opened ? "现在才知道，这一趟它到底带了什么。" : "包还没拆。先别偷看。"}</p>
       </div>
-      <PersonaArt alt={`${catName}带着旅途札记回到窝里`} className="returned-persona-art" persona={playerPersona} state="returned" />
-      <PaperCard className="returned-artifact">
-        <span>{journey.artifact ? "问题票根 · QUESTION TICKET" : "旅途明信片 · POSTCARD"}</span>
-        <h2>{question?.title ?? "今天没碰到值得带回来的新问题"}</h2>
-        <p>出门方向：{journey.routeBias ?? "随便逛"}{interests.length ? ` · ${interests.join(" / ")}` : ""}</p>
-        <blockquote>“{thought}”</blockquote>
-        <div className="returned-meta">
-          <span>内容来源 <b>{journey.contentSource === "live" ? "知乎实时公开内容" : "本趟无新内容"}</b></span>
-          <span>收藏 <b>{journey.artifact ? "已自动写入" : "没有额外掉落"}</b></span>
-        </div>
-        {question ? <a className="home-last-night-link" href={question.url} rel="noreferrer" target="_blank">查看知乎原问题 →</a> : null}
-        <button className="theatre-button theatre-button-primary" onClick={onArchive} type="button">看完了 <span>→</span></button>
-      </PaperCard>
+      <PersonaArt alt={`${catName}背着旅包回到窝里`} className="returned-persona-art" persona={playerPersona} state="returned" />
+      {!opened ? (
+        <PaperCard className="returned-artifact returned-artifact--sealed">
+          <span>旅包 · SEALED</span>
+          <h2>包鼓鼓的。</h2>
+          <p>可能是问题票根、明信片，也可能什么稀奇东西都没有。拆开以前不告诉你。</p>
+          <div className="returned-package-mark" aria-hidden="true">?</div>
+          <button className="theatre-button theatre-button-primary" onClick={() => setOpened(true)} type="button">拆开它的包 <span>→</span></button>
+        </PaperCard>
+      ) : (
+        <PaperCard className="returned-artifact is-opened">
+          <span>{journey.artifact ? "问题票根 · QUESTION TICKET" : "旅途明信片 · POSTCARD"}</span>
+          <h2>{question?.title ?? "今天没碰到值得带回来的新问题"}</h2>
+          <p>出门方向：{journey.routeBias ?? "随便逛"}{interests.length ? ` · ${interests.join(" / ")}` : ""}</p>
+          <blockquote>“{thought}”</blockquote>
+          <div className="returned-meta">
+            <span>内容来源 <b>{journey.contentSource === "live" ? "知乎实时公开内容" : "本趟无新内容"}</b></span>
+            <span>带回 <b>{journey.artifact ? "1 张问题票根" : "1 张明信片"}</b></span>
+          </div>
+          {question ? <a className="home-last-night-link" href={question.url} rel="noreferrer" target="_blank">去知乎看原问题 →</a> : null}
+          <button className="theatre-button theatre-button-primary" onClick={onArchive} type="button">收进旅行册 <span>→</span></button>
+        </PaperCard>
+      )}
     </div>
   );
 }
