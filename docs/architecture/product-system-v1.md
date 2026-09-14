@@ -283,30 +283,52 @@ relationPrediction
 explanations[]
 ```
 
-### AgentEncounter
+### Shared Encounter
 
-两只宠物真正发生的一次互动：
+两只真实用户 Persona 围绕一个真实知乎问题发生的一次服务端共享异步互动。事件只生成一次，双方在不同时间读取同一份历史：
 
 ```text
-matchId
+encounterId
+participantUserIds[2]
+participantPersonaIds[2]
 topicRef
+evidenceRef?
 turns[]
-relationDelta
 summary
+provenance
 createdAt
+completedAt
 ```
 
-### Relationship
+正常对话保持 2–4 轮。双方默认只看到对方 Persona Capsule；完整 OAuth 用户画像不属于 Encounter 展示合同。
 
-长期关系，而不是一次匹配结果：
+### PersonaRelationship
+
+两只 Persona 的长期关系，而不是一次匹配结果，也不等同于真人已经建立连接：
 
 ```text
 personaA
 personaB
-affinity
-status
+familiarity
+chemistry
 encounterCount
 lastEncounterAt
+suppressedByUserIds[]
+```
+
+`familiarity` 表示共同经历深度，`chemistry` 表示持续同频/分歧倾向；用户看到的“初见 / 同频猫友 / 熟悉的杠精 / 灵魂猫友 / 对线冤家”等称号只是投影。
+
+### HumanConnection
+
+真人连接与猫关系分离，双方 connection intent 各自持久化；只有双方都显式 opt-in 才进入 mutual connected。
+
+```text
+userA
+userB
+intentA
+intentB
+status
+updatedAt
 ```
 
 ### Outing
@@ -321,12 +343,12 @@ routeBias           用户留下的弱引导，可为空
 startedAt
 returnedAt
 contentEncounterId?
-socialEncounterId?
+sharedEncounterId?
 returnArtifactId?
 growthDelta?
 ```
 
-一次 outing 最多产生 1 个内容发现、0–1 个社交 Encounter、1 个带回物和 0–1 个成长变化。
+一次 outing 最多产生 1 个内容发现、0–1 个 Shared Encounter、1 个带回物和 0–1 个成长变化。
 
 ### ReturnArtifact
 
@@ -357,7 +379,7 @@ createdAt
 
 ### DailyEvent
 
-首页“今天最值得看的事情”。在采用自主出门后，它更多是 Outing / Return / Relationship 的投影，而不是独立生成的推荐 Feed：
+首页“今天最值得看的事情”。在采用自主出门后，它更多是 Outing / Return / PersonaRelationship 的投影，而不是独立生成的推荐 Feed：
 
 ```text
 type
@@ -400,7 +422,7 @@ MatchService
 EncounterService
 ├─ Shared-topic selection
 ├─ Agent × Agent exchange
-└─ Relationship update
+└─ PersonaRelationship update
 
 ExploreService
 ├─ Personalized content candidate pool
@@ -465,7 +487,7 @@ ShareService
        ↓
 10. Agent × Agent short encounter
        ↓
-11. Relationship seed
+11. PersonaRelationship seed
        ↓
 12. Share card + Activated state
 ```
@@ -497,11 +519,11 @@ AWAY
         +
 人格兴趣检索（知乎搜索缓存）
         +
-Persona / Relationship 候选
+Persona / PersonaRelationship 候选
         ↓
 选择 1 个 ContentEncounter
         +
-可选 0–1 个 AgentEncounter
+可选 0–1 个 Shared Encounter
         ↓
 生成 1 个 ReturnArtifact
         ↓
@@ -528,7 +550,7 @@ JourneyLog / Atlas 沉淀
 - Persona + version；
 - ZhihuComposition 的结构化结果与解释；
 - Growth；
-- Match / Relationship / Encounter；
+- Match / PersonaRelationship / Shared Encounter / HumanConnection；
 - Outing 状态与历史；
 - ReturnArtifact / JourneyLog；
 - DailyEvent；

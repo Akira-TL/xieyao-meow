@@ -49,7 +49,7 @@
 
 ### Game State
 
-稳定 `User` 的服务端长期运行状态总称，覆盖激活进度、当前 Journey/Outing、Persona 演化与记忆、收藏资产、Encounter / Relationship 及 Daily Event 等会影响后续体验的事实。浏览器只能缓存短生命周期 view-model、交互状态和 optimistic projection，不能成为 Game State 的唯一真相。
+稳定 `User` 的服务端长期运行状态总称，覆盖激活进度、当前 Journey/Outing、Persona 演化与记忆、收藏资产、Shared Encounter / PersonaRelationship / HumanConnection 及 Daily Event 等会影响后续体验的事实。浏览器只能缓存短生命周期 view-model、交互状态和 optimistic projection，不能成为 Game State 的唯一真相。
 
 ### Journey
 
@@ -74,6 +74,22 @@
 ### 灵魂匹配
 
 基于两个 Persona 的兴趣交集、表达方式差异和真实知乎话题上下文生成的可解释关系判断。匹配分数是谢邀喵应用内部算法结果，不是知乎官方评分。
+
+### Shared Encounter
+
+两只真实用户 Persona 围绕同一真实知乎问题发生的一次服务端共享异步相遇。它只生成一次并成为双方共同历史；双方可以在不同时间查看各自视角，但不能各自重抽同一次相遇。
+
+### Persona Capsule
+
+真实用户 Persona 在相遇场景中对另一方默认公开的最小人格名片，只包含猫的身份表现、抽象兴趣/表达特征、匹配原因与本次公共话题，不直接暴露完整收藏、关注或创作明细。
+
+### PersonaRelationship
+
+两只 Persona 的长期关系，由 Shared Encounter 自动演化；核心维度是共同经历的 `familiarity` 与同频/分歧倾向 `chemistry`。它属于猫的世界状态，不等同于两个真人已经建立连接。
+
+### HumanConnection
+
+两个真实用户是否愿意进一步建立连接的独立状态，双方意愿分别保存，只有 mutual opt-in 才成立。PersonaRelationship 的自动变化不能替用户创建 HumanConnection。
 
 ### 首次遇见
 
