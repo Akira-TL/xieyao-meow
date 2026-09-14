@@ -109,79 +109,50 @@ export class ZhihuGateway {
 
     const response = await this.fetchWithRetry(new URL("/user", OAUTH_BASE_URL), {
       method: "GET",
-      headers: this.createDataHeaders(token),
+      headers: {
+        authorization: `Bearer ${token}`,
+        "content-type": "application/json",
+      },
     });
     if (!response.ok) {
       throw new Error(`Zhihu OAuth user request failed with HTTP ${response.status}`);
     }
 
     const payload = await response.json() as unknown;
-    if (!payload || typeof payload !== "object") {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
       throw new Error("Zhihu OAuth user response is not an object");
     }
     const envelope = payload as Record<string, unknown>;
-    const toRecord = (candidate: unknown): Record<string, unknown> | null => {
-      if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
-        return candidate as Record<string, unknown>;
-      }
-      if (typeof candidate === "string" && candidate.trim()) {
-        try {
-          const parsed = JSON.parse(candidate) as unknown;
-          return parsed && typeof parsed === "object" && !Array.isArray(parsed)
-            ? parsed as Record<string, unknown>
-            : null;
-        } catch {
-          return null;
-        }
-      }
-      return null;
-    };
-    const objectCandidates = [envelope.data, envelope.Data, envelope.user, envelope]
-      .map(toRecord)
-      .filter((candidate): candidate is Record<string, unknown> => Boolean(candidate));
-    const source = objectCandidates.find((candidate) => (
-      candidate.id !== undefined || candidate.Id !== undefined || candidate.ID !== undefined
-    ));
-    if (!source) {
-      const rawData = envelope.data ?? envelope.Data;
-      const dataLength = typeof rawData === "string" ? rawData.length : null;
-      const dataLooksJson = typeof rawData === "string" && /^[\s]*[\[{]/.test(rawData);
-      throw new Error(
-        `Zhihu OAuth user response has no stable user object; code=${String(envelope.code ?? envelope.Code ?? "unknown")}; dataLength=${String(dataLength)}; dataLooksJson=${String(dataLooksJson)}`,
-      );
+    const code = typeof envelope.code === "number" ? envelope.code : 0;
+    if (code !== 0) {
+      throw new Error(`Zhihu OAuth user request failed with code ${code}`);
     }
-    const rawSubject = source.id ?? source.Id ?? source.ID;
+
+    const sourceCandidate = envelope.data ?? envelope;
+    if (!sourceCandidate || typeof sourceCandidate !== "object" || Array.isArray(sourceCandidate)) {
+      throw new Error("Zhihu OAuth user response has no user object");
+    }
+    const source = sourceCandidate as Record<string, unknown>;
+    const rawSubject = source.uid;
     const providerSubject =
       typeof rawSubject === "string" || typeof rawSubject === "number"
         ? String(rawSubject).trim()
         : "";
     if (!providerSubject) {
-      const fieldNames = Object.keys(source).sort().join(", ");
-      throw new Error(
-        `Zhihu OAuth user response has no stable id field; fields=[${fieldNames}]`,
-      );
+      throw new Error("Zhihu OAuth user response has no uid");
     }
 
-    const stringField = (...names: string[]): string | undefined => {
-      for (const name of names) {
-        const value = source[name];
-        if (typeof value === "string" && value.trim()) return value.trim();
-      }
-      return undefined;
+    const stringField = (name: string): string | undefined => {
+      const value = source[name];
+      return typeof value === "string" && value.trim() ? value.trim() : undefined;
     };
 
     return {
       providerSubject,
-      ...(stringField("name", "Fullname", "fullname")
-        ? { name: stringField("name", "Fullname", "fullname") }
-        : {}),
-      ...(stringField("avatar_url", "AvatarUrl")
-        ? { avatarUrl: stringField("avatar_url", "AvatarUrl") }
-        : {}),
-      ...(stringField("headline", "Headline")
-        ? { headline: stringField("headline", "Headline") }
-        : {}),
-      ...(stringField("url", "Url") ? { url: stringField("url", "Url") } : {}),
+      ...(stringField("fullname") ? { name: stringField("fullname") } : {}),
+      ...(stringField("avatar_path") ? { avatarUrl: stringField("avatar_path") } : {}),
+      ...(stringField("headline") ? { headline: stringField("headline") } : {}),
+      ...(stringField("url") ? { url: stringField("url") } : {}),
     };
   }
 
