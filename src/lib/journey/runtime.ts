@@ -233,7 +233,23 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
   const recentRefs = new Set([...recentQuestionUrls, ...recentMemoryTopicRefs]);
   const unseenQuestions = questions.filter((item) => !recentRefs.has(item.url));
-  const candidatePool = unseenQuestions.length ? unseenQuestions : questions;
+  if (!unseenQuestions.length) {
+    const narrative = await createJourneyNarrative({
+      gateway,
+      planSeed,
+      routeBias,
+      actor,
+    });
+    return {
+      question: null,
+      contentSource: "none",
+      knowledgeSource: "none",
+      sourceFetchedAt: fetchedAt,
+      postcardHeadline: narrative.headline,
+      postcardBody: narrative.body,
+    };
+  }
+  const candidatePool = unseenQuestions;
   const ranked = candidatePool
     .map((item) => {
       const haystack = `${item.title} ${item.summary}`.toLocaleLowerCase("zh-CN");
