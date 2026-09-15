@@ -295,11 +295,11 @@ export class ZhihuGateway {
 
     const pending = (async () => {
       try {
-        const xml = await this.callSseMcpTool(
+        const xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
           "/api/mcp/hot_list/v1",
           "hot_list",
           { limit: 30 },
-        );
+        ));
         const items = parseHotListXml(xml);
         if (!items.length) throw new Error("Zhihu hot_list MCP returned no items");
         sharedRuntime.hotListCache = { fetchedAt: now, items };
@@ -334,11 +334,11 @@ export class ZhihuGateway {
 
     const pending = (async () => {
       try {
-        const xml = await this.callSseMcpTool(
+        const xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
           "/api/mcp/zhihu_search/v1",
           "zhihu_search",
           { query: normalized, count: limit },
-        );
+        ));
         const items = parseZhihuSearchXml(xml);
         if (!items.length) throw new Error("Zhihu search MCP returned no items");
         sharedRuntime.searchCache!.set(key, { fetchedAt: now, items });
