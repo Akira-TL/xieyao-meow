@@ -122,6 +122,28 @@ function parseZhihuSearchXml(xml: string): ZhihuSearchItem[] {
   return items;
 }
 
+function parseXmlTag(source: string, name: string): string {
+  const match = source.match(new RegExp(`<${name}>([\\s\\S]*?)<\\/${name}>`));
+  return decodeXml(match?.[1] ?? "").replace(/\s+/g, " ").trim();
+}
+
+function parseHotListXml(xml: string): ZhihuHotItem[] {
+  const items: ZhihuHotItem[] = [];
+  for (const match of xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/g)) {
+    const body = match[1] ?? "";
+    const title = parseXmlTag(body, "title");
+    const url = parseXmlTag(body, "url");
+    if (!title || !url) continue;
+    items.push({
+      title,
+      url,
+      thumbnailUrl: parseXmlTag(body, "thumbnail_url"),
+      summary: parseXmlTag(body, "summary"),
+    });
+  }
+  return items;
+}
+
 export class ZhihuGateway {
   private readonly fetchImpl: typeof fetch;
   private readonly now: () => number;
@@ -270,18 +292,13 @@ export class ZhihuGateway {
 
     const pending = (async () => {
       try {
-        const payload = await this.getJson(
-          "/api/v1/content/hot_list",
-          { Limit: "30" },
-          hotListEnvelopeSchema,
+        const xml = await this.callSseMcpTool(
+          "/api/mcp/hot_list/v1",
+          "hot_list",
+          { limit: 30 },
         );
-        const data = this.requireSuccessData(payload.Code, payload.Message, payload.Data);
-        const items = data.Items.map((item) => ({
-          title: item.Title,
-          url: item.Url,
-          thumbnailUrl: item.ThumbnailUrl,
-          summary: item.Summary,
-        }));
+        const items = parseHotListXml(xml);
+        if (!items.length) throw new Error("Zhihu hot_list MCP returned no items");
         sharedRuntime.hotListCache = { fetchedAt: now, items };
         return items;
       } catch (error) {
