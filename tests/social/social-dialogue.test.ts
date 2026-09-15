@@ -150,6 +150,32 @@ describe("SocialDialogueService", () => {
     expect(fourth.shouldStop).toBe(true);
   });
 
+  it("labels route-only NPC chat as route context instead of fabricating a Zhihu question", async () => {
+    const gateway = new FakeGateway([
+      JSON.stringify({ text: "既然只是随便逛，我先挑一条和惯常兴趣不同的路。" }),
+      JSON.stringify({
+        text: "可以，但别把陌生当随机；至少说清你为什么愿意多停一下。",
+        should_stop: false,
+        memory_note: "路线闲聊里更在意陌生内容为什么值得停留",
+      }),
+    ]);
+    const service = new SocialDialogueService(gateway);
+    const routeTopic = {
+      title: "纸条「随便逛」",
+      url: "/home",
+      summary: "这是旅途路上的 Persona 闲聊，不是知乎问题，也不代表外部事实。",
+      contextLabel: "本趟路线",
+    };
+
+    const result = await service.nextRound({ actor: self, target: other, topic: routeTopic, history: [], memory });
+
+    expect(result.mode).toBe("deepseek");
+    expect(gateway.requests).toHaveLength(2);
+    expect(gateway.requests[0]?.prompt).toContain("本趟路线：纸条「随便逛」");
+    expect(gateway.requests[0]?.prompt).toContain("不是知乎问题，也不代表外部事实");
+    expect(gateway.requests[0]?.prompt).not.toContain("知乎问题：纸条「随便逛」");
+  });
+
   it("falls back to persona-aware dialogue when DeepSeek is unavailable", async () => {
     const service = new SocialDialogueService(new FakeGateway(["not-json"]));
 

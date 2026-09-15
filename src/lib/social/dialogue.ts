@@ -17,6 +17,7 @@ export interface SocialDialogueTopic {
   title: string;
   url: string;
   summary: string;
+  contextLabel?: string;
 }
 
 export interface PersonaExperienceMemory {
@@ -83,16 +84,17 @@ function compactHistory(input: NextDialogueRoundInput) {
 }
 
 function firstSpeakerPrompt(input: NextDialogueRoundInput, roundNumber: number): string {
+  const contextLabel = input.topic.contextLabel ?? "知乎问题";
   return [
     `你只扮演 Persona A「${input.actor.displayName}」，不要替 Persona B 说话。`,
-    "你正在围绕一个知乎问题继续真实聊天。不要解释人格设定，不要做主持人总结，不要说‘作为 AI’。",
+    `你正在围绕下面的「${contextLabel}」继续真实聊天。不要解释人格设定，不要做主持人总结，不要说‘作为 AI’。`,
     "严格保持 A 的性格、兴趣、口头禅倾向和回答风格；最近经历只能让表达产生轻微变化，不能把核心性格洗掉。",
     "这一句应当直接回应上一轮，或提出新的具体判断 / 反例 / 有锋芒的问题。避免礼貌套话和机械复述题目。",
     "正文控制在 16～64 个汉字。只输出 JSON，不要 Markdown。",
     '格式：{"text":"A 的下一句"}',
     `当前第 ${roundNumber} 轮，最多 ${MAX_ROUNDS} 轮。`,
-    `知乎问题：${input.topic.title}`,
-    `问题摘要：${input.topic.summary || "暂无摘要"}`,
+    `${contextLabel}：${input.topic.title}`,
+    `上下文摘要：${input.topic.summary || "暂无摘要"}`,
     `Persona A：${JSON.stringify(compactPersona(input.actor))}`,
     `Persona B：${JSON.stringify(compactPersona(input.target))}`,
     `A 最近的经历记忆：${JSON.stringify(input.memory)}`,
@@ -105,6 +107,7 @@ function secondSpeakerPrompt(
   roundNumber: number,
   selfText: string,
 ): string {
+  const contextLabel = input.topic.contextLabel ?? "知乎问题";
   return [
     `你只扮演 Persona B「${input.target.displayName}」，不要替 Persona A 说话。`,
     "你刚刚听到 Persona A 的新一句话，现在必须用 B 自己的性格直接回应。不要解释人格设定，不要做主持人总结。",
@@ -114,8 +117,8 @@ function secondSpeakerPrompt(
     "正文控制在 16～64 个汉字，memory_note≤56字。只输出 JSON，不要 Markdown。",
     '格式：{"text":"B 的回应","should_stop":false,"memory_note":"A 新记住的一点"}',
     `当前第 ${roundNumber} 轮，最多 ${MAX_ROUNDS} 轮。`,
-    `知乎问题：${input.topic.title}`,
-    `问题摘要：${input.topic.summary || "暂无摘要"}`,
+    `${contextLabel}：${input.topic.title}`,
+    `上下文摘要：${input.topic.summary || "暂无摘要"}`,
     `Persona A：${JSON.stringify(compactPersona(input.actor))}`,
     `Persona B：${JSON.stringify(compactPersona(input.target))}`,
     `A 最近的经历记忆：${JSON.stringify(input.memory)}`,

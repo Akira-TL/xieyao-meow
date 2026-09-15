@@ -4,7 +4,7 @@ import { getAccountStore } from "@/lib/auth/runtime";
 import { COMMUNITY_RESIDENTS } from "@/data/community-residents";
 import { tryCreateDeepSeekFlashClientFromEnv } from "@/lib/narrative/deepseek";
 import { buildComposition, buildPersona } from "@/lib/persona";
-import { SocialDialogueService, type SocialAgent } from "@/lib/social";
+import { SocialDialogueService, type SocialAgent, type SocialDialogueTopic } from "@/lib/social";
 import {
   SharedEncounterService,
   type SharedEncounterProvenance,
@@ -129,7 +129,7 @@ function conversationCharCount(turns: JourneyConversation["turns"]): number {
 
 async function createNpcJourneyConversation(input: {
   actor: SocialAgent;
-  question: JourneyQuestion;
+  topic: SocialDialogueTopic;
   planSeed: string;
 }): Promise<JourneyConversation> {
   const target = COMMUNITY_RESIDENTS[
@@ -151,9 +151,8 @@ async function createNpcJourneyConversation(input: {
       actor: input.actor,
       target,
       topic: {
-        title: input.question.title,
-        url: input.question.url,
-        summary: input.question.summary.slice(0, 1800),
+        ...input.topic,
+        summary: input.topic.summary.slice(0, 1800),
       },
       history,
       memory,
@@ -265,11 +264,24 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   }
 
   if (!unseenQuestions.length) {
+    const conversation = actor
+      ? await createNpcJourneyConversation({
+          actor,
+          planSeed,
+          topic: {
+            title: routeBias ? `纸条「${routeBias}」` : "没有指定方向的随便逛",
+            url: "/home",
+            summary: `这是旅途路上的 Persona 闲聊，不是知乎问题，也不代表外部事实。已知路线倾向：${routeBias ?? "随便逛"}。Persona 当前兴趣：${interests.join("、") || actor.composition.primaryInterest}。`,
+            contextLabel: "本趟路线",
+          },
+        })
+      : undefined;
     const narrative = await createJourneyNarrative({
       gateway,
       planSeed,
       routeBias,
       actor,
+      encounterName: conversation?.participantName ?? null,
     });
     const insight = actor
       ? await createJourneyInsight({
@@ -289,6 +301,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
       postcardHeadline: narrative.headline,
       postcardBody: narrative.body,
       insight,
+      ...(conversation ? { conversation } : {}),
     };
   }
 
@@ -418,7 +431,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     }
 
     if (!conversation) {
-      conversation = await createNpcJourneyConversation({ actor, question, planSeed });
+      conversation = await createNpcJourneyConversation({ actor, topic: question, planSeed });
       encounterName = conversation.participantName;
     }
   }
