@@ -13,7 +13,7 @@ export default async function FirstEncounterPage({ searchParams }: { searchParam
         <section className="first-encounter-stage">
           {isEncounter ? (
             <>
-              <p className="stage-caption">SCENE 06 · 对手戏：两个不同的思考方式，在同一个真实问题上相遇</p>
+              <p className="stage-caption">SCENE 06 · 对手戏：两种不同的思考方式，在同一个真实问题上相遇</p>
               <EncounterPlayback />
             </>
           ) : (

@@ -372,7 +372,7 @@ export function FirstMatchInteraction() {
       ? "短句直给型"
       : "结构化表达型";
   const primaryInterest = snapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.archetype;
-  const prediction = matchInsight?.prediction ?? (matchLoading ? "正在比较两种思考方式…" : "匹配结果暂时不可用");
+  const prediction = matchInsight?.prediction ?? (matchLoading ? "正在比对两种思考方式…" : "匹配结果暂时不可用");
   const bridge = matchInsight?.bridge ?? (matchLoading ? "寻找连接点…" : candidate.interests[0]);
 
   useEffect(() => {
@@ -405,12 +405,12 @@ export function FirstMatchInteraction() {
   return (
     <div className="first-match-shell">
       <p className="stage-caption">SCENE 05 · 两个不同的思考方式，也许能走得很远</p>
-      <h1 className="match-title">第一次<span>相遇</span></h1>
+      <h1 className="match-title">初次<span>相遇</span></h1>
       <p className="match-handwriting">不同，才更有意思。</p>
 
       <div className="match-stage-grid">
         <div className="match-persona match-persona--self">
-          <PersonaArt alt="本喵第一次遇见候选 Persona" className="match-self-persona-art" persona={playerPersona} state="thinking" />
+          <PersonaArt alt="本喵初次遇见候选 Persona" className="match-self-persona-art" persona={playerPersona} state="thinking" />
           <strong>{selfPersona?.certifiedTitle ?? DEMO_FIXTURE.persona.title}</strong>
           <span>{selfStyle}</span>
           <q>{selfPersona?.catchphrase ?? DEMO_FIXTURE.persona.catchphrase}</q>
@@ -450,7 +450,7 @@ export function FirstMatchInteraction() {
       </div>
       <p className="match-prediction">关系预测：{prediction}</p>
       <p className="match-reason">
-        {matchLoading ? "正在比较两种思考方式…" : matchInsight?.reason ?? "先从共同兴趣和表达差异建立第一条连接。"}
+        {matchLoading ? "正在比对两种思考方式…" : matchInsight?.reason ?? "先从共同兴趣和表达差异建立第一条连接。"}
         <span className={matchInsight?.mode === "zhida" ? "is-live" : ""}>
           {matchLoading ? "匹配中" : matchInsight?.sourceLabel ?? "匹配暂不可用"}
         </span>
@@ -563,7 +563,7 @@ export function EncounterPlayback() {
         })
         .catch((error: unknown) => {
           if (cancelled || (error instanceof DOMException && error.name === "AbortError")) return;
-          setDialogueError("这轮接话断了一下。再让它们试一次。 ");
+          setDialogueError("这轮对话断了一下。再让它们试一次。");
         })
         .finally(() => {
           if (!cancelled) setDialogueLoading(false);
@@ -614,7 +614,7 @@ export function EncounterPlayback() {
         ? `聊到第 ${roundCount} 轮，刚好停在这里。`
         : dialogueLoading
           ? roundCount === 0
-            ? "两只 Persona 正在找第一句。"
+            ? "两只 Persona 正在酝酿开场白。"
             : `第 ${roundCount + 1} 轮，它们还在接话。`
           : "准备接下一句。";
 

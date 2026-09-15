@@ -19,12 +19,12 @@ import { CatProfileEditor, useCatProfile } from "../profile/client";
 
 function compact(value: string, max = 112) {
   const normalized = value.replace(/\s+/g, " ").trim();
-  if (!normalized) return "这只喵没有解释，只把问题叼了回来。";
+  if (!normalized) return "这只喵不做解释，只把问题叼了回来。";
   return normalized.length > max ? `${normalized.slice(0, max).trim()}…` : normalized;
 }
 
 function questionReason(index: number, primaryInterest: string) {
-  if (index === 0) return `它先在这题前停了下来。你常看「${primaryInterest}」，这题又刚好留了个能继续追问的口子。`;
+  if (index === 0) return `它先在这道题前停了下来。你常看「${primaryInterest}」，这题又刚好留了个能继续追问的口子。`;
   if (index === 1) return `和「${primaryInterest}」不完全同路，所以它反而多看了一会儿。`;
   return "完全是顺路拐进去的陌生地方。它觉得这张票根值得带回来。";
 }
@@ -461,7 +461,7 @@ export function LiveLandingSignal() {
   const questionSnapshot = useLiveQuestionSnapshot();
   const question = questionSnapshot?.question;
 
-  if (!question) return <p>今天，谢邀喵正在知乎闻新的问题。</p>;
+  if (!question) return <p>今天，谢邀喵正在知乎里嗅探新问题。</p>;
   return <p>刚刚闻到：{compact(question.title, 42)}</p>;
 }
 
@@ -512,11 +512,11 @@ export function LiveAtlasSection() {
     ? recentInsights.map((item) => item.headline)
     : composition
       ? [
-          `主兴趣目前稳定在「${primaryInterest}」`,
+          `核心兴趣当前稳定在「${primaryInterest}」`,
           `公开创作 ${counts?.contents ?? 0} 条，表达节奏偏${composition.writingLength === "long" ? "长答" : composition.writingLength === "short" ? "短句" : "中等篇幅"}`,
           `公开收藏 ${counts?.collections ?? 0} 条、收藏夹 ${counts?.favlists ?? 0} 个，收藏倾向 ${composition.hoardingLevel}%`,
         ]
-      : ["正在整理你的知乎成分。", "人格档案会随着公开行为继续变化。", "旅途与关系会逐步留下新的痕迹。"];
+      : ["正在整理你的知乎成分。", "人格档案会随你的公开行为持续更新。", "旅途与关系会逐步留下新的痕迹。"];
 
   return (
     <section className="atlas-stage">

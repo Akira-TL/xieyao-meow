@@ -72,7 +72,7 @@ export function LandingActions() {
       <div className="flex flex-col gap-3 sm:flex-row">
         <DemoFlowButton href="/home">回我的窝</DemoFlowButton>
         <DemoFlowButton href="/explore?mode=app" variant="secondary">
-          看看它今天叼了什么
+          看看它今天叼回了什么
         </DemoFlowButton>
       </div>
     );
@@ -269,7 +269,7 @@ export function DemoScanningFlow() {
           </div>
         </article>
       ))}
-      <p className="scan-footnote">正在拼出你的社交气味…</p>
+      <p className="scan-footnote">正在拼凑你的社交气味…</p>
     </div>
   );
 }

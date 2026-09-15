@@ -174,7 +174,7 @@ export function ScanningStageVisual() {
   }, []);
 
   const status = state === "scanning"
-    ? "正在闻你的知乎轨迹"
+    ? "正在嗅探你的知乎轨迹"
     : state === "glowing"
       ? "有东西开始发光了"
       : state === "cracking"
@@ -300,7 +300,7 @@ export function LiveScanningFlow() {
         ) : snapshot?.mode === "fallback" ? (
           <>本地开发备用人格 · 公网不会使用这份数据冒充你的 Persona</>
         ) : (
-          <><CloudDoneOutlinedIcon fontSize="inherit" /> 你的知乎公开数据已读取 · 正在拼出你的社交气味</>
+          <><CloudDoneOutlinedIcon fontSize="inherit" /> 你的知乎公开数据已读取 · 正在拼凑你的社交气味</>
         )}
       </p>
     </div>

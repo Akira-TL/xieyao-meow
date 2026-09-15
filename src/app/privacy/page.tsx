@@ -8,7 +8,7 @@ const cards = [
   {
     title: "我们读取什么",
     summary: "仅基于你在知乎的公开内容",
-    items: ["公开创作 · 用来理解你的表达", "关注 · 用来理解兴趣方向", "公开收藏 · 用来理解长期偏好"],
+    items: ["公开创作 · 用于解析你的表达风格", "关注 · 用于识别兴趣方向", "公开收藏 · 用于挖掘长期偏好"],
     tone: "blue",
   },
   {
@@ -20,11 +20,11 @@ const cards = [
   {
     title: "我们不会做什么",
     summary: "我们不会进行以下行为",
-    items: ["自动发布 · 不会代表你发布内容", "自动私信 · 不会向他人发送私信", "用于广告投放 · 不会将数据用于商业广告"],
+    items: ["自动发布 · 不会代表你发布任何内容", "自动私信 · 不会向他人发送任何私信", "商业广告 · 不会将数据用于广告投放"],
     tone: "red",
   },
   {
-    title: "你可以做什么",
+    title: "你拥有的控制权",
     summary: "你始终拥有控制权",
     items: ["删除数据 · 可随时申请删除相关数据", "退出授权 · 可随时取消授权", "管理分享可见性 · 可设置内容的可见范围"],
     tone: "gear",
@@ -38,8 +38,8 @@ export default function PrivacyPage() {
       <section className="privacy-stage">
         <div className="privacy-hero-copy">
           <p className="stage-caption">DATA BOUNDARY · TRUST CREATES A WIDER YOU</p>
-          <h1>你的数据，<br />只用来认识你的<span>另一面</span>。</h1>
-          <p>我们尊重你的隐私，只在你授权的范围内，用公开的内容，帮助你孵化另一个更像你的自己。</p>
+          <h1>你的数据，<br />只用来塑造你的<span>另一面</span>。</h1>
+          <p>我们尊重你的隐私，仅在你授权的范围内，使用公开内容帮助你孵化另一个更贴近你的数字分身。</p>
         </div>
         <div className="privacy-hero-art">
           <KanshanPlaceholder action="idle" className="privacy-guide-persona" />
