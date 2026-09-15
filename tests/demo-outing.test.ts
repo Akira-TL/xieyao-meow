@@ -122,6 +122,57 @@ describe("server Journey", () => {
     service.close();
   });
 
+  it("coalesces concurrent return polls into one discovery/materialization", async () => {
+    const dbPath = createDbPath();
+    const userId = createUser(dbPath, "subject-a", "user-a");
+    let now = 2_000_000;
+    let releaseDiscovery!: () => void;
+    const discoveryGate = new Promise<void>((resolve) => {
+      releaseDiscovery = resolve;
+    });
+    const discover = vi.fn(async () => {
+      await discoveryGate;
+      return {
+        question: {
+          title: "并发轮询也只发现一次",
+          url: "https://www.zhihu.com/question/456",
+          summary: "同一趟 Journey 只能 materialize 一次。",
+        },
+        contentSource: "live" as const,
+        knowledgeSource: "template" as const,
+        sourceFetchedAt: now,
+        postcardBody: "这一趟只生成一次。",
+      };
+    });
+    const service = new JourneyService({
+      dbPath,
+      now: () => now,
+      createId: (() => {
+        let sequence = 0;
+        return () => `concurrent-${++sequence}`;
+      })(),
+      discover,
+    });
+
+    const preparing = await service.start(userId, "oauth-a", "多看看 AI");
+    now = preparing.journey!.returnAt;
+
+    const firstPoll = service.getProjection(userId, "oauth-a");
+    await Promise.resolve();
+    const secondPoll = service.getProjection(userId, "oauth-a");
+    await Promise.resolve();
+    expect(discover).toHaveBeenCalledTimes(1);
+
+    releaseDiscovery();
+    const [firstReturned, secondReturned] = await Promise.all([firstPoll, secondPoll]);
+    expect(firstReturned.state).toBe("RETURNED");
+    expect(secondReturned.state).toBe("RETURNED");
+    expect(firstReturned.journey?.question?.url).toBe("https://www.zhihu.com/question/456");
+    expect(secondReturned.journey?.question?.url).toBe("https://www.zhihu.com/question/456");
+    expect(discover).toHaveBeenCalledTimes(1);
+    service.close();
+  });
+
   it("keeps Journey ownership isolated by stable user_id", async () => {
     const dbPath = createDbPath();
     const userA = createUser(dbPath, "subject-a", "user-a");

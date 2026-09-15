@@ -217,6 +217,7 @@ export class JourneyService {
   private readonly now: () => number;
   private readonly createId: () => string;
   private readonly timeScale: number;
+  private readonly materializationInFlight = new Map<string, Promise<boolean>>();
 
   constructor(private readonly options: JourneyServiceOptions) {
     const dbPath = resolveDatabasePath(options.dbPath);
@@ -263,9 +264,8 @@ export class JourneyService {
       }
 
       if (now >= row.return_at && row.materialized_at === null) {
-        const result = await this.discoverOrEmpty(userId, oauthAccessToken, row, now);
-        this.materialize(row.id, userId, result, now);
-        completedThisRequest += 1;
+        const didMaterialize = await this.ensureMaterialized(userId, oauthAccessToken, row, now);
+        if (didMaterialize) completedThisRequest += 1;
         row = this.readCurrentRow(userId) ?? row;
 
         if (completedThisRequest >= MAX_OFFLINE_COMPLETIONS) {
@@ -422,6 +422,35 @@ export class JourneyService {
 
   close(): void {
     this.db.close();
+  }
+
+  private async ensureMaterialized(
+    userId: string,
+    oauthAccessToken: string,
+    row: JourneyRow,
+    now: number,
+  ): Promise<boolean> {
+    const existing = this.materializationInFlight.get(row.id);
+    if (existing) {
+      await existing;
+      return false;
+    }
+
+    const pending = (async () => {
+      const latest = this.readRow(userId, row.id, true);
+      if (!latest || latest.materialized_at !== null) return false;
+      const result = await this.discoverOrEmpty(userId, oauthAccessToken, latest, now);
+      this.materialize(latest.id, userId, result, now);
+      return true;
+    })();
+    this.materializationInFlight.set(row.id, pending);
+    try {
+      return await pending;
+    } finally {
+      if (this.materializationInFlight.get(row.id) === pending) {
+        this.materializationInFlight.delete(row.id);
+      }
+    }
   }
 
   private async discoverOrEmpty(
