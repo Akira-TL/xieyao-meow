@@ -173,6 +173,8 @@ describe("SocialDialogueService", () => {
     expect(gateway.requests).toHaveLength(2);
     expect(gateway.requests[0]?.prompt).toContain("本趟路线：纸条「随便逛」");
     expect(gateway.requests[0]?.prompt).toContain("不是知乎问题，也不代表外部事实");
+    expect(gateway.requests[0]?.prompt).toContain("禁止声称自己真实看过某条新闻、首页推荐、直播、商品、人物、日期、价格、数量");
+    expect(gateway.requests[1]?.prompt).toContain("需要举例时必须明确写成‘比如’或‘假设’");
     expect(gateway.requests[0]?.prompt).not.toContain("知乎问题：纸条「随便逛」");
   });
 

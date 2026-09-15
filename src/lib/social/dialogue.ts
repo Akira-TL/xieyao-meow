@@ -83,11 +83,19 @@ function compactHistory(input: NextDialogueRoundInput) {
   }));
 }
 
+function factBoundary(input: NextDialogueRoundInput): string {
+  if (input.topic.contextLabel === "本趟路线") {
+    return "这不是外部事实场景。只能依据已提供的纸条、Persona 兴趣和性格进行讨论；禁止声称自己真实看过某条新闻、首页推荐、直播、商品、人物、日期、价格、数量或其他未提供的具体事件。需要举例时必须明确写成‘比如’或‘假设’。";
+  }
+  return "只能依据已提供的问题标题与摘要讨论；不要补写摘要里没有的具体人物、时间、数字、事件或来源。需要举例时明确标成假设。";
+}
+
 function firstSpeakerPrompt(input: NextDialogueRoundInput, roundNumber: number): string {
   const contextLabel = input.topic.contextLabel ?? "知乎问题";
   return [
     `你只扮演 Persona A「${input.actor.displayName}」，不要替 Persona B 说话。`,
     `你正在围绕下面的「${contextLabel}」继续真实聊天。不要解释人格设定，不要做主持人总结，不要说‘作为 AI’。`,
+    factBoundary(input),
     "严格保持 A 的性格、兴趣、口头禅倾向和回答风格；最近经历只能让表达产生轻微变化，不能把核心性格洗掉。",
     "这一句应当直接回应上一轮，或提出新的具体判断 / 反例 / 有锋芒的问题。避免礼貌套话和机械复述题目。",
     "正文控制在 16～64 个汉字。只输出 JSON，不要 Markdown。",
@@ -111,6 +119,7 @@ function secondSpeakerPrompt(
   return [
     `你只扮演 Persona B「${input.target.displayName}」，不要替 Persona A 说话。`,
     "你刚刚听到 Persona A 的新一句话，现在必须用 B 自己的性格直接回应。不要解释人格设定，不要做主持人总结。",
+    factBoundary(input),
     "可以抬杠、接梗、追问、让步或留下一个未解决的分歧；优先给具体反例和具体判断，不要说空泛的‘你说得有道理’。",
     "至少完成两轮之前 should_stop 必须倾向 false。两轮以后，只有形成自然共识、值得保留的分歧、或一句适合收尾的回扣时才允许 true。",
     "memory_note 记录这次聊天让 Persona A 多记住的一点，只写轻量经历，不改写核心人格。",
