@@ -250,22 +250,6 @@ export class JourneyService {
     if (current.state !== "AT_HOME") return current;
 
     const now = this.now();
-    const journeyCount = this.countJourneys(userId);
-    if (journeyCount === 0) {
-      this.createJourney(userId, routeBias, now);
-      return this.getProjection(userId, oauthAccessToken);
-    }
-
-    const userState = this.readUserState(userId);
-    if (userState.next_eligible_at !== null && userState.next_eligible_at > now) {
-      if (journeyCount <= 3) {
-        this.createJourney(userId, routeBias, now);
-        return this.getProjection(userId, oauthAccessToken);
-      }
-      this.setQueuedRouteBias(userId, routeBias, userState.next_eligible_at);
-      return this.homeProjection(userId, now);
-    }
-
     this.createJourney(userId, routeBias, now);
     return this.getProjection(userId, oauthAccessToken);
   }
@@ -401,7 +385,8 @@ export class JourneyService {
     );
     this.ensureUserState(userId);
     this.db.prepare(`
-      UPDATE journey_user_state SET queued_route_bias = NULL, updated_at = ?
+      UPDATE journey_user_state
+      SET queued_route_bias = NULL, next_eligible_at = NULL, updated_at = ?
       WHERE user_id = ?
     `).run(this.now(), userId);
   }

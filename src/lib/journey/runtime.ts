@@ -169,8 +169,17 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
 
   let interests: string[] = [];
   let actor: SocialAgent | null = null;
+  let profileQuestions: Array<{ title: string; url: string; summary: string; thumbnailUrl: string }> = [];
   try {
     const zhihuProfile = await gateway.getUserProfile({ oauthAccessToken });
+    profileQuestions = [...zhihuProfile.collections, ...zhihuProfile.contents]
+      .filter((item) => Boolean(item.title?.trim()) && isQuestion(item.url))
+      .map((item) => ({
+        title: item.title.trim(),
+        url: item.url,
+        summary: item.summary ?? "",
+        thumbnailUrl: "",
+      }));
     const composition = buildComposition(zhihuProfile);
     const persona = buildPersona(composition);
     interests = persona.interests;
@@ -199,6 +208,9 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
       }));
   } catch {
     questions = [];
+  }
+  if (!questions.length && profileQuestions.length) {
+    questions = profileQuestions;
   }
   if (!questions.length) {
     const narrative = await createJourneyNarrative({

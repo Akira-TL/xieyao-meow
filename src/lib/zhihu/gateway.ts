@@ -144,17 +144,6 @@ function parseXmlAttribute(source: string, name: string): string {
   return decodeXml(match?.[1] ?? "").trim();
 }
 
-function globalFallbackTopic(query: string): string {
-  const value = query.toLocaleLowerCase("zh-CN");
-  if (["吵", "争议", "热议", "讨论"].some((term) => value.includes(term))) return "争议 热议";
-  if (["ai", "人工智能", "大模型", "agent"].some((term) => value.includes(term))) return "人工智能";
-  if (["科学", "研究", "物理", "生物", "宇宙"].some((term) => value.includes(term))) return "科学";
-  if (["职场", "创业", "工作", "公司"].some((term) => value.includes(term))) return "职场";
-  if (["游戏", "玩家", "电竞"].some((term) => value.includes(term))) return "游戏";
-  if (["宠物", "猫", "狗", "动物"].some((term) => value.includes(term))) return "宠物";
-  return "社会 生活";
-}
-
 function parseZhihuSearchXml(xml: string): ZhihuSearchItem[] {
   const items: ZhihuSearchItem[] = [];
   const pattern = /<search_item\b([^>]*)>([\s\S]*?)<\/search_item>/g;
@@ -402,30 +391,6 @@ export class ZhihuGateway {
               sharedRuntime.zhihuSearchBlockedUntil = Date.now() + 10 * 60_000;
             } else if (!message.includes("fetch failed")) {
               throw error;
-            }
-          }
-        }
-
-        if (!items.length) {
-          const fallbackTopic = globalFallbackTopic(normalized);
-          const fallbackKey = `global:${fallbackTopic}`;
-          const fallbackCached = sharedRuntime.searchCache!.get(fallbackKey);
-          if (fallbackCached && now - fallbackCached.fetchedAt < SEARCH_TTL_MS) {
-            items = fallbackCached.items;
-          } else {
-            const xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
-              "/api/mcp/global_search/v1",
-              "global_search",
-              {
-                query: fallbackTopic,
-                count: Math.min(10, limit),
-                filter: 'host=="www.zhihu.com"',
-                search_db: "all",
-              },
-            ));
-            items = parseZhihuSearchXml(xml);
-            if (items.length) {
-              sharedRuntime.searchCache!.set(fallbackKey, { fetchedAt: Date.now(), items });
             }
           }
         }
