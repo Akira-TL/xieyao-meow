@@ -295,7 +295,10 @@ function ReturnedStage({
           : insight
             ? "新认识 · ABOUT YOU"
             : "旅途札记 · POSTCARD";
-  const artifactTitle = journey.artifact?.title ?? question?.title ?? insight?.headline ?? journey.postcard?.headline ?? "这一趟的旅行札记";
+  const legacyScentArtifact = journey.artifact?.type === "NEW_SCENT";
+  const artifactTitle = legacyScentArtifact
+    ? insight?.headline ?? "这一趟留下的旅行记录"
+    : journey.artifact?.title ?? question?.title ?? insight?.headline ?? journey.postcard?.headline ?? "这一趟的旅行札记";
 
   async function submitInsightFeedback(response: JourneyInsightAction) {
     if (!insight || feedbackBusy) return;
