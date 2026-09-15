@@ -148,16 +148,22 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
         summary: item.summary ?? "",
         thumbnailUrl: "",
       }));
-    const composition = buildComposition(zhihuProfile);
-    const persona = buildPersona(composition);
-    interests = persona.interests;
-    actor = {
-      id: `user:${userId}`,
-      displayName: getAccountStore().getUserProfile(userId).catName,
-      composition,
-      persona,
-    };
-    socialStore.savePersonaSnapshot(userId, actor, "live");
+    const signalCount = zhihuProfile.contents.length
+      + zhihuProfile.followees.length
+      + zhihuProfile.collections.length
+      + zhihuProfile.favlists.length;
+    if (signalCount > 0) {
+      const composition = buildComposition(zhihuProfile);
+      const persona = buildPersona(composition);
+      interests = persona.interests;
+      actor = {
+        id: `user:${userId}`,
+        displayName: getAccountStore().getUserProfile(userId).catName,
+        composition,
+        persona,
+      };
+      socialStore.savePersonaSnapshot(userId, actor, "live");
+    }
   } catch {
     // Keep the last verified Persona snapshot if the user-data API is temporarily unavailable.
   }
