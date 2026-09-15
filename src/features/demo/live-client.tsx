@@ -79,15 +79,15 @@ export function useLiveQuestionSnapshot() {
     if (cached) {
       try {
         const parsed = JSON.parse(cached) as LiveQuestionSnapshot | { mode?: string; generatedAt?: number };
-        if (parsed.mode === "fallback") {
+        if (parsed.mode !== "live") {
           window.sessionStorage.removeItem(LIVE_QUESTION_STORAGE_KEY);
         } else {
           setSnapshot(parsed as LiveQuestionSnapshot);
-        }
-        if (parsed.mode !== "fallback" && typeof parsed.generatedAt === "number" && Date.now() / 1000 - parsed.generatedAt < 300) {
-          return () => {
-            cancelled = true;
-          };
+          if (typeof parsed.generatedAt === "number" && Date.now() / 1000 - parsed.generatedAt < 300) {
+            return () => {
+              cancelled = true;
+            };
+          }
         }
       } catch {
         window.sessionStorage.removeItem(LIVE_QUESTION_STORAGE_KEY);
