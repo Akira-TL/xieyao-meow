@@ -11,19 +11,14 @@ import {
 import { getSharedEncounterStore } from "@/lib/social/runtime";
 import { createZhihuGatewayFromEnv } from "@/lib/zhihu/env";
 
-import { createFallbackJourneyInsight, createJourneyInsight } from "./insight";
+import {
+  createFallbackJourneyInsight,
+  createJourneyInsight,
+  JOURNEY_INTEREST_TERMS,
+  resolveJourneyInsightTopic,
+} from "./insight";
 import { JourneyService } from "./service";
 import type { JourneyDiscoverer, JourneyReturnArtifactSeed, JourneyQuestion } from "./types";
-
-const INTEREST_TERMS: Record<string, string[]> = {
-  "AI 与数码": ["ai", "人工智能", "大模型", "模型", "机器人", "科技", "数码", "智能"],
-  "宠物": ["宠物", "猫", "狗", "动物"],
-  "科学": ["科学", "物理", "化学", "生物", "研究", "实验", "宇宙"],
-  "职场与创业": ["职场", "工作", "公司", "创业", "职业", "管理"],
-  "游戏": ["游戏", "玩家", "电竞", "主机"],
-  "文化与生活": ["文化", "生活", "电影", "音乐", "文学", "社会"],
-  "综合": [],
-};
 
 function isQuestion(url: string): boolean {
   try {
@@ -230,6 +225,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
       ? await createJourneyInsight({
           persona: actor.persona,
           composition: actor.composition,
+          topic: resolveJourneyInsightTopic(routeBias, null, interests),
           routeBias,
           question: null,
           recentFeedback: recentInsightFeedback,
@@ -246,7 +242,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     };
   }
 
-  const interestTerms = interests.flatMap((interest) => INTEREST_TERMS[interest] ?? []);
+  const interestTerms = interests.flatMap((interest) => JOURNEY_INTEREST_TERMS[interest] ?? []);
   const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
   const candidatePool = unseenQuestions;
   const ranked = candidatePool
@@ -259,7 +255,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
       let score = interestHits * 4;
       if (recentRefs.has(item.url)) score -= 20;
       for (const feedback of recentInsightFeedback) {
-        const feedbackTerms = INTEREST_TERMS[feedback.topic] ?? [feedback.topic.toLocaleLowerCase("zh-CN")];
+        const feedbackTerms = JOURNEY_INTEREST_TERMS[feedback.topic] ?? [feedback.topic.toLocaleLowerCase("zh-CN")];
         if (!feedbackTerms.some((term) => haystack.includes(term))) continue;
         score += feedback.action === "CONFIRM_INTEREST"
           ? 3
@@ -268,7 +264,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
             : -6;
       }
       if (route.includes("ai")) {
-        score += INTEREST_TERMS["AI 与数码"].some((term) => haystack.includes(term)) ? 8 : 0;
+        score += JOURNEY_INTEREST_TERMS["AI 与数码"].some((term) => haystack.includes(term)) ? 8 : 0;
       }
       if (route.includes("陌生")) score += interestHits === 0 ? 7 : 0;
       if (route.includes("吵")) {
@@ -367,6 +363,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     ? await createJourneyInsight({
         persona: actor.persona,
         composition: actor.composition,
+        topic: resolveJourneyInsightTopic(routeBias, question, interests),
         routeBias,
         question,
         encounterName,

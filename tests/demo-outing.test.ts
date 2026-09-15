@@ -58,7 +58,7 @@ describe("server Journey", () => {
         textCharCount: 88,
         model: "deepseek-flash",
         promptVersion: "journey-insight-v1",
-        factsJson: '{"zhihuComposition":{"primaryInterest":"AI 与数码"},"journey":{"routeBias":"多看看 AI"}}',
+        factsJson: '{"insightTopic":"AI 与数码","zhihuComposition":{"primaryInterest":"科学"},"journey":{"routeBias":"多看看 AI"}}',
       },
     }));
     const service = new JourneyService({

@@ -15,7 +15,7 @@
 2. JourneyInsight 的事实输入只能来自服务端已经确认的结构化事实：当前 Persona / 知乎成分、route bias、本趟真实问题、真实 Shared Encounter、以及已经持久化的用户反馈。模型不得决定内容是否真实、Journey 状态、关系状态、Root Persona 或业务 action。
 3. Persona Narrative provider 固定使用 **DeepSeek `deepseek-flash`**。请求显式设置 `thinking: { type: "disabled" }`，不允许该层自动切换到 Pro / reasoning 模型。输出使用严格 JSON schema 和短文本上限。
 4. JourneyInsight 只在 **Journey materialize** 时生成一次并写入 SQLite。页面打开、刷新 Home、进入 Atlas 都只读取持久化结果，不重复调用模型。持久化至少保留 `journey_id / prompt_version / facts_json / headline / insight / why_it_matters / evidence_summary / interaction / model / text_char_count / created_at`。
-5. 用户看到的交互按钮文案可以由 Narrative provider 按 Persona 语气生成，但业务动作只能映射到固定集合：`CONFIRM_INTEREST / CORRECT_INTEREST / REDUCE_INTEREST`。反馈单独持久化为轻量偏好层，可小幅影响后续 Journey 选题和下一次 Insight，但不能直接改写 Root Persona。
+5. 用户看到的交互按钮文案可以由 Narrative provider 按 Persona 语气生成，但业务动作只能映射到固定集合：`CONFIRM_INTEREST / CORRECT_INTEREST / REDUCE_INTEREST`。每条 Insight 的反馈主题由服务端在 materialize 时固定为 `insightTopic`（基于 route bias、已选真实问题和 Persona 兴趣分类），模型不能自由定义；反馈单独持久化为轻量偏好层，可小幅影响该 topic 的后续 Journey 选题和下一次 Insight，但不能直接改写 Root Persona。
 6. Persona × Persona / Persona × Resident 对话也使用 Narrative provider，但遵守**一次请求只扮演一个角色**：A 完成一句后，B 的独立请求才收到 A 的文本。P0 每句正文最多 64 个汉字；失败时使用短的 Persona-aware 本地回退。
 7. `zhida_openai` / 知乎直答保留给真正需要知乎语境 grounding 的关键节点，例如围绕已选中的真实知乎问题做知识整理或高价值 Shared Encounter；不再作为普通 Journey 文案和角色闲聊的默认生成器。
 8. `NEW_SCENT` 只保留为旧 SQLite 数据/枚举的兼容类型，**不再是现行产品概念，也不得在新 UI 中显示“兴趣札记”**。历史记录展示时投影为中性的旅行记录。

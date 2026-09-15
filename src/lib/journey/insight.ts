@@ -12,6 +12,16 @@ import type {
 
 export const JOURNEY_INSIGHT_PROMPT_VERSION = "journey-insight-v1";
 
+export const JOURNEY_INTEREST_TERMS: Record<string, readonly string[]> = {
+  "AI 与数码": ["ai", "人工智能", "大模型", "模型", "机器人", "科技", "数码", "智能"],
+  "宠物": ["宠物", "猫", "狗", "动物"],
+  "科学": ["科学", "物理", "化学", "生物", "研究", "实验", "宇宙"],
+  "职场与创业": ["职场", "工作", "公司", "创业", "职业", "管理"],
+  "游戏": ["游戏", "玩家", "电竞", "主机"],
+  "文化与生活": ["文化", "生活", "电影", "音乐", "文学", "社会"],
+  "综合": [],
+};
+
 const generatedInsightSchema = z.object({
   headline: z.string().trim().min(4).max(28),
   insight: z.string().trim().min(8).max(70),
@@ -31,6 +41,7 @@ type InsightSeed = NonNullable<JourneyDiscoveryResult["insight"]>;
 export interface JourneyInsightInput {
   persona: Persona;
   composition: ZhihuComposition;
+  topic: string;
   routeBias: string | null;
   question: JourneyQuestion | null;
   encounterName?: string | null;
@@ -46,8 +57,38 @@ function charCount(values: string[]): number {
   return Array.from(values.join("")).length;
 }
 
+export function resolveJourneyInsightTopic(
+  routeBias: string | null,
+  question: JourneyQuestion | null,
+  interests: readonly string[],
+): string {
+  const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
+  if (route.includes("ai")) return "AI 与数码";
+
+  if (question) {
+    const haystack = `${question.title} ${question.summary}`.toLocaleLowerCase("zh-CN");
+    const interestPriority = new Map(interests.map((interest, index) => [interest, index]));
+    const ranked = Object.entries(JOURNEY_INTEREST_TERMS)
+      .filter(([topic]) => topic !== "综合")
+      .map(([topic, terms], order) => ({
+        topic,
+        hits: terms.reduce((sum, term) => sum + (haystack.includes(term) ? 1 : 0), 0),
+        interestOrder: interestPriority.get(topic) ?? Number.MAX_SAFE_INTEGER,
+        order,
+      }))
+      .filter((entry) => entry.hits > 0)
+      .sort((left, right) =>
+        right.hits - left.hits || left.interestOrder - right.interestOrder || left.order - right.order,
+      );
+    if (ranked[0]) return ranked[0].topic;
+  }
+
+  return interests.find((interest) => interest.trim()) ?? "综合";
+}
+
 function buildFacts(input: JourneyInsightInput) {
   return {
+    insightTopic: input.topic,
     persona: {
       title: input.persona.certifiedTitle,
       traits: input.persona.personality.slice(0, 3),
@@ -102,10 +143,9 @@ function personaQuestion(persona: Persona): string {
 }
 
 function fallbackGenerated(input: JourneyInsightInput): GeneratedInsight {
-  const primary = input.composition.primaryInterest;
   const question = input.question ? compact(input.question.title, 24) : null;
   return {
-    headline: `它对「${primary}」的理解又多了一点`,
+    headline: `它对「${input.topic}」的理解又多了一点`,
     insight: question
       ? `这趟它停在「${question}」前，开始猜：你会被能继续追问的问题吸引，而不只是熟悉的标签。`
       : `这趟它把你给的方向和长期兴趣并排记下，形成了一条可以继续校准的新观察。`,
@@ -198,6 +238,7 @@ export async function createJourneyInsight(
 
 export function createFallbackJourneyInsight(routeBias: string | null): InsightSeed {
   const route = compact(routeBias || "随便逛", 24);
+  const topic = routeBias?.toLocaleLowerCase("zh-CN").includes("ai") ? "AI 与数码" : "综合";
   const generated: GeneratedInsight = {
     headline: "它把你给的方向认真记下了",
     insight: `「${route}」这张纸条被它收进了这趟旅程，并成为下一次探索时会继续参考的一条线索。`,
@@ -210,6 +251,9 @@ export function createFallbackJourneyInsight(routeBias: string | null): InsightS
     },
   };
   const evidenceSummary = `本趟纸条：「${route}」 · 当前只记录这条已知路线意图`;
-  const factsJson = JSON.stringify({ journey: { routeBias: routeBias ?? null, question: null } });
+  const factsJson = JSON.stringify({
+    insightTopic: topic,
+    journey: { routeBias: routeBias ?? null, question: null },
+  });
   return toSeed(generated, evidenceSummary, factsJson, "local-fallback");
 }

@@ -728,9 +728,14 @@ export class JourneyService {
     return rows.flatMap((row) => {
       try {
         const facts = JSON.parse(row.facts_json) as {
+          insightTopic?: unknown;
           zhihuComposition?: { primaryInterest?: unknown };
         };
-        const topic = facts.zhihuComposition?.primaryInterest;
+        const explicitTopic = facts.insightTopic;
+        const legacyTopic = facts.zhihuComposition?.primaryInterest;
+        const topic = typeof explicitTopic === "string" && explicitTopic.trim()
+          ? explicitTopic
+          : legacyTopic;
         return typeof topic === "string" && topic.trim()
           ? [{ action: row.feedback_action, topic: topic.trim() }]
           : [];
