@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { DEMO_FALLBACK } from "@/data/demo-fallback";
 import { createZhihuGatewayFromEnv } from "@/lib/zhihu/env";
 
 export const dynamic = "force-dynamic";
@@ -44,10 +43,10 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        mode: "fallback" as const,
+        mode: "unavailable" as const,
         generatedAt: Math.floor(Date.now() / 1000),
-        question: DEMO_FALLBACK.question,
-        questions: [DEMO_FALLBACK.question],
+        question: null,
+        questions: [],
       },
       { headers: { "cache-control": "no-store" } },
     );

@@ -23,6 +23,7 @@ import type {
   ZhihuHotItem,
   ZhihuOAuthConfig,
   ZhihuOAuthUserIdentity,
+  ZhihuSearchItem,
   ZhidaRequest,
   ZhidaResult,
 } from "./types";
@@ -49,6 +50,76 @@ export class ZhihuApiError extends Error {
     super(message);
     this.name = "ZhihuApiError";
   }
+}
+
+type ZhihuRuntimeState = {
+  dataApiQueue?: Promise<void>;
+  lastDataApiAt?: number;
+  hotListCache?: { fetchedAt: number; items: ZhihuHotItem[] };
+  hotListInFlight?: Promise<ZhihuHotItem[]>;
+};
+
+const zhihuRuntime = globalThis as typeof globalThis & { __xieyaoZhihuRuntime?: ZhihuRuntimeState };
+zhihuRuntime.__xieyaoZhihuRuntime ??= {};
+const sharedRuntime = zhihuRuntime.__xieyaoZhihuRuntime;
+const DATA_API_MIN_INTERVAL_MS = 1_050;
+const HOT_LIST_TTL_MS = 5 * 60_000;
+const HOT_LIST_STALE_MS = 6 * 60 * 60_000;
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function scheduleDataApiRequest<T>(task: () => Promise<T>): Promise<T> {
+  const previous = sharedRuntime.dataApiQueue ?? Promise.resolve();
+  let resolveQueue!: () => void;
+  sharedRuntime.dataApiQueue = new Promise<void>((resolve) => {
+    resolveQueue = resolve;
+  });
+  await previous.catch(() => undefined);
+  const delay = Math.max(0, (sharedRuntime.lastDataApiAt ?? 0) + DATA_API_MIN_INTERVAL_MS - Date.now());
+  if (delay > 0) await wait(delay);
+  try {
+    return await task();
+  } finally {
+    sharedRuntime.lastDataApiAt = Date.now();
+    resolveQueue();
+  }
+}
+
+function decodeXml(value: string): string {
+  return value
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+function parseXmlAttribute(source: string, name: string): string {
+  const match = source.match(new RegExp(`${name}="([\\s\\S]*?)"`));
+  return decodeXml(match?.[1] ?? "").trim();
+}
+
+function parseZhihuSearchXml(xml: string): ZhihuSearchItem[] {
+  const items: ZhihuSearchItem[] = [];
+  const pattern = /<search_item\b([^>]*)>([\s\S]*?)<\/search_item>/g;
+  for (const match of xml.matchAll(pattern)) {
+    const attributes = match[1] ?? "";
+    const title = parseXmlAttribute(attributes, "title");
+    const url = parseXmlAttribute(attributes, "url");
+    if (!title || !url) continue;
+    const score = Number(parseXmlAttribute(attributes, "ranking_score"));
+    const body = decodeXml((match[2] ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ")).trim();
+    items.push({
+      title,
+      url,
+      summary: body,
+      contentType: parseXmlAttribute(attributes, "content_type"),
+      rankingScore: Number.isFinite(score) ? score : 0,
+    });
+  }
+  return items;
 }
 
 export class ZhihuGateway {
@@ -188,18 +259,53 @@ export class ZhihuGateway {
   }
 
   async getHotList(limit = 30): Promise<ZhihuHotItem[]> {
-    const payload = await this.getJson(
-      "/api/v1/content/hot_list",
-      { Limit: String(limit) },
-      hotListEnvelopeSchema,
+    const now = this.now();
+    const cached = sharedRuntime.hotListCache;
+    if (cached && now - cached.fetchedAt < HOT_LIST_TTL_MS) {
+      return cached.items.slice(0, limit);
+    }
+    if (sharedRuntime.hotListInFlight) {
+      return (await sharedRuntime.hotListInFlight).slice(0, limit);
+    }
+
+    const pending = (async () => {
+      try {
+        const payload = await this.getJson(
+          "/api/v1/content/hot_list",
+          { Limit: "30" },
+          hotListEnvelopeSchema,
+        );
+        const data = this.requireSuccessData(payload.Code, payload.Message, payload.Data);
+        const items = data.Items.map((item) => ({
+          title: item.Title,
+          url: item.Url,
+          thumbnailUrl: item.ThumbnailUrl,
+          summary: item.Summary,
+        }));
+        sharedRuntime.hotListCache = { fetchedAt: now, items };
+        return items;
+      } catch (error) {
+        if (cached && now - cached.fetchedAt < HOT_LIST_STALE_MS) return cached.items;
+        throw error;
+      }
+    })();
+    sharedRuntime.hotListInFlight = pending;
+    try {
+      return (await pending).slice(0, limit);
+    } finally {
+      sharedRuntime.hotListInFlight = undefined;
+    }
+  }
+
+  async searchZhihu(query: string, count = 8): Promise<ZhihuSearchItem[]> {
+    const normalized = query.trim();
+    if (normalized.length < 2) return [];
+    const xml = await this.callSseMcpTool(
+      "/api/mcp/zhihu_search/v1",
+      "zhihu_search",
+      { query: normalized.slice(0, 100), count: Math.max(1, Math.min(10, count)) },
     );
-    const data = this.requireSuccessData(payload.Code, payload.Message, payload.Data);
-    return data.Items.map((item) => ({
-      title: item.Title,
-      url: item.Url,
-      thumbnailUrl: item.ThumbnailUrl,
-      summary: item.Summary,
-    }));
+    return parseZhihuSearchXml(xml);
   }
 
   async getQuestionAnswers(questionUrl: string, limit = 20): Promise<ZhihuAnswerSummary[]> {
@@ -374,6 +480,142 @@ export class ZhihuGateway {
     }));
   }
 
+  private async callSseMcpTool(
+    basePath: string,
+    toolName: string,
+    args: Record<string, unknown>,
+  ): Promise<string> {
+    const accessSecret = this.options.accessSecret?.trim();
+    if (!accessSecret) throw new Error("ZHIHU_ACCESS_SECRET is required for Zhihu MCP requests");
+
+    const controller = new AbortController();
+    const headers = {
+      authorization: `Bearer ${accessSecret}`,
+      accept: "text/event-stream",
+    };
+    const sseResponse = await this.fetchImpl(new URL(`${basePath}/sse`, DATA_BASE_URL), {
+      headers,
+      signal: controller.signal,
+    });
+    if (!sseResponse.ok || !sseResponse.body) {
+      throw new Error(`Zhihu MCP SSE failed with HTTP ${sseResponse.status}`);
+    }
+
+    let endpointResolve!: (value: string) => void;
+    let endpointReject!: (reason?: unknown) => void;
+    const endpointPromise = new Promise<string>((resolve, reject) => {
+      endpointResolve = resolve;
+      endpointReject = reject;
+    });
+    const waiters = new Map<number, { resolve: (value: Record<string, unknown>) => void; reject: (reason?: unknown) => void }>();
+    const reader = sseResponse.body.getReader();
+    const decoder = new TextDecoder();
+
+    const handleBlock = (block: string) => {
+      const lines = block.split(/\r?\n/);
+      let event = "message";
+      const data: string[] = [];
+      for (const line of lines) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        if (line.startsWith("data:")) data.push(line.slice(5).trim());
+      }
+      const payload = data.join("\n");
+      if (!payload) return;
+      if (event === "endpoint") {
+        endpointResolve(payload);
+        return;
+      }
+      if (event !== "message") return;
+      try {
+        const message = JSON.parse(payload) as Record<string, unknown>;
+        const id = typeof message.id === "number" ? message.id : null;
+        if (id === null) return;
+        const waiter = waiters.get(id);
+        if (!waiter) return;
+        waiters.delete(id);
+        if (message.error) waiter.reject(new Error(`Zhihu MCP error: ${JSON.stringify(message.error)}`));
+        else waiter.resolve(message);
+      } catch {
+        // Ignore keep-alives or non-JSON SSE messages.
+      }
+    };
+
+    const pump = (async () => {
+      let buffer = "";
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          while (true) {
+            const index = buffer.search(/\r?\n\r?\n/);
+            if (index < 0) break;
+            const block = buffer.slice(0, index);
+            const separator = buffer.slice(index).match(/^\r?\n\r?\n/)?.[0]?.length ?? 2;
+            buffer = buffer.slice(index + separator);
+            handleBlock(block);
+          }
+        }
+        endpointReject(new Error("Zhihu MCP SSE closed before completion"));
+      } catch (error) {
+        if (!controller.signal.aborted) endpointReject(error);
+      }
+    })();
+
+    const withTimeout = async <T>(promise: Promise<T>, label: string): Promise<T> => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        return await Promise.race([
+          promise,
+          new Promise<T>((_, reject) => {
+            timer = setTimeout(() => reject(new Error(`${label} timed out`)), 12_000);
+          }),
+        ]);
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+    };
+
+    const post = async (id: number, method: string, params?: Record<string, unknown>) => {
+      const responsePromise = new Promise<Record<string, unknown>>((resolve, reject) => {
+        waiters.set(id, { resolve, reject });
+      });
+      const endpoint = await withTimeout(endpointPromise, "Zhihu MCP endpoint");
+      const response = await this.fetchImpl(new URL(endpoint, DATA_BASE_URL), {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${accessSecret}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ jsonrpc: "2.0", id, method, ...(params ? { params } : {}) }),
+      });
+      if (!response.ok) {
+        waiters.delete(id);
+        throw new Error(`Zhihu MCP message failed with HTTP ${response.status}`);
+      }
+      return withTimeout(responsePromise, `Zhihu MCP ${method}`);
+    };
+
+    try {
+      await post(1, "initialize", {
+        protocolVersion: "2024-11-05",
+        clientInfo: { name: "xieyao-meow", version: "1.0.0" },
+        capabilities: {},
+      });
+      await post(2, "tools/list");
+      const message = await post(3, "tools/call", { name: toolName, arguments: args });
+      const result = message.result as { content?: Array<{ type?: string; text?: string }> } | undefined;
+      const text = result?.content?.find((item) => item.type === "text" && typeof item.text === "string")?.text;
+      if (!text) throw new Error("Zhihu MCP tool returned no text content");
+      return text;
+    } finally {
+      controller.abort();
+      await pump.catch(() => undefined);
+      for (const waiter of waiters.values()) waiter.reject(new Error("Zhihu MCP session closed"));
+      waiters.clear();
+    }
+  }
+
   private async getJson<TSchema extends z.ZodType>(
     path: string,
     query: Record<string, string>,
@@ -385,10 +627,10 @@ export class ZhihuGateway {
       url.searchParams.set(key, value);
     }
 
-    const response = await this.fetchWithRetry(url, {
+    const response = await scheduleDataApiRequest(() => this.fetchWithRetry(url, {
       method: "GET",
       headers: this.createDataHeaders(oauthAccessToken),
-    });
+    }));
     if (!response.ok) {
       throw new Error(`Zhihu API request failed with HTTP ${response.status}`);
     }

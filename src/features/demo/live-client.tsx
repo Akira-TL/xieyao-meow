@@ -20,9 +20,9 @@ export interface LivePersonaSnapshot {
 }
 
 export interface LiveQuestionSnapshot {
-  mode: AnswerExperience["mode"];
+  mode: "live" | "unavailable";
   generatedAt: number;
-  question: AnswerExperience["question"];
+  question: AnswerExperience["question"] | null;
   questions?: AnswerExperience["question"][];
 }
 
@@ -78,9 +78,13 @@ export function useLiveQuestionSnapshot() {
     const cached = window.sessionStorage.getItem(LIVE_QUESTION_STORAGE_KEY);
     if (cached) {
       try {
-        const parsed = JSON.parse(cached) as LiveQuestionSnapshot;
-        setSnapshot(parsed);
-        if (Date.now() / 1000 - parsed.generatedAt < 300) {
+        const parsed = JSON.parse(cached) as LiveQuestionSnapshot | { mode?: string; generatedAt?: number };
+        if (parsed.mode === "fallback") {
+          window.sessionStorage.removeItem(LIVE_QUESTION_STORAGE_KEY);
+        } else {
+          setSnapshot(parsed as LiveQuestionSnapshot);
+        }
+        if (parsed.mode !== "fallback" && typeof parsed.generatedAt === "number" && Date.now() / 1000 - parsed.generatedAt < 300) {
           return () => {
             cancelled = true;
           };
@@ -97,7 +101,11 @@ export function useLiveQuestionSnapshot() {
       })
       .then((next) => {
         if (cancelled) return;
-        window.sessionStorage.setItem(LIVE_QUESTION_STORAGE_KEY, JSON.stringify(next));
+        if (next.mode === "live") {
+          window.sessionStorage.setItem(LIVE_QUESTION_STORAGE_KEY, JSON.stringify(next));
+        } else {
+          window.sessionStorage.removeItem(LIVE_QUESTION_STORAGE_KEY);
+        }
         setSnapshot(next);
       })
       .catch(() => undefined);

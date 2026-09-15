@@ -89,7 +89,8 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
       routeBias: entry.routeBias,
       artifactType: entry.artifact?.type ?? null,
     }));
-  const questions = appMode ? journeyQuestions : publicQuestions;
+  const showingLivePool = publicQuestions.length > 0;
+  const questions = showingLivePool ? publicQuestions : journeyQuestions;
 
   return (
     <section className={`explore-stage ${appMode ? "explore-stage--app" : "explore-stage--public"}`}>
@@ -124,7 +125,9 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
         {questions.map((item, index) => (
           <PaperCard className={index === 0 ? "explore-card is-featured" : "explore-card"} key={`${item.url}-${index}`}>
             <div className="explore-card-number">{String(index + 1).padStart(2, "0")}</div>
-            <span className="explore-card-badge">{appMode ? (index === 0 ? "最近带回" : `旅途 ${index + 1}`) : (index === 0 ? "今天先看" : index === 1 ? "顺路闻到" : "陌生领域")}</span>
+            <span className="explore-card-badge">{showingLivePool
+              ? (index === 0 ? "现在热榜" : index === 1 ? "顺路看看" : "再逛一题")
+              : (index === 0 ? "最近带回" : `旅途 ${index + 1}`)}</span>
             <h2>{item.title}</h2>
             <p>{compact(item.summary)}</p>
             <ArtSlot
@@ -134,9 +137,9 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
               src={item.thumbnailUrl || undefined}
             />
             <div className="explore-why">
-              <b>{appMode ? "这一趟：" : "为什么带回来："}</b>{appMode
-                ? `${item.completedAt ? formatJourneyDate(item.completedAt) : ""} · 纸条「${item.routeBias ?? "随便逛"}」${item.artifactType === "RELATION_TICKET" ? " · 途中还遇见了另一只猫" : ""}`
-                : "来自当前知乎公开内容，用来展示不同问题如何触发不同 Persona 的注意。"}
+              <b>{showingLivePool ? "现在为什么会看到：" : "这一趟："}</b>{showingLivePool
+                ? `来自当前知乎公开发现池。它会结合「${primaryInterest}」和你塞进包里的纸条，在真正出门时自己挑一题。`
+                : `${item.completedAt ? formatJourneyDate(item.completedAt) : ""} · 纸条「${item.routeBias ?? "随便逛"}」${item.artifactType === "RELATION_TICKET" ? " · 途中还遇见了另一只猫" : ""}`}
             </div>
             <a className="explore-card-link" href={item.url} rel="noreferrer" target="_blank">
               查看知乎原问题 <OpenInNewRoundedIcon fontSize="inherit" />
@@ -147,8 +150,14 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
 
       {appMode ? (
         <div className="explore-log-strip">
-          <strong>真实旅途航迹</strong>
-          <span>{atlas === null ? "正在翻旅行册……" : questions.length ? `${primaryInterest} · 最近 ${questions.length} 趟带回了问题` : "还没有真实旅途票根。等它第一次回来再看。"}</span>
+          <strong>{showingLivePool ? "当前知乎发现池" : "真实旅途航迹"}</strong>
+          <span>{showingLivePool
+            ? `现在刷到 ${questions.length} 个真实公开问题 · 旅行时会从更大的候选池里自己挑`
+            : atlas === null
+              ? "正在翻旅行册……"
+              : journeyQuestions.length
+                ? `${primaryInterest} · 最近 ${journeyQuestions.length} 趟带回了问题`
+                : "知乎发现暂时不可用，旅行册里也还没有问题票根。"}</span>
           <a href="/home">回窝看看它在不在 →</a>
         </div>
       ) : (

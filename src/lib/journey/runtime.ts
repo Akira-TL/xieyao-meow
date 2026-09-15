@@ -38,6 +38,30 @@ function stableTieBreak(seed: string): number {
   return hash >>> 0;
 }
 
+const SEARCH_QUERY_BY_INTEREST: Record<string, string> = {
+  "AI 与数码": "人工智能 AI",
+  "宠物": "宠物 动物",
+  "科学": "科学 研究",
+  "职场与创业": "职场 创业",
+  "游戏": "游戏 玩家",
+  "文化与生活": "文化 生活",
+  "综合": "社会 生活",
+};
+
+function journeySearchQuery(routeBias: string | null, interests: string[], planSeed: string): string {
+  const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
+  if (route.includes("ai")) return "人工智能 AI";
+  if (route.includes("吵")) {
+    const topic = SEARCH_QUERY_BY_INTEREST[interests[0] ?? "综合"] ?? "社会";
+    return `${topic.split(" ")[0]} 争议`;
+  }
+  if (route.includes("陌生")) {
+    const options = ["心理学", "历史", "城市生活", "生物", "文学", "设计", "经济学"];
+    return options[stableTieBreak(`${planSeed}:strange-query`) % options.length]!;
+  }
+  return SEARCH_QUERY_BY_INTEREST[interests[0] ?? "综合"] ?? "社会 生活";
+}
+
 type JourneyNarrative = { headline: string; body: string };
 
 function fallbackJourneyNarrative(input: {
@@ -162,12 +186,29 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     actor = null;
   }
 
-  let questions: Awaited<ReturnType<typeof gateway.getHotList>> = [];
-  try {
-    questions = (await gateway.getHotList(30)).filter((item) => isQuestion(item.url));
-  } catch {
-    questions = [];
+  const searchQuery = journeySearchQuery(routeBias, interests, planSeed);
+  const [hotResult, searchResult] = await Promise.allSettled([
+    gateway.getHotList(30),
+    gateway.searchZhihu(searchQuery, 8),
+  ]);
+  const hotQuestions = hotResult.status === "fulfilled"
+    ? hotResult.value.filter((item) => isQuestion(item.url))
+    : [];
+  const searchedQuestions = searchResult.status === "fulfilled"
+    ? searchResult.value
+        .filter((item) => isQuestion(item.url))
+        .map((item) => ({
+          title: item.title,
+          url: item.url,
+          summary: item.summary,
+          thumbnailUrl: "",
+        }))
+    : [];
+  const questionMap = new Map<string, (typeof hotQuestions)[number]>();
+  for (const item of [...searchedQuestions, ...hotQuestions]) {
+    if (!questionMap.has(item.url)) questionMap.set(item.url, item);
   }
+  const questions = [...questionMap.values()];
   if (!questions.length) {
     const narrative = await createJourneyNarrative({
       gateway,
@@ -218,7 +259,22 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     })
     .sort((left, right) => right.score - left.score || left.tie - right.tie);
 
-  const selected = ranked[0]!.item;
+  const shortlist = ranked.slice(0, Math.min(8, ranked.length));
+  const minScore = Math.min(...shortlist.map((entry) => entry.score));
+  const weighted = shortlist.map((entry) => ({
+    ...entry,
+    weight: Math.max(1, entry.score - minScore + 2),
+  }));
+  const totalWeight = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+  let roll = stableTieBreak(`${planSeed}:weighted-topic`) % totalWeight;
+  let selected = weighted[0]!.item;
+  for (const entry of weighted) {
+    if (roll < entry.weight) {
+      selected = entry.item;
+      break;
+    }
+    roll -= entry.weight;
+  }
   let returnArtifact: JourneyReturnArtifactSeed | undefined;
   let encounterName: string | null = null;
 

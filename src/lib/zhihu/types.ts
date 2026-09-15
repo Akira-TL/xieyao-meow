@@ -96,6 +96,14 @@ export interface ZhihuHotItem {
   summary: string;
 }
 
+export interface ZhihuSearchItem {
+  title: string;
+  url: string;
+  summary: string;
+  contentType: string;
+  rankingScore: number;
+}
+
 export interface ZhihuAnswerSummary {
   contentToken: string;
   url: string;

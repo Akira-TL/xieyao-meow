@@ -178,24 +178,11 @@ export class JourneyService {
     for (let guard = 0; guard < 12; guard += 1) {
       let row = this.readCurrentRow(userId);
       if (!row) {
-        let userState = this.readUserState(userId);
+        const userState = this.readUserState(userId);
         const journeyCount = this.countJourneys(userId);
-        if (
-          journeyCount > 0 &&
-          journeyCount <= 3 &&
-          userState.queued_route_bias &&
-          userState.next_eligible_at !== null &&
-          userState.next_eligible_at > now
-        ) {
-          const warmReadyAt = now + restDurationMs(
-            `${userId}:warm-rest:${journeyCount}`,
-            this.timeScale,
-            journeyCount,
-          );
-          if (warmReadyAt < userState.next_eligible_at) {
-            this.setQueuedRouteBias(userId, userState.queued_route_bias, warmReadyAt);
-            userState = this.readUserState(userId);
-          }
+        if (journeyCount > 0 && journeyCount <= 3 && userState.queued_route_bias) {
+          this.createJourney(userId, userState.queued_route_bias, now);
+          continue;
         }
         if (
           journeyCount > 0 &&
@@ -271,13 +258,11 @@ export class JourneyService {
 
     const userState = this.readUserState(userId);
     if (userState.next_eligible_at !== null && userState.next_eligible_at > now) {
-      const warmedReadyAt = journeyCount <= 3
-        ? Math.min(
-            userState.next_eligible_at,
-            now + restDurationMs(`${userId}:queued:${journeyCount}`, this.timeScale, journeyCount),
-          )
-        : userState.next_eligible_at;
-      this.setQueuedRouteBias(userId, routeBias, warmedReadyAt);
+      if (journeyCount <= 3) {
+        this.createJourney(userId, routeBias, now);
+        return this.getProjection(userId, oauthAccessToken);
+      }
+      this.setQueuedRouteBias(userId, routeBias, userState.next_eligible_at);
       return this.homeProjection(userId, now);
     }
 
