@@ -597,7 +597,7 @@ export class ZhihuGateway {
       authorization: `Bearer ${accessSecret}`,
       accept: "text/event-stream",
     };
-    const sseResponse = await this.fetchImpl(new URL(`${basePath}/sse`, DATA_BASE_URL), {
+    const sseResponse = await this.fetchWithRetry(new URL(`${basePath}/sse`, DATA_BASE_URL), {
       headers,
       signal: controller.signal,
     });
@@ -685,7 +685,7 @@ export class ZhihuGateway {
         waiters.set(id, { resolve, reject });
       });
       const endpoint = await withTimeout(endpointPromise, "Zhihu MCP endpoint");
-      const response = await this.fetchImpl(new URL(endpoint, DATA_BASE_URL), {
+      const response = await this.fetchWithRetry(new URL(endpoint, DATA_BASE_URL), {
         method: "POST",
         headers: {
           authorization: `Bearer ${accessSecret}`,
@@ -774,7 +774,7 @@ export class ZhihuGateway {
   }
 
   private async fetchWithRetry(input: RequestInfo | URL, init: RequestInit): Promise<Response> {
-    const retry = this.options.retry ?? { attempts: 2, delayMs: 150 };
+    const retry = this.options.retry ?? { attempts: 3, delayMs: 500 };
     const attempts = Math.max(1, retry.attempts);
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
