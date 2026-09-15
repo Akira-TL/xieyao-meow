@@ -1335,7 +1335,7 @@ body {
     bottom:64px;
     height:250px;
     pointer-events:none;
-    background-image:linear-gradient(180deg,rgba(4,6,9,1),rgba(4,6,9,.05) 35%,rgba(4,6,9,.02)),url("/art/p0/generation-02/19_stage_paper_archive.png");
+    background-image:linear-gradient(180deg,rgba(4,6,9,1),rgba(4,6,9,.05) 35%,rgba(4,6,9,.02)),url("/art/world/theatre/app-rail-archive-illustration.png");
     background-repeat:no-repeat,no-repeat;
     background-size:100% 100%,auto 250px;
     background-position:center,left bottom;
