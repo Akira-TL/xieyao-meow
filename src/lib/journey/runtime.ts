@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getAccountStore } from "@/lib/auth/runtime";
+import { COMMUNITY_RESIDENTS } from "@/data/community-residents";
 import { tryCreateDeepSeekFlashClientFromEnv } from "@/lib/narrative/deepseek";
 import { buildComposition, buildPersona } from "@/lib/persona";
 import { SocialDialogueService, type SocialAgent } from "@/lib/social";
@@ -18,7 +19,7 @@ import {
   resolveJourneyInsightTopic,
 } from "./insight";
 import { JourneyService } from "./service";
-import type { JourneyDiscoverer, JourneyReturnArtifactSeed, JourneyQuestion } from "./types";
+import type { JourneyConversation, JourneyDiscoverer, JourneyReturnArtifactSeed, JourneyQuestion } from "./types";
 
 function isQuestion(url: string): boolean {
   try {
@@ -46,12 +47,17 @@ const SEARCH_QUERY_BY_INTEREST: Record<string, string> = {
 
 function journeySearchQuery(routeBias: string | null, interests: string[]): string {
   const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
-  if (route.includes("ai")) return "人工智能 AI";
-  if (route.includes("吵")) {
+  if (route.includes("ai") || route.includes("数码") || route.includes("人工智能")) return "人工智能 AI";
+  if (route.includes("科学") || route.includes("研究")) return "科学 研究";
+  if (route.includes("宠物") || route.includes("动物")) return "宠物 动物";
+  if (route.includes("游戏")) return "游戏 玩家";
+  if (route.includes("职场") || route.includes("创业")) return "职场 创业";
+  if (route.includes("生活") || route.includes("轻松")) return "文化 生活";
+  if (route.includes("吵") || route.includes("争议") || route.includes("反对")) {
     const topic = SEARCH_QUERY_BY_INTEREST[interests[0] ?? "综合"] ?? "社会";
     return `${topic.split(" ")[0]} 争议`;
   }
-  if (route.includes("陌生")) return "心理学 历史 城市生活";
+  if (route.includes("陌生") || route.includes("不会点开")) return "心理学 历史 城市生活";
   return SEARCH_QUERY_BY_INTEREST[interests[0] ?? "综合"] ?? "社会 生活";
 }
 
@@ -117,10 +123,54 @@ function narrativeGateway() {
 
 const ENCOUNTER_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
-function shouldTryEncounter(planSeed: string, routeBias: string | null): boolean {
-  const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
-  const chance = route.includes("吵") ? 85 : route.includes("陌生") ? 55 : 35;
-  return stableTieBreak(`${planSeed}:shared-encounter`) % 100 < chance;
+function conversationCharCount(turns: JourneyConversation["turns"]): number {
+  return turns.reduce((total, turn) => total + Array.from(turn.text).length, 0);
+}
+
+async function createNpcJourneyConversation(input: {
+  actor: SocialAgent;
+  question: JourneyQuestion;
+  planSeed: string;
+}): Promise<JourneyConversation> {
+  const target = COMMUNITY_RESIDENTS[
+    stableTieBreak(`${input.planSeed}:npc`) % COMMUNITY_RESIDENTS.length
+  ]! as SocialAgent;
+  const dialogue = new SocialDialogueService(narrativeGateway());
+  const history: JourneyConversation["turns"] = [];
+  const memory = {
+    encounterCount: 0,
+    recentTopics: [] as string[],
+    recentResidents: [] as string[],
+    notes: [] as string[],
+  };
+  let sourceLabel = "Persona 对话回退";
+
+  // Two short rounds are enough to feel like an encounter while keeping Flash usage bounded.
+  for (let index = 0; index < 2; index += 1) {
+    const round = await dialogue.nextRound({
+      actor: input.actor,
+      target,
+      topic: {
+        title: input.question.title,
+        url: input.question.url,
+        summary: input.question.summary.slice(0, 1800),
+      },
+      history,
+      memory,
+    });
+    history.push(...round.turns);
+    sourceLabel = round.sourceLabel;
+    if (round.memoryNote) memory.notes = [...memory.notes, round.memoryNote].slice(-3);
+  }
+
+  return {
+    kind: "NPC",
+    participantId: target.id,
+    participantName: target.displayName,
+    turns: history,
+    sourceLabel,
+    textCharCount: conversationCharCount(history),
+  };
 }
 
 const discoverJourneyContent: JourneyDiscoverer = async ({
@@ -263,11 +313,15 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
             ? -3
             : -6;
       }
-      if (route.includes("ai")) {
-        score += JOURNEY_INTEREST_TERMS["AI 与数码"].some((term) => haystack.includes(term)) ? 8 : 0;
+      const routeTopic = Object.entries(JOURNEY_INTEREST_TERMS).find(([topic]) => {
+        const key = topic.toLocaleLowerCase("zh-CN");
+        return route.includes(key) || (topic === "AI 与数码" && (route.includes("ai") || route.includes("数码")));
+      });
+      if (routeTopic) {
+        score += routeTopic[1].some((term) => haystack.includes(term)) ? 8 : 0;
       }
-      if (route.includes("陌生")) score += interestHits === 0 ? 7 : 0;
-      if (route.includes("吵")) {
+      if (route.includes("陌生") || route.includes("不会点开")) score += interestHits === 0 ? 7 : 0;
+      if (route.includes("吵") || route.includes("争议") || route.includes("反对")) {
         score += ["争议", "应该", "是否", "为什么", "如何看待"].some((term) =>
           haystack.includes(term),
         )
@@ -300,8 +354,15 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   }
   let returnArtifact: JourneyReturnArtifactSeed | undefined;
   let encounterName: string | null = null;
+  let conversation: JourneyConversation | undefined;
+  const question: JourneyQuestion = {
+    title: selected.title,
+    url: selected.url,
+    summary: selected.summary,
+    ...(selected.thumbnailUrl ? { thumbnailUrl: selected.thumbnailUrl } : {}),
+  };
 
-  if (actor && shouldTryEncounter(planSeed, routeBias)) {
+  if (actor) {
     const store = getSharedEncounterStore();
     const target = store.findPersonaCandidate(userId);
     const relationship = target ? store.getRelationship(userId, target.userId) : null;
@@ -309,6 +370,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
       ? fetchedAt - relationship.lastEncounterAt < ENCOUNTER_COOLDOWN_MS
       : false;
 
+    // Prefer another real activated User Persona whenever one is available.
     if (target && target.source === "live" && !insideCooldown) {
       const provenance: SharedEncounterProvenance = {
         contentSource: "live",
@@ -323,14 +385,26 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
           requestUserId: userId,
           otherUserId: target.userId,
           topic: {
-            title: selected.title,
-            url: selected.url,
-            summary: selected.summary.slice(0, 1800),
+            title: question.title,
+            url: question.url,
+            summary: question.summary.slice(0, 1800),
           },
           provenance,
         });
         if (encounter.status === "completed") {
           encounterName = target.agent.displayName;
+          const turns = encounter.turns.map((turn) => ({
+            speaker: turn.speakerUserId === userId ? "self" as const : "other" as const,
+            text: turn.text,
+          }));
+          conversation = {
+            kind: "USER",
+            participantId: target.userId,
+            participantName: target.agent.displayName,
+            turns,
+            sourceLabel: "Shared Encounter · 真实用户 Persona 对话",
+            textCharCount: conversationCharCount(turns),
+          };
           returnArtifact = {
             type: "RELATION_TICKET",
             title: `和 ${target.agent.displayName} 的一场相遇`,
@@ -339,8 +413,13 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
           };
         }
       } catch {
-        // Social luck never blocks a Journey from coming home.
+        // A failed real-user encounter falls through to an NPC encounter instead of blocking the Journey.
       }
+    }
+
+    if (!conversation) {
+      conversation = await createNpcJourneyConversation({ actor, question, planSeed });
+      encounterName = conversation.participantName;
     }
   }
 
@@ -349,16 +428,10 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     planSeed,
     routeBias,
     actor,
-    questionTitle: selected.title,
-    questionSummary: selected.summary,
+    questionTitle: question.title,
+    questionSummary: question.summary,
     encounterName,
   });
-  const question: JourneyQuestion = {
-    title: selected.title,
-    url: selected.url,
-    summary: selected.summary,
-    ...(selected.thumbnailUrl ? { thumbnailUrl: selected.thumbnailUrl } : {}),
-  };
   const insight = actor
     ? await createJourneyInsight({
         persona: actor.persona,
@@ -379,6 +452,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     postcardHeadline: narrative.headline,
     postcardBody: narrative.body,
     insight,
+    ...(conversation ? { conversation } : {}),
     ...(returnArtifact ? { returnArtifact } : {}),
   };
 };

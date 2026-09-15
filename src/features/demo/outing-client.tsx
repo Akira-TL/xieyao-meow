@@ -144,6 +144,13 @@ function AtHomeStage({
   journeyNotice: string | null;
 }) {
   const fixture = DEMO_FIXTURE;
+  const [draftRouteBias, setDraftRouteBias] = useState(queuedRouteBias ?? "");
+  const submitRouteBias = async (close: () => void) => {
+    const routeBias = draftRouteBias.trim();
+    if (!routeBias) return;
+    await onPrepare(routeBias);
+    close();
+  };
   return (
     <div className="home-at-home home-room-stage">
       <RoomBackdrop />
@@ -181,17 +188,39 @@ function AtHomeStage({
           {(close) => (
             <>
               <p>{resting ? "它刚回来，还在睡。你可以先塞一张纸条；醒了以后它会自己决定什么时候走。" : "你只能给一个模糊方向。纸条不会决定目的地，更不会决定它带什么回来。"}</p>
-              <div className="route-bias-list">
+              <div className="route-bias-list" aria-label="纸条方向建议">
                 {fixture.outing.routeBiases.map((bias) => (
                   <button
+                    className={draftRouteBias === bias ? "is-selected" : ""}
                     key={bias}
-                    onClick={() => void onPrepare(bias).finally(close)}
+                    onClick={() => setDraftRouteBias(bias)}
                     type="button"
                   >
                     {bias}
                   </button>
                 ))}
               </div>
+              <form
+                className="route-bias-custom"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void submitRouteBias(close);
+                }}
+              >
+                <label htmlFor="journey-route-note">自己写一张</label>
+                <textarea
+                  id="journey-route-note"
+                  maxLength={40}
+                  onChange={(event) => setDraftRouteBias(event.target.value)}
+                  placeholder="比如：最近总在看效率工具，带我去看看反对意见。"
+                  rows={3}
+                  value={draftRouteBias}
+                />
+                <div className="route-bias-custom-footer">
+                  <span>{Array.from(draftRouteBias).length}/40 字</span>
+                  <button disabled={!draftRouteBias.trim()} type="submit">压进包里 →</button>
+                </div>
+              </form>
             </>
           )}
         </BottomSheet>
@@ -283,6 +312,7 @@ function ReturnedStage({
   const question = journey.question;
   const thought = journey.postcard?.body ?? "这一趟只留下了出门记录。";
   const relationTicket = journey.artifact?.type === "RELATION_TICKET";
+  const conversation = journey.conversation;
   const insight = journey.insight;
   const artifactLabel = relationTicket
     ? "关系票根 · RELATION TICKET"
@@ -340,8 +370,24 @@ function ReturnedStage({
           {question || relationTicket ? <blockquote>“{thought}”</blockquote> : null}
           <div className="returned-meta">
             <span>它看到了什么 <b>{question ? "一个真实知乎问题" : relationTicket ? "一场真实相遇" : insight ? "一条沿这趟路线形成的新观察" : "一页可追溯的旅行记录"}</b></span>
+            <span>它路上聊了什么 <b>{conversation ? `${conversation.kind === "USER" ? "真实用户 Persona" : "社区 NPC"} · ${conversation.textCharCount} 字` : "这趟没有停下来聊天"}</b></span>
             <span>它更懂你什么 <b>{insight ? `1 条新认识 · ${insight.textCharCount} 字` : "仍按可验证事实记录"}</b></span>
           </div>
+          {conversation ? (
+            <section className="returned-conversation" aria-label="旅途中发生的对话">
+              <span>{conversation.kind === "USER" ? "SHARED ENCOUNTER · 真实用户" : "ROADSIDE CHAT · 社区 NPC"}</span>
+              <h3>路上碰见了 {conversation.participantName}。</h3>
+              <div className="returned-conversation-turns">
+                {conversation.turns.map((turn, index) => (
+                  <p className={turn.speaker === "other" ? "is-other" : ""} key={`${turn.speaker}-${index}`}>
+                    <b>{turn.speaker === "self" ? catName : conversation.participantName}</b>
+                    {turn.text}
+                  </p>
+                ))}
+              </div>
+              <small>{conversation.sourceLabel} · {conversation.turns.length} 句 · {conversation.textCharCount} 字</small>
+            </section>
+          ) : null}
           {insight ? (
             <section className="returned-insight" aria-label="它对你的一个新发现">
               <span>新认识 · ABOUT YOU · {insight.textCharCount} 字</span>

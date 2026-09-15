@@ -8,6 +8,7 @@ import { resolveDatabasePath } from "@/lib/persistence/database-path";
 import type {
   JourneyAtlasEntry,
   JourneyAtlasView,
+  JourneyConversation,
   JourneyDiscoverer,
   JourneyDiscoveryResult,
   JourneyInsight,
@@ -63,6 +64,12 @@ interface JourneyRow {
   insight_model: string | null;
   insight_prompt_version: string | null;
   insight_feedback_action: JourneyInsightAction | null;
+  conversation_kind: JourneyConversation["kind"] | null;
+  conversation_participant_id: string | null;
+  conversation_participant_name: string | null;
+  conversation_turns_json: string | null;
+  conversation_source_label: string | null;
+  conversation_text_char_count: number | null;
 }
 
 interface JourneyUserStateRow {
@@ -95,6 +102,12 @@ interface AtlasRow {
   insight_model: string | null;
   insight_prompt_version: string | null;
   insight_feedback_action: JourneyInsightAction | null;
+  conversation_kind: JourneyConversation["kind"] | null;
+  conversation_participant_id: string | null;
+  conversation_participant_name: string | null;
+  conversation_turns_json: string | null;
+  conversation_source_label: string | null;
+  conversation_text_char_count: number | null;
 }
 
 const MINUTE = 60_000;
@@ -118,17 +131,18 @@ function scaleMs(value: number, timeScale: number): number {
 }
 
 function journeyDurationMs(sequence: number, seed: string, timeScale: number): number {
-  if (sequence <= 1) return scaleMs(rangedMs(seed, 3 * MINUTE, 5 * MINUTE), timeScale);
-  if (sequence === 2) return scaleMs(rangedMs(seed, 10 * MINUTE, 20 * MINUTE), timeScale);
-  if (sequence === 3) return scaleMs(rangedMs(seed, 20 * MINUTE, 40 * MINUTE), timeScale);
-  return scaleMs(rangedMs(seed, 30 * MINUTE, 90 * MINUTE), timeScale);
+  // Journeys should feel alive during a short product session, not disappear for tens of minutes.
+  if (sequence <= 1) return scaleMs(rangedMs(seed, 1 * MINUTE, 2 * MINUTE), timeScale);
+  if (sequence === 2) return scaleMs(rangedMs(seed, 2 * MINUTE, 4 * MINUTE), timeScale);
+  if (sequence === 3) return scaleMs(rangedMs(seed, 3 * MINUTE, 6 * MINUTE), timeScale);
+  return scaleMs(rangedMs(seed, 5 * MINUTE, 10 * MINUTE), timeScale);
 }
 
 function restDurationMs(seed: string, timeScale: number, sequence: number): number {
-  if (sequence <= 1) return scaleMs(rangedMs(`${seed}:rest`, 1 * MINUTE, 2 * MINUTE), timeScale);
-  if (sequence === 2) return scaleMs(rangedMs(`${seed}:rest`, 2 * MINUTE, 5 * MINUTE), timeScale);
-  if (sequence === 3) return scaleMs(rangedMs(`${seed}:rest`, 5 * MINUTE, 10 * MINUTE), timeScale);
-  return scaleMs(rangedMs(`${seed}:rest`, 30 * MINUTE, 90 * MINUTE), timeScale);
+  if (sequence <= 1) return scaleMs(rangedMs(`${seed}:rest`, 30_000, 1 * MINUTE), timeScale);
+  if (sequence === 2) return scaleMs(rangedMs(`${seed}:rest`, 45_000, 90_000), timeScale);
+  if (sequence === 3) return scaleMs(rangedMs(`${seed}:rest`, 1 * MINUTE, 2 * MINUTE), timeScale);
+  return scaleMs(rangedMs(`${seed}:rest`, 2 * MINUTE, 5 * MINUTE), timeScale);
 }
 
 function routePostcardFallback(seed: string, routeBias: string | null) {
@@ -206,6 +220,35 @@ function insightFromRow(row: Pick<
       model: row.insight_model,
       promptVersion: row.insight_prompt_version,
       feedbackAction: row.insight_feedback_action,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function conversationFromRow(row: Pick<
+  JourneyRow,
+  | "conversation_kind"
+  | "conversation_participant_id"
+  | "conversation_participant_name"
+  | "conversation_turns_json"
+  | "conversation_source_label"
+  | "conversation_text_char_count"
+>): JourneyConversation | null {
+  if (
+    !row.conversation_kind || !row.conversation_participant_id || !row.conversation_participant_name ||
+    !row.conversation_turns_json || !row.conversation_source_label || row.conversation_text_char_count === null
+  ) return null;
+  try {
+    const turns = JSON.parse(row.conversation_turns_json) as JourneyConversation["turns"];
+    if (!Array.isArray(turns) || turns.length < 2) return null;
+    return {
+      kind: row.conversation_kind,
+      participantId: row.conversation_participant_id,
+      participantName: row.conversation_participant_name,
+      turns,
+      sourceLabel: row.conversation_source_label,
+      textCharCount: row.conversation_text_char_count,
     };
   } catch {
     return null;
@@ -367,12 +410,19 @@ export class JourneyService {
         i.options_json AS insight_options_json,
         i.text_char_count AS insight_text_char_count,
         i.model AS insight_model, i.prompt_version AS insight_prompt_version,
-        i.feedback_action AS insight_feedback_action
+        i.feedback_action AS insight_feedback_action,
+        c.kind AS conversation_kind,
+        c.participant_id AS conversation_participant_id,
+        c.participant_name AS conversation_participant_name,
+        c.turns_json AS conversation_turns_json,
+        c.source_label AS conversation_source_label,
+        c.text_char_count AS conversation_text_char_count
       FROM journey_logs l
       JOIN journeys j ON j.id = l.journey_id
       JOIN journey_postcards p ON p.journey_id = l.journey_id
       LEFT JOIN return_artifacts a ON a.origin_journey_id = l.journey_id
       LEFT JOIN journey_insights i ON i.journey_id = l.journey_id
+      LEFT JOIN journey_conversations c ON c.journey_id = l.journey_id
       WHERE l.user_id = ?
       ORDER BY l.completed_at DESC
       LIMIT 30
@@ -392,6 +442,7 @@ export class JourneyService {
         postcard,
         artifact: artifactFromRow(row),
         insight: insightFromRow(row),
+        conversation: conversationFromRow(row),
         contentSource: row.content_source,
       };
     });
@@ -604,6 +655,25 @@ export class JourneyService {
         );
       }
 
+      if (result.conversation) {
+        this.db.prepare(`
+          INSERT OR IGNORE INTO journey_conversations (
+            journey_id, user_id, kind, participant_id, participant_name,
+            turns_json, source_label, text_char_count, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          journeyId,
+          userId,
+          result.conversation.kind,
+          result.conversation.participantId,
+          result.conversation.participantName,
+          JSON.stringify(result.conversation.turns),
+          result.conversation.sourceLabel,
+          result.conversation.textCharCount,
+          latest.return_at,
+        );
+      }
+
       if (artifactSeed && artifactId) {
         this.db.prepare(`
           INSERT OR IGNORE INTO return_artifacts (
@@ -800,6 +870,7 @@ export class JourneyService {
           : null,
       artifact: artifactFromRow(row),
       insight: insightFromRow(row),
+      conversation: conversationFromRow(row),
     };
   }
 
@@ -824,12 +895,19 @@ export class JourneyService {
         i.options_json AS insight_options_json,
         i.text_char_count AS insight_text_char_count,
         i.model AS insight_model, i.prompt_version AS insight_prompt_version,
-        i.feedback_action AS insight_feedback_action
+        i.feedback_action AS insight_feedback_action,
+        c.kind AS conversation_kind,
+        c.participant_id AS conversation_participant_id,
+        c.participant_name AS conversation_participant_name,
+        c.turns_json AS conversation_turns_json,
+        c.source_label AS conversation_source_label,
+        c.text_char_count AS conversation_text_char_count
       FROM journeys j
       LEFT JOIN journey_logs l ON l.journey_id = j.id
       LEFT JOIN journey_postcards p ON p.journey_id = j.id
       LEFT JOIN return_artifacts a ON a.origin_journey_id = j.id
       LEFT JOIN journey_insights i ON i.journey_id = j.id
+      LEFT JOIN journey_conversations c ON c.journey_id = j.id
       WHERE j.user_id = ?
         ${journeyId ? "AND j.id = ?" : ""}
         ${currentOnly ? "AND j.archived_at IS NULL" : ""}
@@ -905,6 +983,20 @@ export class JourneyService {
       );
       CREATE INDEX IF NOT EXISTS idx_journey_insights_user_created
         ON journey_insights(user_id, created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS journey_conversations (
+        journey_id TEXT PRIMARY KEY REFERENCES journeys(id) ON DELETE CASCADE,
+        user_id TEXT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        kind TEXT NOT NULL CHECK (kind IN ('NPC', 'USER')),
+        participant_id TEXT NOT NULL,
+        participant_name TEXT NOT NULL,
+        turns_json TEXT NOT NULL,
+        source_label TEXT NOT NULL,
+        text_char_count INTEGER NOT NULL,
+        created_at INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_journey_conversations_user_created
+        ON journey_conversations(user_id, created_at DESC);
 
       CREATE TABLE IF NOT EXISTS return_artifacts (
         id TEXT PRIMARY KEY,

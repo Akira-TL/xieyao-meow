@@ -130,7 +130,16 @@ export const DEMO_FIXTURE = {
     },
   },
   outing: {
-    routeBiases: ["随便逛", "多看看 AI", "去陌生地方", "看看大家在吵什么"],
+    routeBiases: [
+      "随便逛",
+      "多看看 AI",
+      "去陌生地方",
+      "看看大家在吵什么",
+      "看看科学",
+      "找点轻松的",
+      "去看看生活",
+      "找一个我平时不会点开的",
+    ],
     note: "出去转转。",
     awayStatus: "已经逛了一会儿",
     returnArtifact: {

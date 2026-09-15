@@ -49,6 +49,22 @@ export interface JourneyPostcard {
   question: JourneyQuestion | null;
 }
 
+export type JourneyConversationKind = "NPC" | "USER";
+
+export interface JourneyConversationTurn {
+  speaker: "self" | "other";
+  text: string;
+}
+
+export interface JourneyConversation {
+  kind: JourneyConversationKind;
+  participantId: string;
+  participantName: string;
+  turns: JourneyConversationTurn[];
+  sourceLabel: string;
+  textCharCount: number;
+}
+
 export interface ReturnArtifact {
   id: string;
   type: ReturnArtifactType;
@@ -70,6 +86,7 @@ export interface JourneyView {
   postcard: JourneyPostcard | null;
   artifact: ReturnArtifact | null;
   insight: JourneyInsight | null;
+  conversation: JourneyConversation | null;
 }
 
 export interface JourneyProjection {
@@ -87,6 +104,7 @@ export interface JourneyAtlasEntry {
   postcard: JourneyPostcard;
   artifact: ReturnArtifact | null;
   insight: JourneyInsight | null;
+  conversation: JourneyConversation | null;
   contentSource: JourneyContentSource;
 }
 
@@ -120,6 +138,7 @@ export interface JourneyDiscoveryResult {
   insight?: Omit<JourneyInsight, "feedbackAction"> & {
     factsJson: string;
   };
+  conversation?: JourneyConversation;
   returnArtifact?: JourneyReturnArtifactSeed;
 }
 

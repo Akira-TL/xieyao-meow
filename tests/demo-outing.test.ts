@@ -29,7 +29,7 @@ function createUser(dbPath: string, providerSubject: string, userId: string) {
 }
 
 describe("server Journey", () => {
-  it("freezes a 3–5 minute first Journey and materializes its return only once", async () => {
+  it("freezes a 1–2 minute first Journey and materializes its return only once", async () => {
     const dbPath = createDbPath();
     const userId = createUser(dbPath, "subject-a", "user-a");
     let now = 1_000_000;
@@ -60,6 +60,17 @@ describe("server Journey", () => {
         promptVersion: "journey-insight-v1",
         factsJson: '{"insightTopic":"AI 与数码","zhihuComposition":{"primaryInterest":"科学"},"journey":{"routeBias":"多看看 AI"}}',
       },
+      conversation: {
+        kind: "NPC" as const,
+        participantId: "resident-thesis",
+        participantName: "刻度",
+        turns: [
+          { speaker: "self" as const, text: "先看证据从哪里来。" },
+          { speaker: "other" as const, text: "那我先问样本够不够。" },
+        ],
+        sourceLabel: "DeepSeek Flash · 单角色逐句对话",
+        textCharCount: 20,
+      },
     }));
     const service = new JourneyService({
       dbPath,
@@ -71,8 +82,8 @@ describe("server Journey", () => {
     const preparing = await service.start(userId, "oauth-a", "多看看 AI");
     expect(preparing.state).toBe("PREPARING");
     expect(preparing.journey?.routeBias).toBe("多看看 AI");
-    expect(preparing.journey!.returnAt - now).toBeGreaterThanOrEqual(180_000);
-    expect(preparing.journey!.returnAt - now).toBeLessThanOrEqual(300_000);
+    expect(preparing.journey!.returnAt - now).toBeGreaterThanOrEqual(60_000);
+    expect(preparing.journey!.returnAt - now).toBeLessThanOrEqual(120_000);
     const frozenReturnAt = preparing.journey!.returnAt;
 
     now = preparing.journey!.departAt;
@@ -92,6 +103,12 @@ describe("server Journey", () => {
       textCharCount: 88,
       feedbackAction: null,
     });
+    expect(returned.journey?.conversation).toMatchObject({
+      kind: "NPC",
+      participantName: "刻度",
+      sourceLabel: "DeepSeek Flash · 单角色逐句对话",
+    });
+    expect((await service.getAtlas(userId, "oauth-a")).journeys[0]?.conversation?.participantName).toBe("刻度");
 
     const repeated = await service.getProjection(userId, "oauth-a");
     expect(repeated).toEqual(returned);
@@ -230,8 +247,8 @@ describe("server Journey", () => {
     const first = await service.start(userId, "oauth-a", "多看看 AI");
     now = first.journey!.returnAt;
     const firstReturned = await service.getProjection(userId, "oauth-a");
-    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeGreaterThanOrEqual(60_000);
-    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeLessThanOrEqual(2 * 60_000);
+    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeGreaterThanOrEqual(30_000);
+    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeLessThanOrEqual(60_000);
 
     const resting = await service.archive(userId, "oauth-a");
     expect(resting).toMatchObject({ state: "AT_HOME", resting: true });
@@ -246,8 +263,8 @@ describe("server Journey", () => {
     const second = await service.getProjection(userId, "oauth-a");
     expect(second.state).toBe("PREPARING");
     expect(second.journey?.routeBias).toBe("去陌生地方");
-    expect(second.journey!.returnAt - second.journey!.createdAt).toBeGreaterThanOrEqual(10 * 60_000);
-    expect(second.journey!.returnAt - second.journey!.createdAt).toBeLessThanOrEqual(20 * 60_000);
+    expect(second.journey!.returnAt - second.journey!.createdAt).toBeGreaterThanOrEqual(2 * 60_000);
+    expect(second.journey!.returnAt - second.journey!.createdAt).toBeLessThanOrEqual(4 * 60_000);
 
     now = second.journey!.returnAt;
     const secondReturned = await service.getProjection(userId, "oauth-a");
@@ -255,8 +272,8 @@ describe("server Journey", () => {
     now = secondReturned.nextJourneyAt!;
     const third = await service.getProjection(userId, "oauth-a");
     expect(third.journey?.routeBias).toBeNull();
-    expect(third.journey!.returnAt - third.journey!.createdAt).toBeGreaterThanOrEqual(20 * 60_000);
-    expect(third.journey!.returnAt - third.journey!.createdAt).toBeLessThanOrEqual(40 * 60_000);
+    expect(third.journey!.returnAt - third.journey!.createdAt).toBeGreaterThanOrEqual(3 * 60_000);
+    expect(third.journey!.returnAt - third.journey!.createdAt).toBeLessThanOrEqual(6 * 60_000);
 
     now = third.journey!.createdAt + 24 * 60 * 60_000;
     const caughtUp = await service.getProjection(userId, "oauth-a");
@@ -293,8 +310,8 @@ describe("server Journey", () => {
     });
 
     const started = await service.start(userId, "oauth-a", null);
-    expect(started.journey!.returnAt - started.journey!.createdAt).toBeGreaterThanOrEqual(3_600);
-    expect(started.journey!.returnAt - started.journey!.createdAt).toBeLessThanOrEqual(6_000);
+    expect(started.journey!.returnAt - started.journey!.createdAt).toBeGreaterThanOrEqual(1_200);
+    expect(started.journey!.returnAt - started.journey!.createdAt).toBeLessThanOrEqual(2_400);
     now = started.journey!.returnAt;
     expect((await service.getProjection(userId, "oauth-a")).state).toBe("RETURNED");
     service.close();
