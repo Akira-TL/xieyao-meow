@@ -63,6 +63,7 @@ type ZhihuRuntimeState = {
   searchCache?: Map<string, { fetchedAt: number; items: ZhihuSearchItem[] }>;
   searchCacheLoaded?: boolean;
   searchInFlight?: Map<string, Promise<ZhihuSearchItem[]>>;
+  zhihuSearchBlockedUntil?: number;
 };
 
 const zhihuRuntime = globalThis as typeof globalThis & { __xieyaoZhihuRuntime?: ZhihuRuntimeState };
@@ -73,7 +74,6 @@ const HOT_LIST_TTL_MS = 5 * 60_000;
 const HOT_LIST_STALE_MS = 6 * 60 * 60_000;
 const SEARCH_TTL_MS = 10 * 60_000;
 const SEARCH_STALE_MS = 24 * 60 * 60_000;
-const MCP_RATE_LIMIT_RETRY_MS = 3_200;
 
 function searchCachePath(): string {
   return path.join(path.dirname(resolveDatabasePath()), "zhihu-search-cache.json");
@@ -142,6 +142,17 @@ function decodeXml(value: string): string {
 function parseXmlAttribute(source: string, name: string): string {
   const match = source.match(new RegExp(`${name}="([\\s\\S]*?)"`));
   return decodeXml(match?.[1] ?? "").trim();
+}
+
+function globalFallbackTopic(query: string): string {
+  const value = query.toLocaleLowerCase("zh-CN");
+  if (["吵", "争议", "热议", "讨论"].some((term) => value.includes(term))) return "争议 热议";
+  if (["ai", "人工智能", "大模型", "agent"].some((term) => value.includes(term))) return "人工智能";
+  if (["科学", "研究", "物理", "生物", "宇宙"].some((term) => value.includes(term))) return "科学";
+  if (["职场", "创业", "工作", "公司"].some((term) => value.includes(term))) return "职场";
+  if (["游戏", "玩家", "电竞"].some((term) => value.includes(term))) return "游戏";
+  if (["宠物", "猫", "狗", "动物"].some((term) => value.includes(term))) return "宠物";
+  return "社会 生活";
 }
 
 function parseZhihuSearchXml(xml: string): ZhihuSearchItem[] {
@@ -375,24 +386,50 @@ export class ZhihuGateway {
 
     const pending = (async () => {
       try {
-        let xml: string;
-        try {
-          xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
-            "/api/mcp/zhihu_search/v1",
-            "zhihu_search",
-            { query: normalized, count: limit },
-          ));
-        } catch (error) {
-          const message = error instanceof Error ? error.message : "";
-          if (!message.includes("rate limit exceeded")) throw error;
-          await wait(MCP_RATE_LIMIT_RETRY_MS);
-          xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
-            "/api/mcp/zhihu_search/v1",
-            "zhihu_search",
-            { query: normalized, count: limit },
-          ));
+        let items: ZhihuSearchItem[] = [];
+        const primaryBlocked = (sharedRuntime.zhihuSearchBlockedUntil ?? 0) > Date.now();
+        if (!primaryBlocked) {
+          try {
+            const xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
+              "/api/mcp/zhihu_search/v1",
+              "zhihu_search",
+              { query: normalized, count: limit },
+            ));
+            items = parseZhihuSearchXml(xml);
+          } catch (error) {
+            const message = error instanceof Error ? error.message : "";
+            if (message.includes("rate limit exceeded")) {
+              sharedRuntime.zhihuSearchBlockedUntil = Date.now() + 10 * 60_000;
+            } else if (!message.includes("fetch failed")) {
+              throw error;
+            }
+          }
         }
-        const items = parseZhihuSearchXml(xml);
+
+        if (!items.length) {
+          const fallbackTopic = globalFallbackTopic(normalized);
+          const fallbackKey = `global:${fallbackTopic}`;
+          const fallbackCached = sharedRuntime.searchCache!.get(fallbackKey);
+          if (fallbackCached && now - fallbackCached.fetchedAt < SEARCH_TTL_MS) {
+            items = fallbackCached.items;
+          } else {
+            const xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
+              "/api/mcp/global_search/v1",
+              "global_search",
+              {
+                query: fallbackTopic,
+                count: Math.min(10, limit),
+                filter: 'host=="www.zhihu.com"',
+                search_db: "all",
+              },
+            ));
+            items = parseZhihuSearchXml(xml);
+            if (items.length) {
+              sharedRuntime.searchCache!.set(fallbackKey, { fetchedAt: Date.now(), items });
+            }
+          }
+        }
+
         if (!items.length) throw new Error("Zhihu search MCP returned no items");
         sharedRuntime.searchCache!.set(key, { fetchedAt: Date.now(), items });
         persistSearchCache();
