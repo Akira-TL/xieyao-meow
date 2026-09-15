@@ -18,6 +18,11 @@ export interface JourneyInsightOption {
   label: string;
 }
 
+export interface JourneyInsightFeedback {
+  action: JourneyInsightAction;
+  topic: string;
+}
+
 export interface JourneyInsight {
   headline: string;
   insight: string;
@@ -125,6 +130,7 @@ export interface JourneyDiscoveryInput {
   planSeed: string;
   recentQuestionUrls: string[];
   recentMemoryTopicRefs: string[];
+  recentInsightFeedback: JourneyInsightFeedback[];
 }
 
 export type JourneyDiscoverer = (input: JourneyDiscoveryInput) => Promise<JourneyDiscoveryResult>;

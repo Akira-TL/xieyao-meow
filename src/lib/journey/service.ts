@@ -12,6 +12,7 @@ import type {
   JourneyDiscoveryResult,
   JourneyInsight,
   JourneyInsightAction,
+  JourneyInsightFeedback,
   JourneyPostcard,
   JourneyProjection,
   JourneyQuestion,
@@ -437,6 +438,7 @@ export class JourneyService {
         planSeed: row.plan_seed,
         recentQuestionUrls: this.readRecentQuestionUrls(userId),
         recentMemoryTopicRefs: this.readRecentMemoryTopicRefs(userId),
+        recentInsightFeedback: this.readRecentInsightFeedback(userId),
       });
     } catch {
       const fallback = routePostcardFallback(row.plan_seed, row.route_bias);
@@ -710,6 +712,32 @@ export class JourneyService {
       ORDER BY created_at DESC
       LIMIT 8
     `).all(userId) as unknown as Array<{ topic_ref: string }>).map((row) => row.topic_ref);
+  }
+
+  private readRecentInsightFeedback(userId: string): JourneyInsightFeedback[] {
+    const rows = this.db.prepare(`
+      SELECT feedback_action, facts_json
+      FROM journey_insights
+      WHERE user_id = ? AND feedback_action IS NOT NULL
+      ORDER BY COALESCE(feedback_at, created_at) DESC
+      LIMIT 6
+    `).all(userId) as unknown as Array<{
+      feedback_action: JourneyInsightAction;
+      facts_json: string;
+    }>;
+    return rows.flatMap((row) => {
+      try {
+        const facts = JSON.parse(row.facts_json) as {
+          zhihuComposition?: { primaryInterest?: unknown };
+        };
+        const topic = facts.zhihuComposition?.primaryInterest;
+        return typeof topic === "string" && topic.trim()
+          ? [{ action: row.feedback_action, topic: topic.trim() }]
+          : [];
+      } catch {
+        return [];
+      }
+    });
   }
 
   private countJourneys(userId: string): number {

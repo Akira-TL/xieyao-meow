@@ -3,7 +3,12 @@ import { z } from "zod";
 import type { Persona, ZhihuComposition } from "@/lib/persona/types";
 import type { PersonaNarrativeGateway } from "@/lib/narrative/deepseek";
 
-import type { JourneyDiscoveryResult, JourneyInsight, JourneyQuestion } from "./types";
+import type {
+  JourneyDiscoveryResult,
+  JourneyInsight,
+  JourneyInsightFeedback,
+  JourneyQuestion,
+} from "./types";
 
 export const JOURNEY_INSIGHT_PROMPT_VERSION = "journey-insight-v1";
 
@@ -29,6 +34,7 @@ export interface JourneyInsightInput {
   routeBias: string | null;
   question: JourneyQuestion | null;
   encounterName?: string | null;
+  recentFeedback?: JourneyInsightFeedback[];
 }
 
 function compact(value: string, max: number): string {
@@ -64,6 +70,7 @@ function buildFacts(input: JourneyInsightInput) {
         : null,
       encounterName: input.encounterName ?? null,
     },
+    recentFeedback: (input.recentFeedback ?? []).slice(0, 4),
   };
 }
 
@@ -74,6 +81,15 @@ function buildEvidenceSummary(input: JourneyInsightInput): string {
   ];
   if (input.question) parts.push(`本趟停留：「${compact(input.question.title, 30)}」`);
   if (input.encounterName) parts.push(`途中遇见：${compact(input.encounterName, 12)}`);
+  const latestFeedback = input.recentFeedback?.[0];
+  if (latestFeedback) {
+    const label = latestFeedback.action === "CONFIRM_INTEREST"
+      ? "你确认过"
+      : latestFeedback.action === "CORRECT_INTEREST"
+        ? "你纠正过"
+        : "你要求少看";
+    parts.push(`${label}：「${compact(latestFeedback.topic, 18)}」`);
+  }
   return parts.join(" · ");
 }
 
@@ -109,7 +125,7 @@ function prompt(input: JourneyInsightInput): string {
     "下面 FACTS 是唯一事实来源。禁止补充 FACTS 中没有的收藏主题、行为次数、动机或结论。",
     "把内容写成“这只猫对主人形成的一条可被纠正的新理解”，允许用“像是、可能、开始觉得”等保守措辞。",
     "必须简短：headline≤28字，insight≤70字，why_it_matters≤52字，互动问题≤22字，每个按钮≤10字。",
-    "三个按钮只生成显示文案，实际动作由服务端固定映射；不要发明第四个动作。",
+    "三个按钮只生成显示文案，实际动作由服务端固定映射；不要发明第四个动作。confirm_label 必须表示“这条理解基本准确”，correct_label 必须表示“这条理解需要修正”，reduce_label 必须表示“以后减少这个主题”，不得互换语义。",
     "只输出 JSON，不要 Markdown，不要解释。",
     '格式：{"headline":"…","insight":"…","why_it_matters":"…","interaction":{"question":"…","confirm_label":"…","correct_label":"…","reduce_label":"…"}}',
     `FACTS=${JSON.stringify(buildFacts(input))}`,

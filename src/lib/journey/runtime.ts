@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getAccountStore } from "@/lib/auth/runtime";
-import { createDeepSeekFlashClientFromEnv } from "@/lib/narrative/deepseek";
+import { tryCreateDeepSeekFlashClientFromEnv } from "@/lib/narrative/deepseek";
 import { buildComposition, buildPersona } from "@/lib/persona";
 import { SocialDialogueService, type SocialAgent } from "@/lib/social";
 import {
@@ -117,11 +117,7 @@ async function createJourneyNarrative(input: {
 }
 
 function narrativeGateway() {
-  try {
-    return createDeepSeekFlashClientFromEnv();
-  } catch {
-    return null;
-  }
+  return tryCreateDeepSeekFlashClientFromEnv();
 }
 
 const ENCOUNTER_COOLDOWN_MS = 24 * 60 * 60 * 1000;
@@ -139,6 +135,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   planSeed,
   recentQuestionUrls,
   recentMemoryTopicRefs,
+  recentInsightFeedback,
 }) => {
   const gateway = createZhihuGatewayFromEnv();
   const fetchedAt = Date.now();
@@ -235,6 +232,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
           composition: actor.composition,
           routeBias,
           question: null,
+          recentFeedback: recentInsightFeedback,
         }, narrativeGateway())
       : createFallbackJourneyInsight(routeBias);
     return {
@@ -260,6 +258,15 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
       );
       let score = interestHits * 4;
       if (recentRefs.has(item.url)) score -= 20;
+      for (const feedback of recentInsightFeedback) {
+        const feedbackTerms = INTEREST_TERMS[feedback.topic] ?? [feedback.topic.toLocaleLowerCase("zh-CN")];
+        if (!feedbackTerms.some((term) => haystack.includes(term))) continue;
+        score += feedback.action === "CONFIRM_INTEREST"
+          ? 3
+          : feedback.action === "CORRECT_INTEREST"
+            ? -3
+            : -6;
+      }
       if (route.includes("ai")) {
         score += INTEREST_TERMS["AI 与数码"].some((term) => haystack.includes(term)) ? 8 : 0;
       }
@@ -363,6 +370,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
         routeBias,
         question,
         encounterName,
+        recentFeedback: recentInsightFeedback,
       }, narrativeGateway())
     : createFallbackJourneyInsight(routeBias);
 

@@ -34,7 +34,7 @@ describe("server Journey", () => {
     const userId = createUser(dbPath, "subject-a", "user-a");
     let now = 1_000_000;
     let sequence = 0;
-    const discover = vi.fn(async () => ({
+    const discover = vi.fn(async (_input?: unknown) => ({
       question: {
         title: "真实问题",
         url: "https://www.zhihu.com/question/123",
@@ -58,7 +58,7 @@ describe("server Journey", () => {
         textCharCount: 88,
         model: "deepseek-flash",
         promptVersion: "journey-insight-v1",
-        factsJson: '{"route":"AI"}',
+        factsJson: '{"zhihuComposition":{"primaryInterest":"AI 与数码"},"journey":{"routeBias":"多看看 AI"}}',
       },
     }));
     const service = new JourneyService({
@@ -106,6 +106,19 @@ describe("server Journey", () => {
     expect(responded.journey?.insight?.feedbackAction).toBe("CONFIRM_INTEREST");
     expect((await service.getAtlas(userId, "oauth-a")).journeys[0]?.insight?.feedbackAction).toBe("CONFIRM_INTEREST");
     expect(discover).toHaveBeenCalledTimes(1);
+
+    const resting = await service.archive(userId, "oauth-a");
+    now = resting.nextJourneyAt!;
+    const second = await service.getProjection(userId, "oauth-a");
+    now = second.journey!.returnAt;
+    await service.getProjection(userId, "oauth-a");
+    expect(discover).toHaveBeenCalledTimes(2);
+    const secondDiscoveryInput = discover.mock.calls[1]?.[0] as {
+      recentInsightFeedback: Array<{ action: string; topic: string }>;
+    };
+    expect(secondDiscoveryInput.recentInsightFeedback).toEqual([
+      { action: "CONFIRM_INTEREST", topic: "AI 与数码" },
+    ]);
     service.close();
   });
 

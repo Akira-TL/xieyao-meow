@@ -74,3 +74,11 @@ export function createDeepSeekFlashClientFromEnv(): DeepSeekFlashClient {
   client ??= new DeepSeekFlashClient(apiKey);
   return client;
 }
+
+export function tryCreateDeepSeekFlashClientFromEnv(): DeepSeekFlashClient | null {
+  try {
+    return createDeepSeekFlashClientFromEnv();
+  } catch {
+    return null;
+  }
+}
