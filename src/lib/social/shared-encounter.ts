@@ -416,14 +416,19 @@ export class SharedEncounterStore {
   }
 
   getLatestEncounterForUser(userId: string): SharedEncounter | null {
-    const row = this.db.prepare(`
+    return this.getEncountersForUser(userId, 1)[0] ?? null;
+  }
+
+  getEncountersForUser(userId: string, limit = 20): SharedEncounter[] {
+    const safeLimit = Math.max(1, Math.min(50, Math.trunc(limit)));
+    const rows = this.db.prepare(`
       SELECT * FROM shared_encounters
       WHERE status = 'completed'
         AND (participant_a_user_id = ? OR participant_b_user_id = ?)
       ORDER BY completed_at DESC, created_at DESC
-      LIMIT 1
-    `).get(userId, userId) as EncounterRow | undefined;
-    return row ? this.encounterFromRow(row) : null;
+      LIMIT ?
+    `).all(userId, userId, safeLimit) as unknown as EncounterRow[];
+    return rows.map((row) => this.encounterFromRow(row));
   }
 
   getRelationship(leftUserId: string, rightUserId: string): PersonaRelationship | null {

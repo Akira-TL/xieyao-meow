@@ -130,12 +130,14 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
               : (index === 0 ? "最近带回" : `旅途 ${index + 1}`)}</span>
             <h2>{item.title}</h2>
             <p>{compact(item.summary)}</p>
-            <ArtSlot
-              name={`journey/question-${index + 1}`}
-              label={`旅途卡 ${index + 1}`}
-              aspect="wide"
-              src={item.thumbnailUrl || undefined}
-            />
+            {item.thumbnailUrl ? (
+              <ArtSlot
+                name={`journey/question-${index + 1}`}
+                label={`知乎问题配图 ${index + 1}`}
+                aspect="wide"
+                src={item.thumbnailUrl}
+              />
+            ) : null}
             <div className="explore-why">
               <b>{showingLivePool ? "现在为什么会看到：" : "这一趟："}</b>{showingLivePool
                 ? `来自当前知乎公开发现池。它会结合「${primaryInterest}」和你塞进包里的纸条，在真正出门时自己挑一题。`
@@ -339,13 +341,13 @@ export function LiveJourneyDetail() {
           <div>
             <h2>路上的一些画面</h2>
             <div className="journey-gallery">
-              {galleryQuestions.map((item, index) => (
+              {galleryQuestions.filter((item) => Boolean(item.thumbnailUrl)).map((item, index) => (
                 <ArtSlot
                   key={`${item.url}-${index}`}
                   name={`journey/photo-${String(index + 1).padStart(2, "0")}`}
-                  label={`旅途照片 ${String(index + 1).padStart(2, "0")}`}
+                  label={`知乎内容配图 ${String(index + 1).padStart(2, "0")}`}
                   aspect="polaroid"
-                  src={item.thumbnailUrl || undefined}
+                  src={item.thumbnailUrl!}
                 />
               ))}
             </div>
@@ -440,12 +442,14 @@ export function LiveRelationshipDetail({ relationshipId }: { relationshipId: str
 
         <PaperCard className="relationship-latest-scene">
           <h2>最新一幕</h2>
-          <ArtSlot
-            name="relationship/latest-scene"
-            label="最近一次真实问题对手戏"
-            aspect="wide"
-            src={question.thumbnailUrl || undefined}
-          />
+          {question.thumbnailUrl ? (
+            <ArtSlot
+              name="relationship/latest-scene"
+              label="最近一次真实知乎问题配图"
+              aspect="wide"
+              src={question.thumbnailUrl}
+            />
+          ) : null}
           <h3>“{question.title}”</h3>
           <p>{compact(question.summary, 120)}</p>
           <a href="/encounter?view=featured">看最新一幕 →</a>

@@ -1,6 +1,6 @@
 import { DemoRouteGuard } from "@/features/demo/client";
 import { AppBottomNav, AppHeader, DemoPage } from "@/features/demo/components";
-import { LiveRelationshipDetail } from "@/features/demo/live/daily-live-client";
+import { NpcRelationshipDetail } from "@/features/demo/live/npc-relationship-client";
 
 export default async function RelationshipDetailPage({
   params,
@@ -13,7 +13,7 @@ export default async function RelationshipDetailPage({
     <DemoRouteGuard>
       <DemoPage scene="encounter">
         <AppHeader active="encounter" />
-        <LiveRelationshipDetail relationshipId={relationshipId} />
+        <NpcRelationshipDetail relationshipId={relationshipId} />
         <AppBottomNav active="encounter" />
       </DemoPage>
     </DemoRouteGuard>

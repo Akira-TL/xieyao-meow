@@ -302,6 +302,12 @@ describe("SharedEncounterStore", () => {
     expect(relationshipAfterSecond?.chemistry).not.toBe(relationshipAfterFirst?.chemistry);
     expect(store.getRelationship(userA, userC)).toBeNull();
 
+    const historyA = store.getEncountersForUser(userA);
+    expect(historyA).toHaveLength(2);
+    expect(historyA.map((encounter) => encounter.completedAt)).toEqual([50_000, 40_000]);
+    expect(historyA.map((encounter) => encounter.topic.title)).toEqual(["第二个真实问题", sharedTopic.title]);
+    expect(store.getEncountersForUser(userC)).toEqual([]);
+
     expect(store.getMemoryCandidatesForUser(userA)).toEqual(expect.arrayContaining([
       expect.objectContaining({ ownerUserId: userA, sourceEventId: first.id, type: "shared_encounter" }),
     ]));

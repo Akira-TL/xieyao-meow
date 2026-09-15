@@ -112,6 +112,10 @@ describe("SocialDialogueService", () => {
     expect(gateway.requests).toHaveLength(2);
     expect(gateway.requests[0]?.prompt).toContain("最近更愿意先听完反方再拆结构");
     expect(gateway.requests[0]?.prompt).toContain("中文表达约束（Humanizer-zh）");
+    expect(gateway.requests[0]?.prompt).toContain("先拆一层");
+    expect(gateway.requests[0]?.prompt).toContain("不要整句重复");
+    expect(gateway.requests[1]?.prompt).toContain("反例和边界条件");
+    expect(gateway.requests[1]?.prompt).toContain("那要是");
     expect(gateway.requests[1]?.prompt).toContain("先把决定权分层");
     expect(gateway.requests[1]?.prompt).toContain("JSON 结构必须原样遵守");
     expect(gateway.requests[0]?.maxTokens).toBe(180);

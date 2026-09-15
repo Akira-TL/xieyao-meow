@@ -741,16 +741,13 @@ body {
 /* ---------- encounter hub / boards 3 + 4 + 9 ---------- */
 .encounter-hub-stage {
   min-height:calc(100dvh - var(--target-header-h));
-  height:calc(100dvh - var(--target-header-h));
   padding:0;
-  overflow:hidden;
 }
 .shared-encounter-stage {
   position:relative;
   width:100%;
-  min-height:100%;
-  height:100%;
-  padding: 34px clamp(30px,5vw,74px) 26px 132px;
+  min-height:calc(100dvh - var(--target-header-h));
+  padding:34px clamp(30px,5vw,74px) 46px;
 }
 .encounter-side-rail {
   position:absolute;
@@ -1649,8 +1646,8 @@ body {
   .journey-collect { grid-area:collect; width:100%; min-height:50px; }
 
   /* encounter */
-  .encounter-hub-stage { min-height:calc(100dvh - 134px); height:calc(100dvh - 134px); padding:0; overflow:hidden; }
-  .shared-encounter-stage { min-height:0; height:100%; padding:12px 14px 10px; }
+  .encounter-hub-stage { min-height:calc(100dvh - 134px); padding:0; }
+  .shared-encounter-stage { min-height:calc(100dvh - 134px); padding:12px 14px 24px; }
   .encounter-side-rail { display:none; }
   .encounter-audience-silhouette { right:2%; top:154px; width:124px; min-height:125px; opacity:.16; }
   .shared-encounter-hero { text-align:left; margin-bottom:10px; }

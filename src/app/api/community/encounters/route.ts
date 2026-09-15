@@ -35,9 +35,10 @@ export async function GET() {
     return NextResponse.json({ error: "authentication required" }, { status: 401 });
   }
 
-  const encounter = getSharedEncounterStore().getLatestEncounterForUser(identity.userId);
+  const encounters = getSharedEncounterStore().getEncountersForUser(identity.userId, 20);
+  const views = encounters.map((encounter) => toSharedEncounterView(encounter, identity.userId));
   return NextResponse.json(
-    { encounter: encounter ? toSharedEncounterView(encounter, identity.userId) : null },
+    { encounter: views[0] ?? null, encounters: views },
     { headers: { "cache-control": "no-store" } },
   );
 }

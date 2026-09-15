@@ -15,10 +15,10 @@ import { resolvePersonaArt, type PersonaArtState, type PlayerPersona } from "@/l
 export type AppSection = "home" | "explore" | "encounter" | "atlas";
 
 const APP_ITEMS: readonly [AppSection, string, string, string][] = [
-  ["home", "/home", "窝", "首页"],
-  ["explore", "/explore?mode=app", "逛", "探索"],
-  ["encounter", "/encounter", "遇见", "遇见"],
-  ["atlas", "/atlas", "图鉴", "档案"],
+  ["home", "/home", "首页", "首页"],
+  ["explore", "/explore?mode=app", "探索", "探索"],
+  ["encounter", "/encounter", "关系簿", "关系簿"],
+  ["atlas", "/atlas", "档案", "档案"],
 ];
 
 const DEMO_ACTIVATION_STEPS = [
@@ -218,9 +218,6 @@ export function Surface({
 
 function resolveArtSlotFallback(name: string): string | undefined {
   if (name.startsWith("npc/")) return `/art/slots/${name}.png`;
-  if (name.startsWith("journey/") || name === "relationship/latest-scene") {
-    return resolveP0Art("journey-zhihu-gate");
-  }
   return undefined;
 }
 
