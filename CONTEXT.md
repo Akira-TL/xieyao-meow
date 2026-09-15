@@ -10,11 +10,11 @@
 - 已有技术 PoC 证明两条能力可行：知乎数据 → Persona → Knowledge/回答卡；以及 Persona × Persona → Agent 社交事件。**这些 PoC 不是最终产品页面或信息架构。**
 - 目标产品架构已经冻结：**B「AI 社交匹配」承担首访拉新与传播，A「宠物养成」承担身份资产与长期留存，知乎真实内容连接两者。**
 - 视觉主方向已选择 **Direction C「人格剧场 / Personality Theatre」**：首访采用高戏剧浓度，长期页面逐步收敛。角色 IP 已进一步收敛为：**玩家 Persona 统一为不同的黑猫，差异由模块化外观、装备、贴纸、称号和经历痕迹表达；狐、兔、鸟、熊、汪作为社区 NPC / Resident。**
-- 长期留存采用**自主出门循环**：宠物会自己离开、浏览真实知乎内容、可选遇见其他 Persona，并在回来时带回旅途札记、问题票根、关系票根、观点碎片等人格资产；用户只提供弱路线引导，不完全控制结果。
+- 长期留存采用**自主出门循环**：宠物会自己离开、浏览真实知乎内容、可选遇见其他 Persona，并在回来时带回问题票根、关系票根、观点碎片等可追溯资产，同时形成一条可被用户纠正的 `JourneyInsight`（“它对你的一个新发现”）；用户只提供弱路线引导，不完全控制结果。
 - 首访目标是 60–90 秒完成：OAuth → 人格化验 → 宠物孵化 → 第一次可解释匹配 → Agent × Agent 短互动 → 分享/连接意愿。
 - 激活后的产品壳固定为四个入口：`窝 / 逛 / 遇见 / 图鉴`；其中「窝」由 `AT_HOME / PREPARING / AWAY / RETURNED` 的 outing 状态决定。
 - 首访、OAuth callback、真实开发账号数据、日常 outing、Explore / Encounter / Atlas 等主链已可运行；当前进入**真实视觉资产接入阶段**。双端 UX 继续遵守 `docs/product/responsive-attention-spec-v1.md`，角色资产严格遵守 `docs/product/persona-art-system-v1.md`：STEP 1–3 既有素材保留，后续转为“统一黑猫玩家母体 + 模块化元素 + 动作底板”；其他动物缩编为 NPC 素材。
-- 公开比赛环境已上线：`https://xieyao-meow.babelbeast.com`，Nginx 反向代理到本机 `127.0.0.1:8082`，Let's Encrypt 已签发并通过续期 dry-run；OAuth callback 固定为 `https://xieyao-meow.babelbeast.com/api/auth/zhihu/callback`。当前等待知乎下发 OAuth `app_id/app_key`，Access Secret 真实开发账号数据链路已可在公网运行。
+- 公开比赛环境已上线：`https://xieyao-meow.babelbeast.com`，Nginx 反向代理到本机 `127.0.0.1:8082`，Let's Encrypt 已签发并通过续期 dry-run；OAuth callback 固定为 `https://xieyao-meow.babelbeast.com/api/auth/zhihu/callback`。知乎 OAuth 已配置并完成 production authenticated flow，真实开发账号数据链路可在公网运行。
 - 产品体验、系统架构、比赛信息与知乎 API 说明分别维护在 `docs/product/`、`docs/architecture/` 与 `docs/reference/`；本文件只保存稳定领域词汇与当前阶段边界。
 
 ## 领域词汇
@@ -75,6 +75,14 @@ Persona 的版本化稳定身份层，承载 archetype、核心 traits、长期�
 
 基于 Persona 对既定 Knowledge Layer 进行个性化表达，控制语气、关注点、风格、长度与梗；它不负责候选内容 eligibility，也不得新增或篡改事实基础。
 
+### Persona Narrative Layer
+
+高频、低成本的理解与表达层。当前 provider 固定为 DeepSeek `deepseek-flash` 且显式关闭 thinking。它只接受结构化事实，为 JourneyInsight、Journey 总结、Persona 互动提问和逐角色对话生成短文本；不能决定知乎事实、Journey/关系状态、Root Persona 或业务 action。知乎直答继续负责需要知乎语境 grounding 的关键节点，不承担普通人格包装。
+
+### JourneyInsight
+
+一次 Journey materialize 时生成并持久化的一条“它对你的新理解”。它与问题票根/关系票根等 ReturnArtifact 独立，包含理解结论、意义、证据摘要、互动问题和固定 action 对应的显示文案；刷新页面不会重新生成。用户反馈只进入轻量偏好层并影响后续探索权重，不能由一次反馈直接改写 Root Persona。旧 `NEW_SCENT` 只作为历史数据兼容类型，不再是用户可见产品概念。
+
 ### 回答卡片
 
 谢邀喵对知乎真实问题生成的可视化 UGC 产物，也是 Demo 和分享链路的核心结果。
@@ -122,4 +130,4 @@ Persona 的版本化稳定身份层，承载 archetype、核心 traits、长期�
 - 回答卡片仍保留，但属于内容探索/表达的一种产物，不再是整个产品的主入口。
 - 真实宠物图片情绪识别、复杂虚拟经济、传统喂食洗澡等不进入第一版核心架构。
 
-架构决策见 `docs/adr/0001-product-shell-and-activation-flow.md`；系统/前端契约见 `docs/architecture/product-system-v1.md` 与 `docs/architecture/frontend-application-contract-v1.md`；体验流程和页面契约见 `docs/product/experience-flow-v2.md`、`docs/product/first-visit-storyboard-v1.md`、`docs/product/low-fi-screen-contract-v1.md`。
+架构决策见 `docs/adr/0001-product-shell-and-activation-flow.md`；JourneyInsight / DeepSeek Narrative 分工见 `docs/adr/0008-deepseek-persona-narrative-and-journey-insight.md`；系统/前端契约见 `docs/architecture/product-system-v1.md` 与 `docs/architecture/frontend-application-contract-v1.md`；体验流程和页面契约见 `docs/product/experience-flow-v2.md`、`docs/product/first-visit-storyboard-v1.md`、`docs/product/low-fi-screen-contract-v1.md`。

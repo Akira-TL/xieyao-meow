@@ -381,10 +381,11 @@ returnedAt
 contentEncounterId?
 sharedEncounterId?
 returnArtifactId?
+journeyInsightId?
 growthDelta?
 ```
 
-一次 outing 最多产生 1 个内容发现、0–1 个 Shared Encounter、1 个带回物和 0–1 个成长变化。
+一次 outing 最多产生 1 个内容发现、0–1 个 Shared Encounter、0–1 个可追溯带回物和 1 条 JourneyInsight；成长变化仍受独立证据门槛约束。JourneyInsight 不是“没有带回物”时伪造的 Artifact。
 
 ### ReturnArtifact
 
@@ -393,12 +394,36 @@ growthDelta?
 ```text
 artifactId
 outingId
-type                NOTE / QUESTION_TICKET / RELATION_TICKET / OPINION_FRAGMENT / NEW_SCENT
+type                QUESTION_TICKET / RELATION_TICKET / OPINION_FRAGMENT / ODDITY_SPECIMEN
 title
 summary
 sourceRef?
 createdAt
 ```
+
+`NEW_SCENT` 只保留为历史 SQLite 数据的兼容枚举，不再产生新记录，也不作为用户可见产品概念。
+
+### JourneyInsight
+
+一趟 Journey materialize 时形成并持久化的一条可纠正理解，与 ReturnArtifact 独立：
+
+```text
+journeyId
+promptVersion
+factsJson
+headline
+insight
+whyItMatters
+evidenceSummary
+interactionQuestion
+interactionOptions[]   固定映射到 CONFIRM / CORRECT / REDUCE
+model
+textCharCount
+feedbackAction?
+createdAt
+```
+
+Narrative 模型只能把结构化事实包装成短文本；事实、状态和 action 都由应用层决定。
 
 ### JourneyLog
 
@@ -451,6 +476,12 @@ PersonaService
 ├─ Persona Memory validation
 └─ Explainability
 
+NarrativeService
+├─ DeepSeek Flash · thinking disabled
+├─ JourneyInsight short JSON generation
+├─ Persona × Persona single-speaker turns
+└─ bounded local fallback
+
 MatchService
 ├─ Candidate retrieval
 ├─ Similarity
@@ -471,6 +502,7 @@ OutingService
 ├─ finite outing plan
 ├─ content / social event selection
 ├─ return artifact assembly
+├─ JourneyInsight materialization / feedback projection
 └─ outing state transition
 
 GrowthService
@@ -494,7 +526,7 @@ ShareService
 | 孵化人格 | OAuth + 用户创作/关注/收藏 | 是 |
 | 公共事件池 | 热榜 | 是，但可缓存 |
 | 兴趣内容搜索 | 知乎搜索 | 是 |
-| 第一次 Agent 讨论 | 搜索/问题回答 + 直答 | 是 |
+| 第一次 Agent 讨论 | 搜索/问题回答；直答仅在需要知乎 grounding 时使用 | 是（真实问题硬依赖，直答非硬依赖） |
 | 自主出门 / “叼回来” | 热榜 + 搜索 + 应用 Persona 池 | 是 |
 | 外部事实补充 | 全网搜索 | 否 |
 | 更真实关注流 | 关注流 | 合同确认后再接 |
