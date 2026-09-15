@@ -1,4 +1,8 @@
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import type { z } from "zod";
+
+import { resolveDatabasePath } from "@/lib/persistence/database-path";
 
 import {
   collectionsEnvelopeSchema,
@@ -57,6 +61,7 @@ type ZhihuRuntimeState = {
   hotListCache?: { fetchedAt: number; items: ZhihuHotItem[] };
   hotListInFlight?: Promise<ZhihuHotItem[]>;
   searchCache?: Map<string, { fetchedAt: number; items: ZhihuSearchItem[] }>;
+  searchCacheLoaded?: boolean;
   searchInFlight?: Map<string, Promise<ZhihuSearchItem[]>>;
 };
 
@@ -67,7 +72,42 @@ const DATA_API_MIN_INTERVAL_MS = 1_050;
 const HOT_LIST_TTL_MS = 5 * 60_000;
 const HOT_LIST_STALE_MS = 6 * 60 * 60_000;
 const SEARCH_TTL_MS = 10 * 60_000;
-const SEARCH_STALE_MS = 2 * 60 * 60_000;
+const SEARCH_STALE_MS = 24 * 60 * 60_000;
+const MCP_RATE_LIMIT_RETRY_MS = 3_200;
+
+function searchCachePath(): string {
+  return path.join(path.dirname(resolveDatabasePath()), "zhihu-search-cache.json");
+}
+
+function ensureSearchCacheLoaded(): void {
+  if (sharedRuntime.searchCacheLoaded) return;
+  sharedRuntime.searchCacheLoaded = true;
+  sharedRuntime.searchCache ??= new Map();
+  try {
+    const raw = JSON.parse(readFileSync(searchCachePath(), "utf8")) as Array<[
+      string,
+      { fetchedAt: number; items: ZhihuSearchItem[] },
+    ]>;
+    for (const [key, entry] of raw) {
+      if (key && Number.isFinite(entry?.fetchedAt) && Array.isArray(entry?.items)) {
+        sharedRuntime.searchCache.set(key, entry);
+      }
+    }
+  } catch {
+    // No durable cache yet.
+  }
+}
+
+function persistSearchCache(): void {
+  const target = searchCachePath();
+  const temp = `${target}.tmp`;
+  mkdirSync(path.dirname(target), { recursive: true });
+  const entries = [...(sharedRuntime.searchCache ?? new Map()).entries()]
+    .sort((left, right) => right[1].fetchedAt - left[1].fetchedAt)
+    .slice(0, 20);
+  writeFileSync(temp, JSON.stringify(entries), "utf8");
+  renameSync(temp, target);
+}
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -323,6 +363,7 @@ export class ZhihuGateway {
     const limit = Math.max(1, Math.min(10, count));
     const key = normalized.toLocaleLowerCase("zh-CN");
     const now = this.now();
+    ensureSearchCacheLoaded();
     sharedRuntime.searchCache ??= new Map();
     sharedRuntime.searchInFlight ??= new Map();
     const cached = sharedRuntime.searchCache.get(key);
@@ -334,14 +375,27 @@ export class ZhihuGateway {
 
     const pending = (async () => {
       try {
-        const xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
-          "/api/mcp/zhihu_search/v1",
-          "zhihu_search",
-          { query: normalized, count: limit },
-        ));
+        let xml: string;
+        try {
+          xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
+            "/api/mcp/zhihu_search/v1",
+            "zhihu_search",
+            { query: normalized, count: limit },
+          ));
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "";
+          if (!message.includes("rate limit exceeded")) throw error;
+          await wait(MCP_RATE_LIMIT_RETRY_MS);
+          xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
+            "/api/mcp/zhihu_search/v1",
+            "zhihu_search",
+            { query: normalized, count: limit },
+          ));
+        }
         const items = parseZhihuSearchXml(xml);
         if (!items.length) throw new Error("Zhihu search MCP returned no items");
-        sharedRuntime.searchCache!.set(key, { fetchedAt: now, items });
+        sharedRuntime.searchCache!.set(key, { fetchedAt: Date.now(), items });
+        persistSearchCache();
         return items;
       } catch (error) {
         if (cached && now - cached.fetchedAt < SEARCH_STALE_MS) return cached.items;
