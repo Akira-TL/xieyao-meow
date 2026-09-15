@@ -187,28 +187,19 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   }
 
   const searchQuery = journeySearchQuery(routeBias, interests, planSeed);
-  const [hotResult, searchResult] = await Promise.allSettled([
-    gateway.getHotList(30),
-    gateway.searchZhihu(searchQuery, 8),
-  ]);
-  const hotQuestions = hotResult.status === "fulfilled"
-    ? hotResult.value.filter((item) => isQuestion(item.url))
-    : [];
-  const searchedQuestions = searchResult.status === "fulfilled"
-    ? searchResult.value
-        .filter((item) => isQuestion(item.url))
-        .map((item) => ({
-          title: item.title,
-          url: item.url,
-          summary: item.summary,
-          thumbnailUrl: "",
-        }))
-    : [];
-  const questionMap = new Map<string, (typeof hotQuestions)[number]>();
-  for (const item of [...searchedQuestions, ...hotQuestions]) {
-    if (!questionMap.has(item.url)) questionMap.set(item.url, item);
+  let questions: Array<{ title: string; url: string; summary: string; thumbnailUrl: string }> = [];
+  try {
+    questions = (await gateway.searchZhihu(searchQuery, 8))
+      .filter((item) => isQuestion(item.url))
+      .map((item) => ({
+        title: item.title,
+        url: item.url,
+        summary: item.summary,
+        thumbnailUrl: "",
+      }));
+  } catch {
+    questions = [];
   }
-  const questions = [...questionMap.values()];
   if (!questions.length) {
     const narrative = await createJourneyNarrative({
       gateway,

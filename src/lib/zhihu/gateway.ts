@@ -56,6 +56,8 @@ type ZhihuRuntimeState = {
   lastDataApiAt?: number;
   hotListCache?: { fetchedAt: number; items: ZhihuHotItem[] };
   hotListInFlight?: Promise<ZhihuHotItem[]>;
+  searchCache?: Map<string, { fetchedAt: number; items: ZhihuSearchItem[] }>;
+  searchInFlight?: Map<string, Promise<ZhihuSearchItem[]>>;
 };
 
 const zhihuRuntime = globalThis as typeof globalThis & { __xieyaoZhihuRuntime?: ZhihuRuntimeState };
@@ -64,6 +66,8 @@ const sharedRuntime = zhihuRuntime.__xieyaoZhihuRuntime;
 const DATA_API_MIN_INTERVAL_MS = 1_050;
 const HOT_LIST_TTL_MS = 5 * 60_000;
 const HOT_LIST_STALE_MS = 6 * 60 * 60_000;
+const SEARCH_TTL_MS = 10 * 60_000;
+const SEARCH_STALE_MS = 2 * 60 * 60_000;
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -314,14 +318,44 @@ export class ZhihuGateway {
   }
 
   async searchZhihu(query: string, count = 8): Promise<ZhihuSearchItem[]> {
-    const normalized = query.trim();
+    const normalized = query.trim().slice(0, 100);
     if (normalized.length < 2) return [];
-    const xml = await this.callSseMcpTool(
-      "/api/mcp/zhihu_search/v1",
-      "zhihu_search",
-      { query: normalized.slice(0, 100), count: Math.max(1, Math.min(10, count)) },
-    );
-    return parseZhihuSearchXml(xml);
+    const limit = Math.max(1, Math.min(10, count));
+    const key = normalized.toLocaleLowerCase("zh-CN");
+    const now = this.now();
+    sharedRuntime.searchCache ??= new Map();
+    sharedRuntime.searchInFlight ??= new Map();
+    const cached = sharedRuntime.searchCache.get(key);
+    if (cached && now - cached.fetchedAt < SEARCH_TTL_MS) {
+      return cached.items.slice(0, limit);
+    }
+    const inFlight = sharedRuntime.searchInFlight.get(key);
+    if (inFlight) return (await inFlight).slice(0, limit);
+
+    const pending = (async () => {
+      try {
+        const xml = await this.callSseMcpTool(
+          "/api/mcp/zhihu_search/v1",
+          "zhihu_search",
+          { query: normalized, count: limit },
+        );
+        const items = parseZhihuSearchXml(xml);
+        if (!items.length) throw new Error("Zhihu search MCP returned no items");
+        sharedRuntime.searchCache!.set(key, { fetchedAt: now, items });
+        return items;
+      } catch (error) {
+        if (cached && now - cached.fetchedAt < SEARCH_STALE_MS) return cached.items;
+        const recent = [...sharedRuntime.searchCache!.values()]
+          .filter((entry) => now - entry.fetchedAt < SEARCH_STALE_MS)
+          .sort((left, right) => right.fetchedAt - left.fetchedAt)[0];
+        if (recent) return recent.items;
+        throw error;
+      } finally {
+        sharedRuntime.searchInFlight!.delete(key);
+      }
+    })();
+    sharedRuntime.searchInFlight.set(key, pending);
+    return (await pending).slice(0, limit);
   }
 
   async getQuestionAnswers(questionUrl: string, limit = 20): Promise<ZhihuAnswerSummary[]> {
