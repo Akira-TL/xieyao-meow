@@ -131,11 +131,11 @@ function scaleMs(value: number, timeScale: number): number {
 }
 
 function journeyDurationMs(sequence: number, seed: string, timeScale: number): number {
-  // Journeys should feel alive during a short product session, not disappear for tens of minutes.
-  if (sequence <= 1) return scaleMs(rangedMs(seed, 1 * MINUTE, 2 * MINUTE), timeScale);
-  if (sequence === 2) return scaleMs(rangedMs(seed, 2 * MINUTE, 4 * MINUTE), timeScale);
-  if (sequence === 3) return scaleMs(rangedMs(seed, 3 * MINUTE, 6 * MINUTE), timeScale);
-  return scaleMs(rangedMs(seed, 5 * MINUTE, 10 * MINUTE), timeScale);
+  // Keep every Journey short enough to complete inside one product session, including established accounts.
+  if (sequence <= 1) return scaleMs(rangedMs(seed, 45_000, 90_000), timeScale);
+  if (sequence === 2) return scaleMs(rangedMs(seed, 1 * MINUTE, 2 * MINUTE), timeScale);
+  if (sequence === 3) return scaleMs(rangedMs(seed, 90_000, 150_000), timeScale);
+  return scaleMs(rangedMs(seed, 2 * MINUTE, 3 * MINUTE), timeScale);
 }
 
 function restDurationMs(seed: string, timeScale: number, sequence: number): number {

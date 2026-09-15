@@ -29,7 +29,7 @@ function createUser(dbPath: string, providerSubject: string, userId: string) {
 }
 
 describe("server Journey", () => {
-  it("freezes a 1–2 minute first Journey and materializes its return only once", async () => {
+  it("freezes a sub-90-second first Journey and materializes its return only once", async () => {
     const dbPath = createDbPath();
     const userId = createUser(dbPath, "subject-a", "user-a");
     let now = 1_000_000;
@@ -82,8 +82,8 @@ describe("server Journey", () => {
     const preparing = await service.start(userId, "oauth-a", "多看看 AI");
     expect(preparing.state).toBe("PREPARING");
     expect(preparing.journey?.routeBias).toBe("多看看 AI");
-    expect(preparing.journey!.returnAt - now).toBeGreaterThanOrEqual(60_000);
-    expect(preparing.journey!.returnAt - now).toBeLessThanOrEqual(120_000);
+    expect(preparing.journey!.returnAt - now).toBeGreaterThanOrEqual(45_000);
+    expect(preparing.journey!.returnAt - now).toBeLessThanOrEqual(90_000);
     const frozenReturnAt = preparing.journey!.returnAt;
 
     now = preparing.journey!.departAt;
@@ -263,8 +263,8 @@ describe("server Journey", () => {
     const second = await service.getProjection(userId, "oauth-a");
     expect(second.state).toBe("PREPARING");
     expect(second.journey?.routeBias).toBe("去陌生地方");
-    expect(second.journey!.returnAt - second.journey!.createdAt).toBeGreaterThanOrEqual(2 * 60_000);
-    expect(second.journey!.returnAt - second.journey!.createdAt).toBeLessThanOrEqual(4 * 60_000);
+    expect(second.journey!.returnAt - second.journey!.createdAt).toBeGreaterThanOrEqual(1 * 60_000);
+    expect(second.journey!.returnAt - second.journey!.createdAt).toBeLessThanOrEqual(2 * 60_000);
 
     now = second.journey!.returnAt;
     const secondReturned = await service.getProjection(userId, "oauth-a");
@@ -272,8 +272,8 @@ describe("server Journey", () => {
     now = secondReturned.nextJourneyAt!;
     const third = await service.getProjection(userId, "oauth-a");
     expect(third.journey?.routeBias).toBeNull();
-    expect(third.journey!.returnAt - third.journey!.createdAt).toBeGreaterThanOrEqual(3 * 60_000);
-    expect(third.journey!.returnAt - third.journey!.createdAt).toBeLessThanOrEqual(6 * 60_000);
+    expect(third.journey!.returnAt - third.journey!.createdAt).toBeGreaterThanOrEqual(90_000);
+    expect(third.journey!.returnAt - third.journey!.createdAt).toBeLessThanOrEqual(150_000);
 
     now = third.journey!.createdAt + 24 * 60 * 60_000;
     const caughtUp = await service.getProjection(userId, "oauth-a");
@@ -310,8 +310,8 @@ describe("server Journey", () => {
     });
 
     const started = await service.start(userId, "oauth-a", null);
-    expect(started.journey!.returnAt - started.journey!.createdAt).toBeGreaterThanOrEqual(1_200);
-    expect(started.journey!.returnAt - started.journey!.createdAt).toBeLessThanOrEqual(2_400);
+    expect(started.journey!.returnAt - started.journey!.createdAt).toBeGreaterThanOrEqual(1_000);
+    expect(started.journey!.returnAt - started.journey!.createdAt).toBeLessThanOrEqual(1_800);
     now = started.journey!.returnAt;
     expect((await service.getProjection(userId, "oauth-a")).state).toBe("RETURNED");
     service.close();
