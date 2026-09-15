@@ -81,10 +81,14 @@ export function DemoOutingHome() {
   }, [refreshJourney]);
 
   useEffect(() => {
-    if (projection?.state !== "PREPARING" && projection?.state !== "AWAY") return;
-    const timer = window.setInterval(() => void refreshJourney(), 8_000);
+    const shouldPoll = projection?.state === "PREPARING"
+      || projection?.state === "AWAY"
+      || Boolean(projection?.resting)
+      || Boolean(projection?.queuedRouteBias);
+    if (!shouldPoll) return;
+    const timer = window.setInterval(() => void refreshJourney(), 6_000);
     return () => window.clearInterval(timer);
-  }, [projection?.state, refreshJourney]);
+  }, [projection?.state, projection?.resting, projection?.queuedRouteBias, refreshJourney]);
 
   if (!projection) {
     return <div className="outing-loading">正在看它在不在家……</div>;

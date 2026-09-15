@@ -6,7 +6,6 @@ import {
   favlistContentsEnvelopeSchema,
   favlistsEnvelopeSchema,
   followeesEnvelopeSchema,
-  hotListEnvelopeSchema,
   oauthTokenSchema,
   questionAnswersEnvelopeSchema,
   zhidaCompletionSchema,
@@ -106,7 +105,7 @@ function parseZhihuSearchXml(xml: string): ZhihuSearchItem[] {
   const pattern = /<search_item\b([^>]*)>([\s\S]*?)<\/search_item>/g;
   for (const match of xml.matchAll(pattern)) {
     const attributes = match[1] ?? "";
-    const title = parseXmlAttribute(attributes, "title");
+    const title = parseXmlAttribute(attributes, "title").replace(/\s*-\s*知乎\s*$/u, "");
     const url = parseXmlAttribute(attributes, "url");
     if (!title || !url) continue;
     const score = Number(parseXmlAttribute(attributes, "ranking_score"));
