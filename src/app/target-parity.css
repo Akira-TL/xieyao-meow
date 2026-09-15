@@ -254,7 +254,7 @@ body {
 .privacy-stage {
   min-height: calc(100dvh - var(--target-header-h));
   display: grid;
-  grid-template-columns: 1fr .72fr 1fr;
+  grid-template-columns: minmax(0,1fr) minmax(0,.72fr) minmax(0,1fr);
   grid-template-areas:
     "hero hero hero"
     ". art ."
@@ -289,7 +289,9 @@ body {
 .privacy-guide-persona.kanshan-art { width:min(100%,250px); height:auto; aspect-ratio:1; min-height:0; }
 .privacy-card-grid {
   grid-area:cards;
-  width:min(100%,940px);
+  width:100%;
+  max-width:940px;
+  min-width:0;
   justify-self:center;
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
@@ -297,6 +299,7 @@ body {
   margin-top:-6px;
 }
 .privacy-card {
+  min-width:0;
   min-height:240px;
   padding:18px 17px;
   color: #17191d;
@@ -619,6 +622,28 @@ body {
 .explore-stage--app .explore-card:not(.is-featured) .explore-why { margin-top:7px; font-size:8px; line-height:1.4; }
 .explore-stage--app .explore-card:not(.is-featured) .explore-card-link { margin-top:7px; font-size:10px; }
 .explore-stage--app .explore-card:not(.is-featured) .explore-card-link::after { display:none; }
+.explore-stage--app .explore-cards--1 { grid-template-columns:1fr; }
+.explore-stage--app .explore-card.is-single {
+  min-height:238px;
+  display:grid;
+  grid-template-columns:58px minmax(0,1fr) 270px;
+  grid-template-areas:
+    "number badge art"
+    "title title art"
+    "summary summary art"
+    "why why art"
+    "link link art";
+  gap:5px 12px;
+  align-content:center;
+  padding:18px 20px;
+}
+.explore-stage--app .explore-card.is-single .explore-card-number { grid-area:number; align-self:center; }
+.explore-stage--app .explore-card.is-single .explore-card-badge { position:static; grid-area:badge; align-self:center; justify-self:start; }
+.explore-stage--app .explore-card.is-single h2 { grid-area:title; margin:4px 0 0; font-size:24px; }
+.explore-stage--app .explore-card.is-single > p { grid-area:summary; margin:2px 0 0; }
+.explore-stage--app .explore-card.is-single .art-slot { grid-area:art; min-height:180px; height:180px; margin:0; align-self:center; }
+.explore-stage--app .explore-card.is-single .explore-why { grid-area:why; margin-top:3px; }
+.explore-stage--app .explore-card.is-single .explore-card-link { grid-area:link; margin-top:2px; }
 .explore-stage--public {
   grid-template-columns: 1fr;
   grid-template-areas: "hero-copy" "hero-art" "cards" "log";
@@ -714,9 +739,17 @@ body {
 .journey-collect { grid-area:collect; width:min(360px,38vw); min-height:54px; margin:0 auto; }
 
 /* ---------- encounter hub / boards 3 + 4 + 9 ---------- */
+.encounter-hub-stage {
+  min-height:calc(100dvh - var(--target-header-h));
+  height:calc(100dvh - var(--target-header-h));
+  padding:0;
+  overflow:hidden;
+}
 .shared-encounter-stage {
   position:relative;
-  min-height: calc(100dvh - var(--target-header-h));
+  width:100%;
+  min-height:100%;
+  height:100%;
   padding: 34px clamp(30px,5vw,74px) 26px 132px;
 }
 .encounter-side-rail {
@@ -1002,12 +1035,15 @@ body {
 /* ---------- atlas / board 2 ---------- */
 .atlas-stage {
   min-height:calc(100dvh - var(--target-header-h));
+  height:calc(100dvh - var(--target-header-h));
+  overflow:hidden;
   display:grid;
   grid-template-columns:minmax(270px,.9fr) minmax(260px,1fr) minmax(260px,.95fr);
   grid-template-areas:
     "hero hero hero"
     "persona recent signals"
     "relations relations history";
+  grid-template-rows:auto 300px minmax(180px,1fr);
   gap:10px 12px;
   padding:22px clamp(22px,3vw,42px) 20px;
 }
@@ -1061,6 +1097,10 @@ body {
 .atlas-change-list p { font-size:9px; line-height:1.4; }
 .atlas-stats { margin-top:9px; grid-template-columns:repeat(2,1fr); gap:5px; }
 .atlas-stats b { font-size:22px; }
+.atlas-journey-stats b { display:grid; align-content:center; min-height:86px; }
+.atlas-collection-caption { margin-top:10px; border-top:1px solid rgba(0,0,0,.12); padding-top:9px; color:#5f5a54; }
+.atlas-collection-caption b { display:block; color:#17191d; font-size:10px; }
+.atlas-collection-caption span { display:-webkit-box; margin-top:4px; overflow:hidden; font-size:9px; line-height:1.45; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
 .atlas-relationship-polaroids { grid-template-columns:repeat(3,1fr); gap:8px; }
 .atlas-relationship-polaroids .art-slot { min-height:100px; }
 .persona-history-flow { margin-top:10px; gap:5px; }
@@ -1577,6 +1617,8 @@ body {
   /* atlas */
   .atlas-stage {
     min-height:auto;
+    height:auto;
+    overflow:visible;
     grid-template-columns:minmax(0,1fr);
     grid-template-areas:"hero" "persona" "mobile";
     gap:9px;

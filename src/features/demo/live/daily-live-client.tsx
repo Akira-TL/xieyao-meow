@@ -121,9 +121,9 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
         </div>
       </div>
 
-      <div className="explore-cards">
+      <div className={`explore-cards explore-cards--${questions.length}`}>
         {questions.map((item, index) => (
-          <PaperCard className={index === 0 ? "explore-card is-featured" : "explore-card"} key={`${item.url}-${index}`}>
+          <PaperCard className={index === 0 ? `explore-card is-featured${questions.length === 1 ? " is-single" : ""}` : "explore-card"} key={`${item.url}-${index}`}>
             <div className="explore-card-number">{String(index + 1).padStart(2, "0")}</div>
             <span className="explore-card-badge">{showingLivePool
               ? (index === 0 ? "现在热榜" : index === 1 ? "顺路看看" : "再逛一题")
@@ -501,6 +501,11 @@ export function LiveAtlasSection() {
   }, []);
 
   const recentJourneys = journeyAtlas?.journeys.slice(0, 4) ?? [];
+  const allJourneys = journeyAtlas?.journeys ?? [];
+  const journeyCount = allJourneys.length;
+  const questionTicketCount = allJourneys.filter((entry) => Boolean(entry.postcard.question)).length;
+  const relationTicketCount = allJourneys.filter((entry) => entry.artifact?.type === "RELATION_TICKET").length;
+  const scentNoteCount = allJourneys.filter((entry) => entry.artifact?.type === "NEW_SCENT" || (!entry.postcard.question && entry.artifact?.type !== "RELATION_TICKET")).length;
 
   const observations = composition
     ? [
@@ -545,17 +550,11 @@ export function LiveAtlasSection() {
           </div>
         </details>
         <details>
-          <summary><b>知乎成分</b><span>{counts?.contents ?? 0} 创作 · {counts?.followees ?? 0} 关注</span></summary>
-          <div className="atlas-mobile-stats">
-            <span><b>{counts?.contents ?? 0}</b>公开创作</span>
-            <span><b>{counts?.followees ?? 0}</b>关注</span>
-            <span><b>{counts?.collections ?? 0}</b>近期收藏</span>
-            <span><b>{counts?.favlists ?? 0}</b>收藏夹</span>
-          </div>
+          <summary><b>称号</b><span>{title}</span></summary>
+          <p className="atlas-mobile-trace">{counts ? `${counts.contents} 条公开创作 · ${counts.followees} 个关注 · ${counts.collections} 条近期收藏` : "由你的公开知乎成分持续校准"}</p>
         </details>
-        <Link href="/encounter"><b>关系图鉴</b><span>{production ? "真实相遇发生后，会在这里留下关系" : `${DEMO_FIXTURE.atlas.relationships.length} 个关系 · 去看看它遇见了谁`}</span></Link>
         <details>
-          <summary><b>旅行册</b><span>{journeyAtlas === null ? "正在翻页…" : recentJourneys.length ? `${recentJourneys.length} 趟真实旅途` : "还没有完成的旅途"}</span></summary>
+          <summary><b>旅途收藏</b><span>{journeyAtlas === null ? "正在翻页…" : `${journeyCount} 趟 · ${questionTicketCount} 张问题票`}</span></summary>
           <div className="atlas-mobile-journeys">
             {recentJourneys.length ? recentJourneys.map((entry, index) => (
               <article key={entry.journeyId}>
@@ -567,8 +566,9 @@ export function LiveAtlasSection() {
             )) : <p className="atlas-mobile-trace">等它第一次真正回家，这里会出现第一张旅行页。</p>}
           </div>
         </details>
+        <Link href="/encounter"><b>关系图鉴</b><span>{production ? "真实相遇发生后，会在这里留下关系" : `${DEMO_FIXTURE.atlas.relationships.length} 个关系 · 去看看它遇见了谁`}</span></Link>
         <details>
-          <summary><b>人格轨迹</b><span>{primaryInterest} → {title}</span></summary>
+          <summary><b>人格历史</b><span>{primaryInterest} → {title}</span></summary>
           <p className="atlas-mobile-trace">知乎成分「{primaryInterest}」正在把它推向「{title}」。人格会随之后的旅途继续变化。</p>
         </details>
       </div>
@@ -581,43 +581,18 @@ export function LiveAtlasSection() {
           </div>
         </PaperCard>
         <PaperCard>
-          <div className="section-heading-row"><h2>知乎成分</h2><span>PUBLIC PROFILE SIGNALS</span></div>
-          <div className="atlas-stats">
-            <b>{counts?.contents ?? 0}<small><CreateOutlinedIcon fontSize="inherit" /> 公开创作</small></b>
-            <b>{counts?.followees ?? 0}<small><PeopleAltOutlinedIcon fontSize="inherit" /> 关注</small></b>
-            <b>{counts?.collections ?? 0}<small><BookmarkBorderRoundedIcon fontSize="inherit" /> 近期收藏</small></b>
-            <b>{counts?.favlists ?? 0}<small><AutoAwesomeRoundedIcon fontSize="inherit" /> 收藏夹</small></b>
+          <div className="section-heading-row"><h2>旅途收藏</h2><span>JOURNEY COLLECTION</span></div>
+          <div className="atlas-stats atlas-journey-stats">
+            <b>{journeyCount}<small><AutoAwesomeRoundedIcon fontSize="inherit" /> 真实旅途</small></b>
+            <b>{questionTicketCount}<small><BookmarkBorderRoundedIcon fontSize="inherit" /> 问题票根</small></b>
+            <b>{relationTicketCount}<small><PeopleAltOutlinedIcon fontSize="inherit" /> 关系票根</small></b>
+            <b>{scentNoteCount}<small><CreateOutlinedIcon fontSize="inherit" /> 兴趣札记</small></b>
           </div>
-          {!production ? (
-            <div className="atlas-collection-strip" aria-label="旅途收藏摘要">
-              <span><b>14</b><small>幕间札记</small></span>
-              <span><b>9</b><small>问题票根</small></span>
-              <span><b>{DEMO_FIXTURE.atlas.relationships.length}</b><small>关系票根</small></span>
-            </div>
-          ) : null}
+          <div className="atlas-collection-caption">
+            {recentJourneys[0] ? <><b>最近一趟</b><span>{recentJourneys[0].postcard.headline}</span></> : <><b>旅行册</b><span>第一趟回来后，这里会留下真实收藏。</span></>}
+          </div>
         </PaperCard>
       </div>
-
-      <PaperCard className="atlas-journey-book">
-        <div className="section-heading-row"><h2>旅行册</h2><span>REAL JOURNEY LOG</span></div>
-        {recentJourneys.length ? (
-          <div className="atlas-journey-list">
-            {recentJourneys.map((entry, index) => (
-              <article key={entry.journeyId}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <div>
-                  <strong>{entry.postcard.headline}</strong>
-                  <small>{formatJourneyDate(entry.completedAt)} · 纸条「{entry.routeBias ?? "随便逛"}」</small>
-                  <p>{compact(entry.postcard.body, 128)}</p>
-                  {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">查看知乎原问题 →</a> : <em>这趟带回的是一张兴趣札记</em>}
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="atlas-real-relationship-empty"><strong>旅行册还没写下第一页。</strong><p>等它真正完成一次旅途，这里会保留那次出门，而不是用假票根填满。</p></div>
-        )}
-      </PaperCard>
 
       <div className="atlas-grid atlas-grid-bottom">
         <PaperCard>
