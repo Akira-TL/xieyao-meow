@@ -1161,25 +1161,40 @@ body {
 .share-actions .theatre-button { min-height:52px; }
 
 /* Target "desktop" boards are 1000px-wide compositions and must keep the full masthead. */
-@media (min-width: 761px) {
-  .theatre-page:has(.app-header) { padding-bottom:0; }
+@media (min-width: 761px) and (max-width: 1023px) {
+  /* Compact/tablet keeps the top masthead. Desktop gets the persistent rail below. */
+  .theatre-page:has(.app-header) { padding:0; }
   .app-header {
+    position:relative;
+    z-index:20;
+    inset:auto;
+    width:100%;
     min-height:var(--target-header-h);
+    display:grid;
     grid-template-columns:170px 1fr 180px;
+    align-items:center;
+    flex-direction:row;
     gap:12px;
+    border-right:0;
     border-bottom:1px solid rgba(255,255,255,.10);
     background:linear-gradient(180deg,rgba(5,7,9,.82),rgba(5,7,9,.34));
+    box-shadow:none;
     padding:0 18px;
+    backdrop-filter:blur(12px);
   }
+  .app-header .theatre-brand { width:max-content; }
   .app-header .theatre-brand-tagline { display:block; }
   .app-header .app-top-nav {
     display:flex;
     position:static;
     width:auto;
     height:auto;
+    margin-top:0;
     padding:0;
     border:0;
     background:transparent;
+    align-items:center;
+    justify-content:center;
     justify-self:center;
     gap:clamp(22px,3vw,42px);
   }
@@ -1201,6 +1216,132 @@ body {
   .app-header .app-about-link { margin-top:0; border-top:0; padding-top:27px; color:#c7c9cc; }
   .app-header .app-header-right { margin-top:0; justify-self:end; justify-content:flex-end; }
   .theatre-page:has(.app-header) .app-bottom-nav { display:none; }
+}
+
+/* ---------- formal desktop app shell: persistent left rail ---------- */
+@media (min-width: 1024px) {
+  .theatre-page:has(.app-header) {
+    padding:0 18px 18px 182px;
+  }
+  .theatre-page:has(.app-header) > .relative.z-10 {
+    width:100%;
+    max-width:none;
+    margin:0;
+    padding-inline:0;
+  }
+  .app-header {
+    position:fixed;
+    z-index:70;
+    inset:0 auto 0 0;
+    width:164px;
+    height:100dvh;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:0;
+    overflow:hidden;
+    border-right:1px solid rgba(255,255,255,.10);
+    border-bottom:0;
+    padding:28px 18px 22px;
+    background:linear-gradient(180deg,rgba(4,6,9,.96) 0 54%,rgba(4,6,9,.78) 72%,rgba(4,6,9,.40) 100%);
+    box-shadow:18px 0 40px rgba(0,0,0,.22);
+    backdrop-filter:blur(10px);
+  }
+  .app-header > * { position:relative; z-index:2; }
+  .app-header .theatre-brand {
+    width:100%;
+    flex:0 0 auto;
+  }
+  .app-header .theatre-brand-name {
+    font-size:22px;
+  }
+  .app-header .theatre-brand-tagline {
+    display:block;
+    max-width:118px;
+    margin-top:4px;
+    color:#a4a6aa;
+    font-size:7px;
+    line-height:1.45;
+    letter-spacing:.08em;
+  }
+  .app-header .app-top-nav {
+    position:static;
+    width:100%;
+    height:auto;
+    display:grid;
+    justify-content:stretch;
+    justify-items:stretch;
+    gap:7px;
+    margin-top:38px;
+    padding:0;
+    border:0;
+    background:transparent;
+  }
+  .app-header .app-top-nav a,
+  .app-header .app-about-link {
+    min-height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    border:0;
+    border-left:2px solid transparent;
+    padding:0 12px;
+    background:transparent;
+    color:#8f949b;
+    font-size:12px;
+    line-height:1;
+    letter-spacing:.12em;
+  }
+  .app-header .app-top-nav a:hover {
+    color:#fff;
+    background:rgba(255,255,255,.035);
+  }
+  .app-header .app-top-nav a.is-active {
+    border-left-color:var(--target-blue);
+    background:linear-gradient(90deg,rgba(22,119,255,.14),transparent 82%);
+    color:#fff;
+  }
+  .app-header .app-top-nav a.is-active::after { display:none; }
+  .app-header .app-about-link {
+    margin-top:12px;
+    border-top:1px solid rgba(255,255,255,.08);
+    padding-top:12px;
+  }
+  .app-header .app-header-right {
+    width:100%;
+    margin-top:auto;
+    display:flex;
+    justify-content:flex-start;
+    align-items:center;
+    gap:8px;
+    padding-top:12px;
+    border-top:1px solid rgba(255,255,255,.07);
+  }
+  .app-header .header-icon-link {
+    width:36px;
+    height:36px;
+  }
+  .app-header .header-menu-icon { display:none; }
+  .theatre-page:has(.app-header) .app-bottom-nav { display:none; }
+
+  /* Atlas keeps a visible archive illustration in the lower rail instead of an empty black column. */
+  .theatre-page--archive .app-header::after {
+    content:"";
+    position:absolute;
+    z-index:1;
+    left:0;
+    right:0;
+    bottom:64px;
+    height:250px;
+    pointer-events:none;
+    background-image:linear-gradient(180deg,rgba(4,6,9,1),rgba(4,6,9,.05) 35%,rgba(4,6,9,.02)),url("/art/p0/generation-02/19_stage_paper_archive.png");
+    background-repeat:no-repeat,no-repeat;
+    background-size:100% 100%,auto 250px;
+    background-position:center,left bottom;
+    opacity:.88;
+    filter:saturate(.82) contrast(1.04);
+  }
 }
 
 /* ========================================================================
