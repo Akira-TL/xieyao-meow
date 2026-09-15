@@ -89,11 +89,11 @@ function fallbackJourneyNarrative(input: {
   const variants = [
     {
       headline: `它又重新看了一眼「${primaryInterest}」。`,
-      body: `这趟它沿着「${route}」出去，没有硬编一张新票根。它只把这次方向和你已经留下的「${primaryInterest}」线索放在一起，等有真实内容再继续判断${secondaryInterest ? `，也没有把「${secondaryInterest}」擅自合并成结论` : ""}。`,
+      body: `这趟它沿着「${route}」出去，把这次方向和你已经留下的「${primaryInterest}」线索并排记进旅行册${secondaryInterest ? `，旁边也保留了「${secondaryInterest}」这条长期线索` : ""}。新的理解会继续等真实内容来校准。`,
     },
     {
-      headline: "这一趟，它更谨慎了一点。",
-      body: `「${route}」是你给的方向；「${primaryInterest}」是它已经知道的长期线索。没有新事实时，它不会把两者硬说成新的兴趣结论。`,
+      headline: "这一趟，它把两条线放在了一起。",
+      body: `「${route}」是你给的方向；「${primaryInterest}」是它已经知道的长期线索。它先把两者并排记下，再用之后可追溯的内容继续校准。`,
     },
     {
       headline: `它把「${route}」原样记住了。`,

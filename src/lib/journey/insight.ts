@@ -108,7 +108,7 @@ function fallbackGenerated(input: JourneyInsightInput): GeneratedInsight {
     headline: `它对「${primary}」的理解又多了一点`,
     insight: question
       ? `这趟它停在「${question}」前，开始猜：你会被能继续追问的问题吸引，而不只是熟悉的标签。`
-      : `这趟没有带回新问题，但它把你给的方向和长期兴趣放在了一起，留下一条新的观察。`,
+      : `这趟它把你给的方向和长期兴趣并排记下，形成了一条可以继续校准的新观察。`,
     why_it_matters: "它会把这条观察当成后续探索的参考，但不会把一次旅途直接写成你的定论。",
     interaction: {
       question: personaQuestion(input.persona),
@@ -199,9 +199,9 @@ export async function createJourneyInsight(
 export function createFallbackJourneyInsight(routeBias: string | null): InsightSeed {
   const route = compact(routeBias || "随便逛", 24);
   const generated: GeneratedInsight = {
-    headline: "它先记住了你给它的方向",
-    insight: `这趟外部内容没能留下来，但「${route}」这张纸条还在。它不会把空白硬说成新的结论。`,
-    why_it_matters: "下一趟仍会沿着真实内容继续找；没有证据时，它宁可少说一点。",
+    headline: "它把你给的方向认真记下了",
+    insight: `「${route}」这张纸条被它收进了这趟旅程，并成为下一次探索时会继续参考的一条线索。`,
+    why_it_matters: "这条记录只代表你给过的方向；等遇到可追溯内容以后，它再继续校准对你的理解。",
     interaction: {
       question: "这个方向还要保留吗？",
       confirm_label: "继续看看",
@@ -209,7 +209,7 @@ export function createFallbackJourneyInsight(routeBias: string | null): InsightS
       reduce_label: "先少看点",
     },
   };
-  const evidenceSummary = `本趟纸条：「${route}」 · 外部内容未形成可验证的新事实`;
+  const evidenceSummary = `本趟纸条：「${route}」 · 当前只记录这条已知路线意图`;
   const factsJson = JSON.stringify({ journey: { routeBias: routeBias ?? null, question: null } });
   return toSeed(generated, evidenceSummary, factsJson, "local-fallback");
 }

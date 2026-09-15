@@ -339,7 +339,7 @@ function ReturnedStage({
           <p>你塞的纸条：{journey.routeBias ?? "随便逛"}</p>
           {question || relationTicket ? <blockquote>“{thought}”</blockquote> : null}
           <div className="returned-meta">
-            <span>它看到了什么 <b>{question ? "一个真实知乎问题" : relationTicket ? "一场真实相遇" : "这一趟没有硬编新问题"}</b></span>
+            <span>它看到了什么 <b>{question ? "一个真实知乎问题" : relationTicket ? "一场真实相遇" : insight ? "一条沿这趟路线形成的新观察" : "一页可追溯的旅行记录"}</b></span>
             <span>它更懂你什么 <b>{insight ? `1 条新认识 · ${insight.textCharCount} 字` : "仍按可验证事实记录"}</b></span>
           </div>
           {insight ? (
