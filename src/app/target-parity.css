@@ -1308,8 +1308,8 @@ body {
   .scanning-hero { top:4%; left:9%; width:82%; text-align:left; }
   .scanning-hero .stage-caption { text-align:right; }
   .scanning-hero h1 { max-width:7.5ch; margin-top:6px; font-size:46px; line-height:.82; }
-  .scanning-stage-egg-anchor { left:50%; bottom:34%; width:78%; }
-  .scanning-stage-cast .kanshan-art--casting { left:4%; bottom:29%; width:34%; }
+  .scanning-stage-egg-anchor { left:50%; top:54px; bottom:auto; width:68%; }
+  .scanning-stage-cast .kanshan-art--casting { left:4%; bottom:14%; width:34%; }
   .scanning-guide-persona { min-height:190px; }
   .scanning-guide-persona.kanshan-art { height:auto; min-height:0; }
   .scanning-stage-status { bottom:34%; left:8%; font-size:10px; }
@@ -1591,15 +1591,32 @@ body {
   .atlas-mobile-journeys { min-width:0; width:100%; max-width:100%; }
   .atlas-hero-copy { text-align:left; }
   .atlas-hero-copy h1 { width:100%; max-width:100%; margin:5px 0 0; font-size:42px; line-height:.84; overflow-wrap:anywhere; }
-  .atlas-target-title-second { width:auto; max-width:100%; white-space:normal !important; }
-  .atlas-hero-copy > p:not(.stage-caption) { margin:7px 0 0; font-size:10px; line-height:1.5; }
-  .atlas-persona-card { min-height:0; margin:0; padding:11px; overflow:hidden; }
-  .atlas-persona-card > .art-slot, .atlas-current-persona-art { max-width:105px; min-height:120px; }
-  .atlas-persona-card h2 { font-size:28px; }
-  .atlas-persona-card h3 { font-size:13px; }
-  .atlas-tags { gap:4px; }
-  .atlas-tags span { padding:3px 6px; font-size:8px; }
-  .atlas-mobile-index { grid-area:mobile; margin-top:0; }
+  .atlas-target-title-second { width:auto; max-width:100%; white-space:nowrap !important; font-size:.76em; line-height:1; }
+  .atlas-hero-copy > p:not(.stage-caption) { margin:6px 0 0; font-size:9px; line-height:1.45; }
+  .atlas-persona-card {
+    min-height:0;
+    margin:0;
+    grid-template-columns:96px minmax(0,1fr);
+    grid-template-areas:"eyebrow eyebrow" "art title" "art subtitle" "art cert" "art quote" "tags tags" "editor editor";
+    gap:4px 9px;
+    padding:10px;
+    overflow:hidden;
+  }
+  .atlas-persona-card > .art-slot, .atlas-current-persona-art { width:96px; max-width:96px; min-height:120px; }
+  .atlas-persona-card h2 { font-size:26px; }
+  .atlas-persona-card h3 { font-size:12px; }
+  .atlas-persona-card blockquote { margin-top:2px; font-size:10px; line-height:1.35; -webkit-line-clamp:2; }
+  .atlas-cert-title { font-size:8px; }
+  .atlas-tags { gap:3px; }
+  .atlas-tags span { padding:3px 5px; font-size:7px; }
+  .atlas-mobile-index { grid-area:mobile; gap:5px; margin-top:0; }
+  .atlas-mobile-index summary, .atlas-mobile-index > a { gap:8px; padding:9px 10px; }
+  .atlas-mobile-index summary b, .atlas-mobile-index > a b { font-size:11px; }
+  .atlas-mobile-index summary span, .atlas-mobile-index > a span { font-size:8px; }
+  .atlas-mobile-detail { padding:4px 10px 7px; }
+  .atlas-mobile-detail p, .atlas-mobile-trace { margin-top:3px; font-size:8px; line-height:1.4; }
+  .atlas-mobile-stats { padding:7px; }
+  .atlas-mobile-stats b { font-size:15px; }
   .atlas-grid { display:none; }
   .atlas-grid-bottom { display:none; }
   .atlas-profile-settings { margin-top:4px; padding-top:6px; }
