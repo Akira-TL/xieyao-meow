@@ -59,9 +59,12 @@ type ZhihuRuntimeState = {
   dataApiQueue?: Promise<void>;
   lastDataApiAt?: number;
   hotListCache?: { fetchedAt: number; items: ZhihuHotItem[] };
+  hotListCacheLoaded?: boolean;
+  hotListAttemptedAt?: number;
   hotListInFlight?: Promise<ZhihuHotItem[]>;
   searchCache?: Map<string, { fetchedAt: number; items: ZhihuSearchItem[] }>;
   searchCacheLoaded?: boolean;
+  searchAttemptedAt?: Map<string, number>;
   searchInFlight?: Map<string, Promise<ZhihuSearchItem[]>>;
   zhihuSearchBlockedUntil?: number;
 };
@@ -70,10 +73,45 @@ const zhihuRuntime = globalThis as typeof globalThis & { __xieyaoZhihuRuntime?: 
 zhihuRuntime.__xieyaoZhihuRuntime ??= {};
 const sharedRuntime = zhihuRuntime.__xieyaoZhihuRuntime;
 const DATA_API_MIN_INTERVAL_MS = 1_050;
-const HOT_LIST_TTL_MS = 5 * 60_000;
-const HOT_LIST_STALE_MS = 6 * 60 * 60_000;
-const SEARCH_TTL_MS = 10 * 60_000;
-const SEARCH_STALE_MS = 24 * 60 * 60_000;
+const HOT_LIST_TTL_MS = 24 * 60 * 60_000;
+const HOT_LIST_STALE_MS = 7 * 24 * 60 * 60_000;
+const SEARCH_TTL_MS = 24 * 60 * 60_000;
+const SEARCH_STALE_MS = 7 * 24 * 60 * 60_000;
+
+function hotListCachePath(): string {
+  return path.join(path.dirname(resolveDatabasePath()), "zhihu-hot-list-cache.json");
+}
+
+function ensureHotListCacheLoaded(): void {
+  if (sharedRuntime.hotListCacheLoaded) return;
+  sharedRuntime.hotListCacheLoaded = true;
+  try {
+    const parsed = JSON.parse(readFileSync(hotListCachePath(), "utf8")) as {
+      fetchedAt?: number;
+      attemptedAt?: number;
+      items?: ZhihuHotItem[];
+    };
+    if (Number.isFinite(parsed.attemptedAt)) sharedRuntime.hotListAttemptedAt = parsed.attemptedAt;
+    if (Number.isFinite(parsed.fetchedAt) && Array.isArray(parsed.items) && parsed.items.length) {
+      sharedRuntime.hotListCache = { fetchedAt: parsed.fetchedAt!, items: parsed.items };
+    }
+  } catch {
+    // No durable hot-list cache yet.
+  }
+}
+
+function persistHotListCache(): void {
+  const cached = sharedRuntime.hotListCache;
+  const target = hotListCachePath();
+  const temp = `${target}.tmp`;
+  mkdirSync(path.dirname(target), { recursive: true });
+  writeFileSync(temp, JSON.stringify({
+    attemptedAt: sharedRuntime.hotListAttemptedAt ?? 0,
+    fetchedAt: cached?.fetchedAt ?? 0,
+    items: cached?.items ?? [],
+  }), "utf8");
+  renameSync(temp, target);
+}
 
 function searchCachePath(): string {
   return path.join(path.dirname(resolveDatabasePath()), "zhihu-search-cache.json");
@@ -83,15 +121,26 @@ function ensureSearchCacheLoaded(): void {
   if (sharedRuntime.searchCacheLoaded) return;
   sharedRuntime.searchCacheLoaded = true;
   sharedRuntime.searchCache ??= new Map();
+  sharedRuntime.searchAttemptedAt ??= new Map();
   try {
-    const raw = JSON.parse(readFileSync(searchCachePath(), "utf8")) as Array<[
-      string,
-      { fetchedAt: number; items: ZhihuSearchItem[] },
-    ]>;
-    for (const [key, entry] of raw) {
+    const parsed = JSON.parse(readFileSync(searchCachePath(), "utf8")) as
+      | Array<[string, { fetchedAt: number; items: ZhihuSearchItem[] }]>
+      | {
+          entries?: Array<[string, { fetchedAt: number; items: ZhihuSearchItem[] }]>;
+          attempts?: Array<[string, number]>;
+          blockedUntil?: number;
+        };
+    const entries = Array.isArray(parsed) ? parsed : parsed.entries ?? [];
+    for (const [key, entry] of entries) {
       if (key && Number.isFinite(entry?.fetchedAt) && Array.isArray(entry?.items)) {
         sharedRuntime.searchCache.set(key, entry);
       }
+    }
+    if (!Array.isArray(parsed)) {
+      for (const [key, attemptedAt] of parsed.attempts ?? []) {
+        if (key && Number.isFinite(attemptedAt)) sharedRuntime.searchAttemptedAt.set(key, attemptedAt);
+      }
+      if (Number.isFinite(parsed.blockedUntil)) sharedRuntime.zhihuSearchBlockedUntil = parsed.blockedUntil;
     }
   } catch {
     // No durable cache yet.
@@ -105,7 +154,14 @@ function persistSearchCache(): void {
   const entries = [...(sharedRuntime.searchCache ?? new Map()).entries()]
     .sort((left, right) => right[1].fetchedAt - left[1].fetchedAt)
     .slice(0, 20);
-  writeFileSync(temp, JSON.stringify(entries), "utf8");
+  const attempts = [...(sharedRuntime.searchAttemptedAt ?? new Map()).entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 40);
+  writeFileSync(temp, JSON.stringify({
+    entries,
+    attempts,
+    blockedUntil: sharedRuntime.zhihuSearchBlockedUntil ?? 0,
+  }), "utf8");
   renameSync(temp, target);
 }
 
@@ -325,6 +381,7 @@ export class ZhihuGateway {
 
   async getHotList(limit = 30): Promise<ZhihuHotItem[]> {
     const now = this.now();
+    ensureHotListCacheLoaded();
     const cached = sharedRuntime.hotListCache;
     if (cached && now - cached.fetchedAt < HOT_LIST_TTL_MS) {
       return cached.items.slice(0, limit);
@@ -332,7 +389,13 @@ export class ZhihuGateway {
     if (sharedRuntime.hotListInFlight) {
       return (await sharedRuntime.hotListInFlight).slice(0, limit);
     }
+    if (sharedRuntime.hotListAttemptedAt && now - sharedRuntime.hotListAttemptedAt < HOT_LIST_TTL_MS) {
+      if (cached && now - cached.fetchedAt < HOT_LIST_STALE_MS) return cached.items.slice(0, limit);
+      throw new Error("Zhihu hot list daily fetch already attempted");
+    }
 
+    sharedRuntime.hotListAttemptedAt = now;
+    persistHotListCache();
     const pending = (async () => {
       try {
         const xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
@@ -343,8 +406,10 @@ export class ZhihuGateway {
         const items = parseHotListXml(xml);
         if (!items.length) throw new Error("Zhihu hot_list MCP returned no items");
         sharedRuntime.hotListCache = { fetchedAt: now, items };
+        persistHotListCache();
         return items;
       } catch (error) {
+        persistHotListCache();
         if (cached && now - cached.fetchedAt < HOT_LIST_STALE_MS) return cached.items;
         throw error;
       }
@@ -365,6 +430,7 @@ export class ZhihuGateway {
     const now = this.now();
     ensureSearchCacheLoaded();
     sharedRuntime.searchCache ??= new Map();
+    sharedRuntime.searchAttemptedAt ??= new Map();
     sharedRuntime.searchInFlight ??= new Map();
     const cached = sharedRuntime.searchCache.get(key);
     if (cached && now - cached.fetchedAt < SEARCH_TTL_MS) {
@@ -372,27 +438,36 @@ export class ZhihuGateway {
     }
     const inFlight = sharedRuntime.searchInFlight.get(key);
     if (inFlight) return (await inFlight).slice(0, limit);
+    const attemptedAt = sharedRuntime.searchAttemptedAt.get(key) ?? 0;
+    const primaryBlocked = (sharedRuntime.zhihuSearchBlockedUntil ?? 0) > now;
+    if (primaryBlocked || (attemptedAt > 0 && now - attemptedAt < SEARCH_TTL_MS)) {
+      if (cached && now - cached.fetchedAt < SEARCH_STALE_MS) return cached.items.slice(0, limit);
+      const recent = [...sharedRuntime.searchCache.values()]
+        .filter((entry) => now - entry.fetchedAt < SEARCH_STALE_MS)
+        .sort((left, right) => right.fetchedAt - left.fetchedAt)[0];
+      if (recent) return recent.items.slice(0, limit);
+      throw new Error(primaryBlocked ? "Zhihu search daily quota is cooling down" : "Zhihu search daily query already attempted");
+    }
 
+    sharedRuntime.searchAttemptedAt.set(key, now);
+    persistSearchCache();
     const pending = (async () => {
       try {
         let items: ZhihuSearchItem[] = [];
-        const primaryBlocked = (sharedRuntime.zhihuSearchBlockedUntil ?? 0) > Date.now();
-        if (!primaryBlocked) {
-          try {
+        try {
             const xml = await scheduleDataApiRequest(() => this.callSseMcpTool(
               "/api/mcp/zhihu_search/v1",
               "zhihu_search",
               { query: normalized, count: limit },
             ));
             items = parseZhihuSearchXml(xml);
-          } catch (error) {
-            const message = error instanceof Error ? error.message : "";
-            if (message.includes("rate limit exceeded")) {
-              sharedRuntime.zhihuSearchBlockedUntil = Date.now() + 10 * 60_000;
-            } else if (!message.includes("fetch failed")) {
-              throw error;
-            }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "";
+          if (message.includes("rate limit exceeded")) {
+            sharedRuntime.zhihuSearchBlockedUntil = Date.now() + 24 * 60 * 60_000;
+            persistSearchCache();
           }
+          throw error;
         }
 
         if (!items.length) throw new Error("Zhihu search MCP returned no items");

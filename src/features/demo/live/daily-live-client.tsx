@@ -562,7 +562,7 @@ export function LiveAtlasSection() {
                 <b>{String(index + 1).padStart(2, "0")} · {entry.postcard.headline}</b>
                 <span>{formatJourneyDate(entry.completedAt)} · 纸条「{entry.routeBias ?? "随便逛"}」</span>
                 <p>{compact(entry.postcard.body, 92)}</p>
-                {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">看知乎原问题 →</a> : <em>这趟没有留下问题票根</em>}
+                {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">看知乎原问题 →</a> : <em>这趟带回的是一张兴趣札记</em>}
               </article>
             )) : <p className="atlas-mobile-trace">等它第一次真正回家，这里会出现第一张旅行页。</p>}
           </div>
@@ -609,7 +609,7 @@ export function LiveAtlasSection() {
                   <strong>{entry.postcard.headline}</strong>
                   <small>{formatJourneyDate(entry.completedAt)} · 纸条「{entry.routeBias ?? "随便逛"}」</small>
                   <p>{compact(entry.postcard.body, 128)}</p>
-                  {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">查看知乎原问题 →</a> : <em>这趟没有留下问题票根</em>}
+                  {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">查看知乎原问题 →</a> : <em>这趟带回的是一张兴趣札记</em>}
                 </div>
               </article>
             ))}

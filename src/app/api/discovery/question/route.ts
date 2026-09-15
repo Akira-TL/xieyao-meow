@@ -18,24 +18,42 @@ export async function GET() {
   const gateway = createZhihuGatewayFromEnv();
   const generatedAt = Math.floor(Date.now() / 1000);
   let questions: Array<{ title: string; url: string; summary: string; thumbnailUrl: string }> = [];
+  let source: "hot_list" | "search" = "hot_list";
 
   try {
-    const slot = Math.floor(Date.now() / (5 * 60_000)) % DISCOVERY_QUERIES.length;
-    const query = DISCOVERY_QUERIES[slot]!;
-    questions = (await gateway.searchZhihu(query, 8))
+    questions = (await gateway.getHotList(30))
       .filter((item) => isQuestionUrl(item.url))
       .slice(0, 6)
       .map((item) => ({
         title: item.title,
         url: item.url,
         summary: item.summary,
-        thumbnailUrl: "",
+        thumbnailUrl: item.thumbnailUrl,
       }));
-  } catch (error) {
-    console.warn(
-      "[discovery] zhihu_search unavailable",
-      error instanceof Error ? error.message : "unknown error",
-    );
+  } catch {
+    // The hot list is fetched at most once per 24h and otherwise served from durable local cache.
+  }
+
+  if (!questions.length) {
+    source = "search";
+    try {
+      const day = Math.floor(Date.now() / (24 * 60 * 60_000));
+      const query = DISCOVERY_QUERIES[day % DISCOVERY_QUERIES.length]!;
+      questions = (await gateway.searchZhihu(query, 8))
+        .filter((item) => isQuestionUrl(item.url))
+        .slice(0, 6)
+        .map((item) => ({
+          title: item.title,
+          url: item.url,
+          summary: item.summary,
+          thumbnailUrl: "",
+        }));
+    } catch (error) {
+      console.warn(
+        "[discovery] durable Zhihu discovery pool unavailable",
+        error instanceof Error ? error.message : "unknown error",
+      );
+    }
   }
 
   const question = questions[0] ?? null;
@@ -47,7 +65,7 @@ export async function GET() {
   }
 
   return NextResponse.json(
-    { mode: "live" as const, source: "search" as const, generatedAt, question, questions },
+    { mode: "live" as const, source, generatedAt, question, questions },
     { headers: { "cache-control": "no-store" } },
   );
 }

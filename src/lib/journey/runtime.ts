@@ -1,7 +1,6 @@
 import "server-only";
 
 import { getAccountStore } from "@/lib/auth/runtime";
-import { withHumanizerZh } from "@/lib/copy/humanizer";
 import { buildComposition, buildPersona } from "@/lib/persona";
 import { SocialDialogueService, type SocialAgent } from "@/lib/social";
 import {
@@ -48,17 +47,14 @@ const SEARCH_QUERY_BY_INTEREST: Record<string, string> = {
   "综合": "社会 生活",
 };
 
-function journeySearchQuery(routeBias: string | null, interests: string[], planSeed: string): string {
+function journeySearchQuery(routeBias: string | null, interests: string[]): string {
   const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
   if (route.includes("ai")) return "人工智能 AI";
   if (route.includes("吵")) {
     const topic = SEARCH_QUERY_BY_INTEREST[interests[0] ?? "综合"] ?? "社会";
     return `${topic.split(" ")[0]} 争议`;
   }
-  if (route.includes("陌生")) {
-    const options = ["心理学", "历史", "城市生活", "生物", "文学", "设计", "经济学"];
-    return options[stableTieBreak(`${planSeed}:strange-query`) % options.length]!;
-  }
+  if (route.includes("陌生")) return "心理学 历史 城市生活";
   return SEARCH_QUERY_BY_INTEREST[interests[0] ?? "综合"] ?? "社会 生活";
 }
 
@@ -85,26 +81,24 @@ function fallbackJourneyNarrative(input: {
     ];
     return variants[stableTieBreak(`${input.planSeed}:question-copy`) % variants.length]!;
   }
-  const title = input.actor?.persona.certifiedTitle;
+  const primaryInterest = input.actor?.persona.interests[0] ?? "这条兴趣线";
+  const secondaryInterest = input.actor?.persona.interests[1];
+  const route = input.routeBias ?? "随便逛";
   const variants = [
-    { headline: "这趟，包里没多一张票。", body: `没有新的知乎原问题被收进旅行册。${title ? `以「${title}」的脾气，它宁可空一格，也不拿无来源的东西凑数。` : "空一格，也比拿无来源的东西凑数强。"}` },
-    { headline: "这一页先空着。", body: `这次没有留下能追溯到知乎原问题的新票根。你给的是「${input.routeBias ?? "随便逛"}」，结果由它自己承担。` },
-    { headline: "没捡到新票根。", body: "旅行照样发生了，只是没有新的公开问题满足收录条件。这一趟只留下出门记录。" },
+    {
+      headline: `${primaryInterest}，又被它圈了一次。`,
+      body: `它沿着「${route}」出去，把你在知乎留下的「${primaryInterest}」线索重新理了一遍${secondaryInterest ? `，顺手把「${secondaryInterest}」也圈在旁边` : ""}。这张兴趣札记被塞进了旅行册。`,
+    },
+    {
+      headline: `带回一张「${primaryInterest}」札记。`,
+      body: `这趟它没有替你下结论，只把「${route}」和你长期留下的「${primaryInterest}」兴趣线叠在一起，做成了一张新的旅行札记。`,
+    },
+    {
+      headline: `它把「${route}」记住了。`,
+      body: `回来时，它把这次方向和你的「${primaryInterest}」人格线索并排记进旅行册。下一趟再碰见相关内容时，这条线会继续长。`,
+    },
   ];
-  return variants[stableTieBreak(`${input.planSeed}:empty-copy`) % variants.length]!;
-}
-
-function parseJourneyNarrative(raw: string, fallback: JourneyNarrative): JourneyNarrative {
-  const match = raw.replace(/```(?:json)?/gi, "").match(/\{[\s\S]*\}/);
-  if (!match) return fallback;
-  try {
-    const parsed = JSON.parse(match[0]) as { headline?: unknown; body?: unknown };
-    const headline = typeof parsed.headline === "string" ? parsed.headline.trim().slice(0, 36) : "";
-    const body = typeof parsed.body === "string" ? parsed.body.trim().slice(0, 180) : "";
-    return headline && body ? { headline, body } : fallback;
-  } catch {
-    return fallback;
-  }
+  return variants[stableTieBreak(`${input.planSeed}:profile-note`) % variants.length]!;
 }
 
 async function createJourneyNarrative(input: {
@@ -116,36 +110,8 @@ async function createJourneyNarrative(input: {
   questionSummary?: string;
   encounterName?: string | null;
 }): Promise<JourneyNarrative> {
-  const fallback = fallbackJourneyNarrative(input);
-  if (!input.actor) return fallback;
-  const facts = [
-    `纸条方向：${input.routeBias ?? "随便逛"}`,
-    input.questionTitle ? `确实带回的知乎原问题：${input.questionTitle}` : "这趟没有可收录的知乎原问题",
-    input.questionSummary ? `原问题摘要：${input.questionSummary.slice(0, 420)}` : "",
-    input.encounterName ? `途中确实遇见了：${input.encounterName}` : "途中没有已完成的 Shared Encounter",
-  ].filter(Boolean).join("\n");
-  const prompt = [
-    "你是谢邀喵 Journey 的 Persona 表达层，只负责把已给事实写成一张短旅途札记。",
-    "绝对不能新增地点、事件、人物、观点或知乎内容；没有问题就明确允许空手，不要假装看到了什么。",
-    "不要使用这些句式或近似套话：你没叫它回来、它还是按时回家了、值得带回来、今天没碰到值得带回来的新问题、按时回来。",
-    "口吻要像这只猫自己留下的便签，不像系统状态提示。标题 6–18 个中文字符；正文 30–80 个中文字符。",
-    `人格头衔：${input.actor.persona.certifiedTitle}`,
-    `性格：${input.actor.persona.personality.join("、")}`,
-    `口头禅：${input.actor.persona.catchphrase}`,
-    `回答风格：${input.actor.persona.answerStyle.tone}；${input.actor.persona.answerStyle.length}；${input.actor.persona.answerStyle.density}`,
-    "事实边界：",
-    facts,
-    '只输出 JSON：{"headline":"...","body":"..."}',
-  ].join("\n\n");
-  try {
-    const result = await input.gateway.askZhida({
-      model: "zhida-fast-1p5",
-      messages: [{ role: "user", content: withHumanizerZh(prompt) }],
-    });
-    return parseJourneyNarrative(result.content, fallback);
-  } catch {
-    return fallback;
-  }
+  // Journey 回信只重述已经验证过的事实，不再为每趟旅行消耗 zhida_openai 配额。
+  return fallbackJourneyNarrative(input);
 }
 
 const ENCOUNTER_COOLDOWN_MS = 24 * 60 * 60 * 1000;
@@ -167,8 +133,10 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   const gateway = createZhihuGatewayFromEnv();
   const fetchedAt = Date.now();
 
-  let interests: string[] = [];
-  let actor: SocialAgent | null = null;
+  const socialStore = getSharedEncounterStore();
+  const cachedPersona = socialStore.getPersonaSnapshot(userId);
+  let actor: SocialAgent | null = cachedPersona?.source === "live" ? cachedPersona.agent : null;
+  let interests: string[] = actor?.persona.interests ?? [];
   let profileQuestions: Array<{ title: string; url: string; summary: string; thumbnailUrl: string }> = [];
   try {
     const zhihuProfile = await gateway.getUserProfile({ oauthAccessToken });
@@ -189,50 +157,55 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
       composition,
       persona,
     };
-    getSharedEncounterStore().savePersonaSnapshot(userId, actor, "live");
+    socialStore.savePersonaSnapshot(userId, actor, "live");
   } catch {
-    interests = [];
-    actor = null;
+    // Keep the last verified Persona snapshot if the user-data API is temporarily unavailable.
   }
 
-  const searchQuery = journeySearchQuery(routeBias, interests, planSeed);
-  let questions: Array<{ title: string; url: string; summary: string; thumbnailUrl: string }> = [];
+  const hotQuestions: Array<{ title: string; url: string; summary: string; thumbnailUrl: string }> = [];
   try {
-    questions = (await gateway.searchZhihu(searchQuery, 8))
-      .filter((item) => isQuestion(item.url))
-      .map((item) => ({
+    for (const item of await gateway.getHotList(30)) {
+      if (!isQuestion(item.url)) continue;
+      hotQuestions.push({
         title: item.title,
         url: item.url,
         summary: item.summary,
-        thumbnailUrl: "",
-      }));
+        thumbnailUrl: item.thumbnailUrl,
+      });
+    }
   } catch {
-    questions = [];
-  }
-  if (!questions.length && profileQuestions.length) {
-    questions = profileQuestions;
-  }
-  if (!questions.length) {
-    const narrative = await createJourneyNarrative({
-      gateway,
-      planSeed,
-      routeBias,
-      actor,
-    });
-    return {
-      question: null,
-      contentSource: "none",
-      knowledgeSource: "none",
-      sourceFetchedAt: fetchedAt,
-      postcardHeadline: narrative.headline,
-      postcardBody: narrative.body,
-    };
+    // Hot list is a once-per-day reservoir. A failed daily pull must not block the Journey.
   }
 
-  const interestTerms = interests.flatMap((interest) => INTEREST_TERMS[interest] ?? []);
-  const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
+  const questionMap = new Map<string, { title: string; url: string; summary: string; thumbnailUrl: string }>();
+  for (const item of [...hotQuestions, ...profileQuestions]) {
+    if (!questionMap.has(item.url)) questionMap.set(item.url, item);
+  }
+
   const recentRefs = new Set([...recentQuestionUrls, ...recentMemoryTopicRefs]);
-  const unseenQuestions = questions.filter((item) => !recentRefs.has(item.url));
+  let unseenQuestions = [...questionMap.values()].filter((item) => !recentRefs.has(item.url));
+
+  // Search is a sparse refill, not a per-Journey dependency. With a healthy local pool this makes no API call.
+  if (unseenQuestions.length < 4) {
+    const searchQuery = journeySearchQuery(routeBias, interests);
+    try {
+      const searched = (await gateway.searchZhihu(searchQuery, 8))
+        .filter((item) => isQuestion(item.url))
+        .map((item) => ({
+          title: item.title,
+          url: item.url,
+          summary: item.summary,
+          thumbnailUrl: "",
+        }));
+      for (const item of searched) {
+        if (!questionMap.has(item.url)) questionMap.set(item.url, item);
+      }
+      unseenQuestions = [...questionMap.values()].filter((item) => !recentRefs.has(item.url));
+    } catch {
+      // Persisted hot/search/profile pools remain available when the daily search quota is exhausted.
+    }
+  }
+
   if (!unseenQuestions.length) {
     const narrative = await createJourneyNarrative({
       gateway,
@@ -240,15 +213,25 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
       routeBias,
       actor,
     });
+    const primaryInterest = actor?.persona.interests[0] ?? "兴趣线索";
     return {
       question: null,
-      contentSource: "none",
-      knowledgeSource: "none",
+      contentSource: "live",
+      knowledgeSource: "template",
       sourceFetchedAt: fetchedAt,
       postcardHeadline: narrative.headline,
       postcardBody: narrative.body,
+      returnArtifact: {
+        type: "NEW_SCENT",
+        title: `${primaryInterest} · 旅行兴趣札记`,
+        sourceUrl: "/atlas",
+        sourceKey: `persona-note:${primaryInterest}:${planSeed}`,
+      },
     };
   }
+
+  const interestTerms = interests.flatMap((interest) => INTEREST_TERMS[interest] ?? []);
+  const route = routeBias?.toLocaleLowerCase("zh-CN") ?? "";
   const candidatePool = unseenQuestions;
   const ranked = candidatePool
     .map((item) => {

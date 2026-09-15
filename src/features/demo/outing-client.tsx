@@ -279,12 +279,16 @@ function ReturnedStage({
   const relationTicket = journey.artifact?.type === "RELATION_TICKET";
   const artifactLabel = relationTicket
     ? "关系票根 · RELATION TICKET"
-    : journey.artifact
-      ? "问题票根 · QUESTION TICKET"
-      : "旅途明信片 · POSTCARD";
-  const artifactTitle = relationTicket
-    ? journey.artifact?.title ?? "旅途中遇见了另一个 Persona"
-    : question?.title ?? journey.postcard?.headline ?? "这一页先空着。";
+    : journey.artifact?.type === "NEW_SCENT"
+      ? "兴趣札记 · SCENT NOTE"
+      : journey.artifact?.type === "OPINION_FRAGMENT"
+        ? "观点碎片 · OPINION FRAGMENT"
+        : journey.artifact?.type === "ODDITY_SPECIMEN"
+          ? "怪东西 · ODDITY"
+          : question
+            ? "问题票根 · QUESTION TICKET"
+            : "旅途札记 · POSTCARD";
+  const artifactTitle = journey.artifact?.title ?? question?.title ?? journey.postcard?.headline ?? "这一趟的旅行札记";
 
   useEffect(() => {
     setOpened(false);
@@ -304,7 +308,7 @@ function ReturnedStage({
         <PaperCard className="returned-artifact returned-artifact--sealed">
           <span>旅包 · SEALED</span>
           <h2>东西还没摊开。</h2>
-          <p>可能有问题票根、关系票根，也可能只有一张旅途札记。先拆开再看。</p>
+          <p>问题票根、关系票根、兴趣札记——这一趟总会有东西留在包里。先拆开再看。</p>
           <div className="returned-package-mark" aria-hidden="true">?</div>
           <button className="theatre-button theatre-button-primary" onClick={() => setOpened(true)} type="button">拆开它的包 <span>→</span></button>
         </PaperCard>
@@ -315,8 +319,8 @@ function ReturnedStage({
           <p>你塞的纸条：{journey.routeBias ?? "随便逛"}</p>
           <blockquote>“{thought}”</blockquote>
           <div className="returned-meta">
-            <span>这一趟 <b>{journey.contentSource === "live" ? "停在了一个真实知乎问题前" : "没有留下新的问题票根"}</b></span>
-            <span>收进包里 <b>{relationTicket ? "1 张关系票根" : journey.artifact ? "1 张问题票根" : "1 张旅途札记"}</b></span>
+            <span>这一趟 <b>{question ? "停在了一个真实知乎问题前" : "带回了一张基于知乎兴趣线索的旅行札记"}</b></span>
+            <span>收进包里 <b>{relationTicket ? "1 张关系票根" : journey.artifact?.type === "NEW_SCENT" ? "1 张兴趣札记" : question ? "1 张问题票根" : "1 张旅途札记"}</b></span>
           </div>
           {relationTicket ? (
             <a className="home-last-night-link" href="/encounter">看它们这一幕 →</a>

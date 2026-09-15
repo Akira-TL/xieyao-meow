@@ -107,28 +107,24 @@ function restDurationMs(seed: string, timeScale: number, sequence: number): numb
   return scaleMs(rangedMs(`${seed}:rest`, 30 * MINUTE, 90 * MINUTE), timeScale);
 }
 
-function emptyPostcardFallback(seed: string, routeBias: string | null) {
+function routePostcardFallback(seed: string, routeBias: string | null) {
+  const route = routeBias ?? "随便逛";
   const variants = [
     {
-      headline: "这趟，包里没多一张票。",
-      body: "没有找到适合留下来源的问题。它没拿别的内容凑数，只把这次出门记进了旅行册。",
+      headline: `「${route}」被它记进了旅行册。`,
+      body: `这一趟，它把你塞进包里的「${route}」做成了一张路线札记。下一次再沿这条线出去时，这段旅程会继续往下长。`,
     },
     {
-      headline: "没带新问题回来。",
-      body: "这次没有能追溯到知乎原问题的新票根。空着回来，也比随便叼一张更像它。",
+      headline: "包里多了一张路线札记。",
+      body: `它回来时把「${route}」折成了一张小纸片，和这一趟的时间一起夹进旅行册。`,
     },
     {
-      headline: "这一趟，先记个空白。",
-      body: "没有碰到值得记录成问题票根的内容。旅行照样算数，只是这一页暂时没有链接。",
+      headline: `这趟留下了「${route}」。`,
+      body: `纸条不只是出门前的提示；回来以后，它也成了这次旅程的一部分。它把「${route}」原样收进了旅行册。`,
     },
   ];
-  const selected = variants[hashString(`${seed}:empty-copy`) % variants.length]!;
-  return {
-    postcardHeadline: selected.headline,
-    postcardBody: routeBias
-      ? `${selected.body} 你塞进包里的纸条是「${routeBias}」。`
-      : selected.body,
-  };
+  const selected = variants[hashString(`${seed}:route-copy`) % variants.length]!;
+  return { postcardHeadline: selected.headline, postcardBody: selected.body };
 }
 
 function questionFromRow(row: Pick<JourneyRow, "question_title" | "question_url" | "question_summary" | "question_thumbnail_url">): JourneyQuestion | null {
@@ -351,13 +347,20 @@ export class JourneyService {
         recentMemoryTopicRefs: this.readRecentMemoryTopicRefs(userId),
       });
     } catch {
-      const fallback = emptyPostcardFallback(row.plan_seed, row.route_bias);
+      const fallback = routePostcardFallback(row.plan_seed, row.route_bias);
+      const route = row.route_bias ?? "随便逛";
       return {
         question: null,
         contentSource: "none",
-        knowledgeSource: "none",
+        knowledgeSource: "template",
         sourceFetchedAt: now,
         ...fallback,
+        returnArtifact: {
+          type: "NEW_SCENT",
+          title: `${route} · 路线札记`,
+          sourceUrl: "/atlas",
+          sourceKey: `route-note:${row.plan_seed}`,
+        },
       };
     }
   }
@@ -401,7 +404,7 @@ export class JourneyService {
     if (!row || row.materialized_at !== null) return;
 
     const question = result.question;
-    const headline = result.postcardHeadline ?? (question ? "带回一张问题票。" : "这一页先空着。");
+    const headline = result.postcardHeadline ?? (question ? "带回一张问题票。" : "带回一张旅行札记。");
     const artifactSeed = result.returnArtifact ?? (question
       ? {
           type: "QUESTION_TICKET" as const,
@@ -735,13 +738,19 @@ export class JourneyService {
       );
 
       UPDATE journey_logs
-      SET result_summary = '这次没有留下能追溯到知乎原问题的新票根。旅行照样发生，只是这一页没有链接。'
-      WHERE result_summary = '这趟没碰到值得带回来的新问题，但它还是按时回家了。';
+      SET result_summary = '这趟旅行被整理成了一张路线札记，和出门时的方向一起收进旅行册。'
+      WHERE result_summary IN (
+        '这趟没碰到值得带回来的新问题，但它还是按时回家了。',
+        '这次没有留下能追溯到知乎原问题的新票根。旅行照样发生，只是这一页没有链接。'
+      );
 
       UPDATE journey_postcards
-      SET headline = '这一页先空着。',
-          body = '这次没有留下能追溯到知乎原问题的新票根。旅行照样发生，只是这一页没有链接。'
-      WHERE body = '这趟没碰到值得带回来的新问题，但它还是按时回家了。';
+      SET headline = '带回一张旅行札记。',
+          body = '这趟旅行被整理成了一张路线札记，和出门时的方向一起收进旅行册。'
+      WHERE body IN (
+        '这趟没碰到值得带回来的新问题，但它还是按时回家了。',
+        '这次没有留下能追溯到知乎原问题的新票根。旅行照样发生，只是这一页没有链接。'
+      ) OR headline = '这一页先空着。';
     `);
   }
 }
