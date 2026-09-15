@@ -505,15 +505,18 @@ export function LiveAtlasSection() {
   const journeyCount = allJourneys.length;
   const questionTicketCount = allJourneys.filter((entry) => Boolean(entry.postcard.question)).length;
   const relationTicketCount = allJourneys.filter((entry) => entry.artifact?.type === "RELATION_TICKET").length;
-  const scentNoteCount = allJourneys.filter((entry) => entry.artifact?.type === "NEW_SCENT" || (!entry.postcard.question && entry.artifact?.type !== "RELATION_TICKET")).length;
+  const insightCount = allJourneys.filter((entry) => Boolean(entry.insight)).length;
+  const recentInsights = allJourneys.flatMap((entry) => entry.insight ? [entry.insight] : []).slice(0, 3);
 
-  const observations = composition
-    ? [
-        `主兴趣目前稳定在「${primaryInterest}」`,
-        `公开创作 ${counts?.contents ?? 0} 条，表达节奏偏${composition.writingLength === "long" ? "长答" : composition.writingLength === "short" ? "短句" : "中等篇幅"}`,
-        `公开收藏 ${counts?.collections ?? 0} 条、收藏夹 ${counts?.favlists ?? 0} 个，收藏倾向 ${composition.hoardingLevel}%`,
-      ]
-    : ["正在整理你的知乎成分。", "人格档案会随着公开行为继续变化。", "旅途与关系会逐步留下新的痕迹。"];
+  const observations = recentInsights.length
+    ? recentInsights.map((item) => item.headline)
+    : composition
+      ? [
+          `主兴趣目前稳定在「${primaryInterest}」`,
+          `公开创作 ${counts?.contents ?? 0} 条，表达节奏偏${composition.writingLength === "long" ? "长答" : composition.writingLength === "short" ? "短句" : "中等篇幅"}`,
+          `公开收藏 ${counts?.collections ?? 0} 条、收藏夹 ${counts?.favlists ?? 0} 个，收藏倾向 ${composition.hoardingLevel}%`,
+        ]
+      : ["正在整理你的知乎成分。", "人格档案会随着公开行为继续变化。", "旅途与关系会逐步留下新的痕迹。"];
 
   return (
     <section className="atlas-stage">
@@ -561,7 +564,7 @@ export function LiveAtlasSection() {
                 <b>{String(index + 1).padStart(2, "0")} · {entry.postcard.headline}</b>
                 <span>{formatJourneyDate(entry.completedAt)} · 纸条「{entry.routeBias ?? "随便逛"}」</span>
                 <p>{compact(entry.postcard.body, 92)}</p>
-                {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">看知乎原问题 →</a> : <em>这趟带回的是一张兴趣札记</em>}
+                {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">看知乎原问题 →</a> : entry.insight ? <em>{entry.insight.headline} · {entry.insight.textCharCount} 字</em> : <em>这趟留下了一页旅行记录</em>}
               </article>
             )) : <p className="atlas-mobile-trace">等它第一次真正回家，这里会出现第一张旅行页。</p>}
           </div>
@@ -586,7 +589,7 @@ export function LiveAtlasSection() {
             <b>{journeyCount}<small><AutoAwesomeRoundedIcon fontSize="inherit" /> 真实旅途</small></b>
             <b>{questionTicketCount}<small><BookmarkBorderRoundedIcon fontSize="inherit" /> 问题票根</small></b>
             <b>{relationTicketCount}<small><PeopleAltOutlinedIcon fontSize="inherit" /> 关系票根</small></b>
-            <b>{scentNoteCount}<small><CreateOutlinedIcon fontSize="inherit" /> 兴趣札记</small></b>
+            <b>{insightCount}<small><CreateOutlinedIcon fontSize="inherit" /> 新认识</small></b>
           </div>
           <div className="atlas-collection-caption">
             {recentJourneys[0] ? <><b>最近一趟</b><span>{recentJourneys[0].postcard.headline}</span></> : <><b>旅行册</b><span>第一趟回来后，这里会留下真实收藏。</span></>}

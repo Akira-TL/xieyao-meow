@@ -4,6 +4,7 @@ import { z } from "zod";
 import { COMMUNITY_RESIDENTS } from "@/data/community-residents";
 import { DEMO_FALLBACK } from "@/data/demo-fallback";
 import { getRequestOAuthIdentity } from "@/lib/auth/request-session";
+import { createDeepSeekFlashClientFromEnv } from "@/lib/narrative/deepseek";
 import { buildComposition, buildPersona } from "@/lib/persona";
 import {
   SocialDialogueService,
@@ -101,9 +102,14 @@ export async function POST(request: Request) {
   if (production && personaMode !== "live") {
     return NextResponse.json({ error: "zhihu persona unavailable" }, { status: 502 });
   }
-  const gateway = createZhihuGatewayFromEnv();
+  let dialogueGateway = null;
+  try {
+    dialogueGateway = createDeepSeekFlashClientFromEnv();
+  } catch {
+    // A deterministic persona-aware fallback still returns one reply per speaker.
+  }
   const memory: PersonaExperienceMemory = parsed.memory;
-  const round = await new SocialDialogueService(gateway).nextRound({
+  const round = await new SocialDialogueService(dialogueGateway).nextRound({
     actor,
     target,
     topic: parsed.topic,

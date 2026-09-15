@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { resolveP0Art } from "@/lib/art/p0";
-import type { JourneyProjection, JourneyView } from "@/lib/journey/types";
+import type { JourneyInsightAction, JourneyProjection, JourneyView } from "@/lib/journey/types";
 import type { PlayerPersona, ZhihuComposition } from "@/lib/persona";
 
 import { PaperCard, PersonaArt } from "./components";
@@ -106,6 +106,9 @@ export function DemoOutingHome() {
         journey={projection.journey}
         playerPersona={playerPersona}
         onArchive={() => void runAction({ action: "archive" })}
+        onInsightFeedback={async (response) => {
+          await runAction({ action: "insight_feedback", journeyId: projection.journey!.id, response });
+        }}
       />
     );
   }
@@ -266,29 +269,43 @@ function ReturnedStage({
   catName,
   journey,
   onArchive,
+  onInsightFeedback,
   playerPersona,
 }: {
   catName: string;
   journey: JourneyView;
   onArchive: () => void;
+  onInsightFeedback: (response: JourneyInsightAction) => Promise<void>;
   playerPersona: PlayerPersona;
 }) {
   const [opened, setOpened] = useState(false);
+  const [feedbackBusy, setFeedbackBusy] = useState(false);
   const question = journey.question;
   const thought = journey.postcard?.body ?? "这一趟只留下了出门记录。";
   const relationTicket = journey.artifact?.type === "RELATION_TICKET";
+  const insight = journey.insight;
   const artifactLabel = relationTicket
     ? "关系票根 · RELATION TICKET"
-    : journey.artifact?.type === "NEW_SCENT"
-      ? "兴趣札记 · SCENT NOTE"
-      : journey.artifact?.type === "OPINION_FRAGMENT"
-        ? "观点碎片 · OPINION FRAGMENT"
-        : journey.artifact?.type === "ODDITY_SPECIMEN"
-          ? "怪东西 · ODDITY"
-          : question
-            ? "问题票根 · QUESTION TICKET"
+    : journey.artifact?.type === "OPINION_FRAGMENT"
+      ? "观点碎片 · OPINION FRAGMENT"
+      : journey.artifact?.type === "ODDITY_SPECIMEN"
+        ? "怪东西 · ODDITY"
+        : question
+          ? "问题票根 · QUESTION TICKET"
+          : insight
+            ? "新认识 · ABOUT YOU"
             : "旅途札记 · POSTCARD";
-  const artifactTitle = journey.artifact?.title ?? question?.title ?? journey.postcard?.headline ?? "这一趟的旅行札记";
+  const artifactTitle = journey.artifact?.title ?? question?.title ?? insight?.headline ?? journey.postcard?.headline ?? "这一趟的旅行札记";
+
+  async function submitInsightFeedback(response: JourneyInsightAction) {
+    if (!insight || feedbackBusy) return;
+    setFeedbackBusy(true);
+    try {
+      await onInsightFeedback(response);
+    } finally {
+      setFeedbackBusy(false);
+    }
+  }
 
   useEffect(() => {
     setOpened(false);
@@ -308,7 +325,7 @@ function ReturnedStage({
         <PaperCard className="returned-artifact returned-artifact--sealed">
           <span>旅包 · SEALED</span>
           <h2>东西还没摊开。</h2>
-          <p>问题票根、关系票根、兴趣札记——这一趟总会有东西留在包里。先拆开再看。</p>
+          <p>可能是一张问题票，也可能是它对你的一个新发现。这一趟回来，总会留下能继续看的东西。</p>
           <div className="returned-package-mark" aria-hidden="true">?</div>
           <button className="theatre-button theatre-button-primary" onClick={() => setOpened(true)} type="button">拆开它的包 <span>→</span></button>
         </PaperCard>
@@ -317,11 +334,38 @@ function ReturnedStage({
           <span>{artifactLabel}</span>
           <h2>{artifactTitle}</h2>
           <p>你塞的纸条：{journey.routeBias ?? "随便逛"}</p>
-          <blockquote>“{thought}”</blockquote>
+          {question || relationTicket ? <blockquote>“{thought}”</blockquote> : null}
           <div className="returned-meta">
-            <span>这一趟 <b>{question ? "停在了一个真实知乎问题前" : "带回了一张基于知乎兴趣线索的旅行札记"}</b></span>
-            <span>收进包里 <b>{relationTicket ? "1 张关系票根" : journey.artifact?.type === "NEW_SCENT" ? "1 张兴趣札记" : question ? "1 张问题票根" : "1 张旅途札记"}</b></span>
+            <span>它看到了什么 <b>{question ? "一个真实知乎问题" : relationTicket ? "一场真实相遇" : "这一趟没有硬编新问题"}</b></span>
+            <span>它更懂你什么 <b>{insight ? `1 条新认识 · ${insight.textCharCount} 字` : "仍按可验证事实记录"}</b></span>
           </div>
+          {insight ? (
+            <section className="returned-insight" aria-label="它对你的一个新发现">
+              <span>新认识 · ABOUT YOU · {insight.textCharCount} 字</span>
+              <h3>{insight.headline}</h3>
+              <p>{insight.insight}</p>
+              <small>{insight.whyItMatters}</small>
+              <details>
+                <summary>它为什么这么想 →</summary>
+                <p>{insight.evidenceSummary}</p>
+              </details>
+              <strong>{insight.interactionQuestion}</strong>
+              <div className="returned-insight-actions">
+                {insight.options.map((option) => (
+                  <button
+                    className={insight.feedbackAction === option.action ? "is-selected" : ""}
+                    disabled={feedbackBusy}
+                    key={option.action}
+                    onClick={() => void submitInsightFeedback(option.action)}
+                    type="button"
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              {insight.feedbackAction ? <em>这次回应已经记进这趟旅程，不会直接改写你的人格。</em> : null}
+            </section>
+          ) : null}
           {relationTicket ? (
             <a className="home-last-night-link" href="/encounter">看它们这一幕 →</a>
           ) : question ? (

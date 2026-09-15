@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getRequestOAuthIdentity } from "@/lib/auth/request-session";
 import { getAccountStore } from "@/lib/auth/runtime";
 import { getAnswerExperienceService } from "@/lib/experience/runtime";
+import { createDeepSeekFlashClientFromEnv } from "@/lib/narrative/deepseek";
 import { SocialDialogueService, type SocialAgent } from "@/lib/social";
 import {
   SharedEncounterService,
@@ -11,7 +12,6 @@ import {
   type SharedEncounterProvenance,
 } from "@/lib/social/shared-encounter";
 import { getSharedEncounterStore } from "@/lib/social/runtime";
-import { createZhihuGatewayFromEnv } from "@/lib/zhihu/env";
 
 export const dynamic = "force-dynamic";
 
@@ -93,7 +93,13 @@ export async function POST(request: Request) {
   };
 
   try {
-    const dialogue = new SocialDialogueService(createZhihuGatewayFromEnv());
+    let dialogueGateway = null;
+    try {
+      dialogueGateway = createDeepSeekFlashClientFromEnv();
+    } catch {
+      // Keep the encounter usable with the deterministic Persona fallback.
+    }
+    const dialogue = new SocialDialogueService(dialogueGateway);
     const encounter = await new SharedEncounterService(store, dialogue).create({
       requestUserId: identity.userId,
       otherUserId: targetSnapshot.userId,

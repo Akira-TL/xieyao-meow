@@ -8,6 +8,29 @@ export type ReturnArtifactType =
   | "NEW_SCENT"
   | "ODDITY_SPECIMEN";
 
+export type JourneyInsightAction =
+  | "CONFIRM_INTEREST"
+  | "CORRECT_INTEREST"
+  | "REDUCE_INTEREST";
+
+export interface JourneyInsightOption {
+  action: JourneyInsightAction;
+  label: string;
+}
+
+export interface JourneyInsight {
+  headline: string;
+  insight: string;
+  whyItMatters: string;
+  evidenceSummary: string;
+  interactionQuestion: string;
+  options: JourneyInsightOption[];
+  textCharCount: number;
+  model: string;
+  promptVersion: string;
+  feedbackAction: JourneyInsightAction | null;
+}
+
 export interface JourneyQuestion {
   title: string;
   url: string;
@@ -41,6 +64,7 @@ export interface JourneyView {
   question: JourneyQuestion | null;
   postcard: JourneyPostcard | null;
   artifact: ReturnArtifact | null;
+  insight: JourneyInsight | null;
 }
 
 export interface JourneyProjection {
@@ -57,6 +81,7 @@ export interface JourneyAtlasEntry {
   routeBias: string | null;
   postcard: JourneyPostcard;
   artifact: ReturnArtifact | null;
+  insight: JourneyInsight | null;
   contentSource: JourneyContentSource;
 }
 
@@ -87,6 +112,9 @@ export interface JourneyDiscoveryResult {
   sourceFetchedAt: number;
   postcardHeadline?: string;
   postcardBody: string;
+  insight?: Omit<JourneyInsight, "feedbackAction"> & {
+    factsJson: string;
+  };
   returnArtifact?: JourneyReturnArtifactSeed;
 }
 

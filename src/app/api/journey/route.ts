@@ -13,6 +13,11 @@ const actionSchema = z.discriminatedUnion("action", [
     routeBias: z.string().trim().min(1).max(40).nullable().optional(),
   }),
   z.object({ action: z.literal("archive") }),
+  z.object({
+    action: z.literal("insight_feedback"),
+    journeyId: z.string().trim().min(1).max(100),
+    response: z.enum(["CONFIRM_INTEREST", "CORRECT_INTEREST", "REDUCE_INTEREST"]),
+  }),
 ]);
 
 function json(data: unknown, init?: ResponseInit) {
@@ -48,13 +53,24 @@ export async function POST(request: Request) {
   }
 
   const service = getJourneyService();
-  const projection = parsed.action === "start"
-    ? await service.start(
-        identity.userId,
-        identity.oauthAccessToken,
-        parsed.routeBias?.trim() || null,
-      )
-    : await service.archive(identity.userId, identity.oauthAccessToken);
-
-  return json(projection);
+  if (parsed.action === "start") {
+    return json(await service.start(
+      identity.userId,
+      identity.oauthAccessToken,
+      parsed.routeBias?.trim() || null,
+    ));
+  }
+  if (parsed.action === "archive") {
+    return json(await service.archive(identity.userId, identity.oauthAccessToken));
+  }
+  try {
+    return json(await service.respondToInsight(
+      identity.userId,
+      identity.oauthAccessToken,
+      parsed.journeyId,
+      parsed.response,
+    ));
+  } catch {
+    return json({ error: "journey insight not found" }, { status: 404 });
+  }
 }

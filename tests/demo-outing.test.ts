@@ -44,6 +44,22 @@ describe("server Journey", () => {
       knowledgeSource: "template" as const,
       sourceFetchedAt: now,
       postcardBody: "它把这个真实问题叼回来了。",
+      insight: {
+        headline: "它发现你会多问一步",
+        insight: "你会在熟悉主题里继续追问边界，而不只停在标签本身。",
+        whyItMatters: "这会影响它以后选择值得停下来的问题。",
+        evidenceSummary: "长期兴趣：AI 与数码 · 本趟纸条：「多看看 AI」 · 本趟停留：「真实问题」",
+        interactionQuestion: "这条推断成立吗？",
+        options: [
+          { action: "CONFIRM_INTEREST" as const, label: "挺像我的" },
+          { action: "CORRECT_INTEREST" as const, label: "方向不太对" },
+          { action: "REDUCE_INTEREST" as const, label: "以后少看这个" },
+        ],
+        textCharCount: 88,
+        model: "deepseek-flash",
+        promptVersion: "journey-insight-v1",
+        factsJson: '{"route":"AI"}',
+      },
     }));
     const service = new JourneyService({
       dbPath,
@@ -70,9 +86,25 @@ describe("server Journey", () => {
     expect(returned.journey?.question?.url).toBe("https://www.zhihu.com/question/123");
     expect(returned.journey?.postcard?.body).toBe("它把这个真实问题叼回来了。");
     expect(returned.journey?.artifact?.type).toBe("QUESTION_TICKET");
+    expect(returned.journey?.insight).toMatchObject({
+      headline: "它发现你会多问一步",
+      model: "deepseek-flash",
+      textCharCount: 88,
+      feedbackAction: null,
+    });
 
     const repeated = await service.getProjection(userId, "oauth-a");
     expect(repeated).toEqual(returned);
+    expect(discover).toHaveBeenCalledTimes(1);
+
+    const responded = await service.respondToInsight(
+      userId,
+      "oauth-a",
+      returned.journey!.id,
+      "CONFIRM_INTEREST",
+    );
+    expect(responded.journey?.insight?.feedbackAction).toBe("CONFIRM_INTEREST");
+    expect((await service.getAtlas(userId, "oauth-a")).journeys[0]?.insight?.feedbackAction).toBe("CONFIRM_INTEREST");
     expect(discover).toHaveBeenCalledTimes(1);
     service.close();
   });

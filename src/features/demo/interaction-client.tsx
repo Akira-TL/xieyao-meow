@@ -605,6 +605,7 @@ export function EncounterPlayback() {
   }, [dialogueDone, relationshipSettled, residentId]);
 
   const roundCount = Math.ceil(turns.length / 2);
+  const dialogueCharCount = turns.reduce((total, turn) => total + Array.from(turn.text).length, 0);
   const conversationStatus = !liveTopic
     ? "正在把今天的问题带进舞台…"
     : dialogueError
@@ -669,8 +670,8 @@ export function EncounterPlayback() {
       </div>
 
       <div className="encounter-dialogue-status">
-        <span className={dialogueSource?.includes("知乎直答") ? "is-live" : ""}>
-          {dialogueSource ?? "双 Persona 对话"}
+        <span className={dialogueSource?.includes("DeepSeek Flash") ? "is-live" : ""}>
+          {dialogueSource ?? "双 Persona 对话"} · {dialogueCharCount} 字
         </span>
         <p>{conversationStatus}</p>
         {dialogueError ? (

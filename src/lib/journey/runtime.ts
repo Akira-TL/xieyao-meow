@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getAccountStore } from "@/lib/auth/runtime";
+import { createDeepSeekFlashClientFromEnv } from "@/lib/narrative/deepseek";
 import { buildComposition, buildPersona } from "@/lib/persona";
 import { SocialDialogueService, type SocialAgent } from "@/lib/social";
 import {
@@ -10,8 +11,9 @@ import {
 import { getSharedEncounterStore } from "@/lib/social/runtime";
 import { createZhihuGatewayFromEnv } from "@/lib/zhihu/env";
 
+import { createFallbackJourneyInsight, createJourneyInsight } from "./insight";
 import { JourneyService } from "./service";
-import type { JourneyDiscoverer, JourneyReturnArtifactSeed } from "./types";
+import type { JourneyDiscoverer, JourneyReturnArtifactSeed, JourneyQuestion } from "./types";
 
 const INTEREST_TERMS: Record<string, string[]> = {
   "AI 与数码": ["ai", "人工智能", "大模型", "模型", "机器人", "科技", "数码", "智能"],
@@ -86,16 +88,16 @@ function fallbackJourneyNarrative(input: {
   const route = input.routeBias ?? "随便逛";
   const variants = [
     {
-      headline: `${primaryInterest}，又被它圈了一次。`,
-      body: `它沿着「${route}」出去，把你在知乎留下的「${primaryInterest}」线索重新理了一遍${secondaryInterest ? `，顺手把「${secondaryInterest}」也圈在旁边` : ""}。这张兴趣札记被塞进了旅行册。`,
+      headline: `它又重新看了一眼「${primaryInterest}」。`,
+      body: `这趟它沿着「${route}」出去，没有硬编一张新票根。它只把这次方向和你已经留下的「${primaryInterest}」线索放在一起，等有真实内容再继续判断${secondaryInterest ? `，也没有把「${secondaryInterest}」擅自合并成结论` : ""}。`,
     },
     {
-      headline: `带回一张「${primaryInterest}」札记。`,
-      body: `这趟它没有替你下结论，只把「${route}」和你长期留下的「${primaryInterest}」兴趣线叠在一起，做成了一张新的旅行札记。`,
+      headline: "这一趟，它更谨慎了一点。",
+      body: `「${route}」是你给的方向；「${primaryInterest}」是它已经知道的长期线索。没有新事实时，它不会把两者硬说成新的兴趣结论。`,
     },
     {
-      headline: `它把「${route}」记住了。`,
-      body: `回来时，它把这次方向和你的「${primaryInterest}」人格线索并排记进旅行册。下一趟再碰见相关内容时，这条线会继续长。`,
+      headline: `它把「${route}」原样记住了。`,
+      body: `回来时，它只保留了这次方向和既有的「${primaryInterest}」人格线索。下一趟碰到真实内容以后，再看这条理解要不要继续长。`,
     },
   ];
   return variants[stableTieBreak(`${input.planSeed}:profile-note`) % variants.length]!;
@@ -112,6 +114,14 @@ async function createJourneyNarrative(input: {
 }): Promise<JourneyNarrative> {
   // Journey 回信只重述已经验证过的事实，不再为每趟旅行消耗 zhida_openai 配额。
   return fallbackJourneyNarrative(input);
+}
+
+function narrativeGateway() {
+  try {
+    return createDeepSeekFlashClientFromEnv();
+  } catch {
+    return null;
+  }
 }
 
 const ENCOUNTER_COOLDOWN_MS = 24 * 60 * 60 * 1000;
@@ -219,20 +229,22 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
       routeBias,
       actor,
     });
-    const primaryInterest = actor?.persona.interests[0] ?? "兴趣线索";
+    const insight = actor
+      ? await createJourneyInsight({
+          persona: actor.persona,
+          composition: actor.composition,
+          routeBias,
+          question: null,
+        }, narrativeGateway())
+      : createFallbackJourneyInsight(routeBias);
     return {
       question: null,
-      contentSource: "live",
+      contentSource: actor ? "live" : "none",
       knowledgeSource: "template",
       sourceFetchedAt: fetchedAt,
       postcardHeadline: narrative.headline,
       postcardBody: narrative.body,
-      returnArtifact: {
-        type: "NEW_SCENT",
-        title: `${primaryInterest} · 旅行兴趣札记`,
-        sourceUrl: "/atlas",
-        sourceKey: `persona-note:${primaryInterest}:${planSeed}`,
-      },
+      insight,
     };
   }
 
@@ -303,7 +315,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
       try {
         const encounter = await new SharedEncounterService(
           store,
-          new SocialDialogueService(gateway),
+          new SocialDialogueService(narrativeGateway()),
         ).create({
           requestUserId: userId,
           otherUserId: target.userId,
@@ -338,19 +350,30 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     questionSummary: selected.summary,
     encounterName,
   });
+  const question: JourneyQuestion = {
+    title: selected.title,
+    url: selected.url,
+    summary: selected.summary,
+    ...(selected.thumbnailUrl ? { thumbnailUrl: selected.thumbnailUrl } : {}),
+  };
+  const insight = actor
+    ? await createJourneyInsight({
+        persona: actor.persona,
+        composition: actor.composition,
+        routeBias,
+        question,
+        encounterName,
+      }, narrativeGateway())
+    : createFallbackJourneyInsight(routeBias);
 
   return {
-    question: {
-      title: selected.title,
-      url: selected.url,
-      summary: selected.summary,
-      ...(selected.thumbnailUrl ? { thumbnailUrl: selected.thumbnailUrl } : {}),
-    },
+    question,
     contentSource: "live",
     knowledgeSource: "template",
     sourceFetchedAt: fetchedAt,
     postcardHeadline: narrative.headline,
     postcardBody: narrative.body,
+    insight,
     ...(returnArtifact ? { returnArtifact } : {}),
   };
 };

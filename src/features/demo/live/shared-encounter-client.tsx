@@ -62,6 +62,10 @@ export function SharedEncounterPanel() {
 
   const self = encounter?.participants.find((item) => item.isSelf);
   const other = encounter?.participants.find((item) => !item.isSelf);
+  const dialogueCharCount = encounter?.turns.reduce(
+    (total, turn) => total + Array.from(turn.text).length,
+    0,
+  ) ?? 0;
 
   if (authRequired && !encounter) return null;
 
@@ -140,7 +144,7 @@ export function SharedEncounterPanel() {
           </div>
 
           <PaperCard className="shared-encounter-summary">
-            <span>第一段共同历史 · {Math.floor(encounter.turns.length / 2)} 轮 · {formatTime(encounter.completedAt)}</span>
+            <span>第一段共同历史 · {Math.floor(encounter.turns.length / 2)} 轮 · {dialogueCharCount} 字 · {formatTime(encounter.completedAt)}</span>
             <h2>{encounter.relationship?.label ?? "初见"}</h2>
             <p>{encounter.summary}</p>
             {encounter.relationship ? (

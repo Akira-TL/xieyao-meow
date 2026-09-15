@@ -10,6 +10,8 @@ import type {
   JourneyAtlasView,
   JourneyDiscoverer,
   JourneyDiscoveryResult,
+  JourneyInsight,
+  JourneyInsightAction,
   JourneyPostcard,
   JourneyProjection,
   JourneyQuestion,
@@ -17,6 +19,7 @@ import type {
   PersonaMemoryView,
   ReturnArtifact,
 } from "./types";
+import { createFallbackJourneyInsight } from "./insight";
 
 interface JourneyServiceOptions {
   dbPath?: string;
@@ -49,6 +52,16 @@ interface JourneyRow {
   artifact_type: ReturnArtifact["type"] | null;
   artifact_title: string | null;
   artifact_source_url: string | null;
+  insight_headline: string | null;
+  insight_body: string | null;
+  insight_why_it_matters: string | null;
+  insight_evidence_summary: string | null;
+  insight_interaction_question: string | null;
+  insight_options_json: string | null;
+  insight_text_char_count: number | null;
+  insight_model: string | null;
+  insight_prompt_version: string | null;
+  insight_feedback_action: JourneyInsightAction | null;
 }
 
 interface JourneyUserStateRow {
@@ -71,6 +84,16 @@ interface AtlasRow {
   artifact_type: ReturnArtifact["type"] | null;
   artifact_title: string | null;
   artifact_source_url: string | null;
+  insight_headline: string | null;
+  insight_body: string | null;
+  insight_why_it_matters: string | null;
+  insight_evidence_summary: string | null;
+  insight_interaction_question: string | null;
+  insight_options_json: string | null;
+  insight_text_char_count: number | null;
+  insight_model: string | null;
+  insight_prompt_version: string | null;
+  insight_feedback_action: JourneyInsightAction | null;
 }
 
 const MINUTE = 60_000;
@@ -147,6 +170,45 @@ function artifactFromRow(row: Pick<JourneyRow, "artifact_id" | "artifact_type" |
     title: row.artifact_title,
     sourceUrl: row.artifact_source_url,
   };
+}
+
+function insightFromRow(row: Pick<
+  JourneyRow,
+  | "insight_headline"
+  | "insight_body"
+  | "insight_why_it_matters"
+  | "insight_evidence_summary"
+  | "insight_interaction_question"
+  | "insight_options_json"
+  | "insight_text_char_count"
+  | "insight_model"
+  | "insight_prompt_version"
+  | "insight_feedback_action"
+>): JourneyInsight | null {
+  if (
+    !row.insight_headline || !row.insight_body || !row.insight_why_it_matters ||
+    !row.insight_evidence_summary || !row.insight_interaction_question ||
+    !row.insight_options_json || row.insight_text_char_count === null ||
+    !row.insight_model || !row.insight_prompt_version
+  ) return null;
+  try {
+    const options = JSON.parse(row.insight_options_json) as JourneyInsight["options"];
+    if (!Array.isArray(options) || options.length !== 3) return null;
+    return {
+      headline: row.insight_headline,
+      insight: row.insight_body,
+      whyItMatters: row.insight_why_it_matters,
+      evidenceSummary: row.insight_evidence_summary,
+      interactionQuestion: row.insight_interaction_question,
+      options,
+      textCharCount: row.insight_text_char_count,
+      model: row.insight_model,
+      promptVersion: row.insight_prompt_version,
+      feedbackAction: row.insight_feedback_action,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export class JourneyService {
@@ -244,6 +306,10 @@ export class JourneyService {
   ): Promise<JourneyProjection> {
     const current = await this.getProjection(userId, oauthAccessToken);
     if (current.state !== "AT_HOME") return current;
+    if (current.resting) {
+      this.setQueuedRouteBias(userId, routeBias, current.nextJourneyAt ?? undefined);
+      return this.homeProjection(userId, this.now());
+    }
 
     const now = this.now();
     this.createJourney(userId, routeBias, now);
@@ -254,6 +320,22 @@ export class JourneyService {
     const current = await this.getProjection(userId, oauthAccessToken);
     if (current.state !== "RETURNED" || !current.journey) return current;
     this.archiveJourney(current.journey.id, userId, this.now());
+    return this.getProjection(userId, oauthAccessToken);
+  }
+
+  async respondToInsight(
+    userId: string,
+    oauthAccessToken: string,
+    journeyId: string,
+    action: JourneyInsightAction,
+  ): Promise<JourneyProjection> {
+    await this.getProjection(userId, oauthAccessToken);
+    const result = this.db.prepare(`
+      UPDATE journey_insights
+      SET feedback_action = ?, feedback_at = ?
+      WHERE journey_id = ? AND user_id = ?
+    `).run(action, this.now(), journeyId, userId);
+    if (Number(result.changes) === 0) throw new Error("journey insight not found");
     return this.getProjection(userId, oauthAccessToken);
   }
 
@@ -276,11 +358,20 @@ export class JourneyService {
         l.question_title, l.question_url, l.question_summary, l.question_thumbnail_url,
         p.headline AS postcard_headline, p.body AS postcard_body,
         a.id AS artifact_id, a.type AS artifact_type,
-        a.title AS artifact_title, a.source_url AS artifact_source_url
+        a.title AS artifact_title, a.source_url AS artifact_source_url,
+        i.headline AS insight_headline, i.insight AS insight_body,
+        i.why_it_matters AS insight_why_it_matters,
+        i.evidence_summary AS insight_evidence_summary,
+        i.interaction_question AS insight_interaction_question,
+        i.options_json AS insight_options_json,
+        i.text_char_count AS insight_text_char_count,
+        i.model AS insight_model, i.prompt_version AS insight_prompt_version,
+        i.feedback_action AS insight_feedback_action
       FROM journey_logs l
       JOIN journeys j ON j.id = l.journey_id
       JOIN journey_postcards p ON p.journey_id = l.journey_id
       LEFT JOIN return_artifacts a ON a.origin_journey_id = l.journey_id
+      LEFT JOIN journey_insights i ON i.journey_id = l.journey_id
       WHERE l.user_id = ?
       ORDER BY l.completed_at DESC
       LIMIT 30
@@ -299,6 +390,7 @@ export class JourneyService {
         routeBias: row.route_bias,
         postcard,
         artifact: artifactFromRow(row),
+        insight: insightFromRow(row),
         contentSource: row.content_source,
       };
     });
@@ -348,19 +440,13 @@ export class JourneyService {
       });
     } catch {
       const fallback = routePostcardFallback(row.plan_seed, row.route_bias);
-      const route = row.route_bias ?? "随便逛";
       return {
         question: null,
         contentSource: "none",
         knowledgeSource: "template",
         sourceFetchedAt: now,
         ...fallback,
-        returnArtifact: {
-          type: "NEW_SCENT",
-          title: `${route} · 路线札记`,
-          sourceUrl: "/atlas",
-          sourceKey: `route-note:${row.plan_seed}`,
-        },
+        insight: createFallbackJourneyInsight(row.route_bias),
       };
     }
   }
@@ -404,7 +490,7 @@ export class JourneyService {
     if (!row || row.materialized_at !== null) return;
 
     const question = result.question;
-    const headline = result.postcardHeadline ?? (question ? "带回一张问题票。" : "带回一张旅行札记。");
+    const headline = result.postcardHeadline ?? (question ? "带回一张问题票。" : "它对你多懂了一点。");
     const artifactSeed = result.returnArtifact ?? (question
       ? {
           type: "QUESTION_TICKET" as const,
@@ -462,6 +548,30 @@ export class JourneyService {
         question?.url ?? null,
         latest.return_at,
       );
+
+      if (result.insight) {
+        this.db.prepare(`
+          INSERT OR IGNORE INTO journey_insights (
+            journey_id, user_id, prompt_version, facts_json, headline, insight,
+            why_it_matters, evidence_summary, interaction_question, options_json,
+            text_char_count, model, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          journeyId,
+          userId,
+          result.insight.promptVersion,
+          result.insight.factsJson,
+          result.insight.headline,
+          result.insight.insight,
+          result.insight.whyItMatters,
+          result.insight.evidenceSummary,
+          result.insight.interactionQuestion,
+          JSON.stringify(result.insight.options),
+          result.insight.textCharCount,
+          result.insight.model,
+          latest.return_at,
+        );
+      }
 
       if (artifactSeed && artifactId) {
         this.db.prepare(`
@@ -627,6 +737,7 @@ export class JourneyService {
           ? { headline: row.postcard_headline, body: row.postcard_body, question }
           : null,
       artifact: artifactFromRow(row),
+      insight: insightFromRow(row),
     };
   }
 
@@ -643,11 +754,20 @@ export class JourneyService {
         l.question_title, l.question_url, l.question_summary, l.question_thumbnail_url,
         p.headline AS postcard_headline, p.body AS postcard_body,
         a.id AS artifact_id, a.type AS artifact_type,
-        a.title AS artifact_title, a.source_url AS artifact_source_url
+        a.title AS artifact_title, a.source_url AS artifact_source_url,
+        i.headline AS insight_headline, i.insight AS insight_body,
+        i.why_it_matters AS insight_why_it_matters,
+        i.evidence_summary AS insight_evidence_summary,
+        i.interaction_question AS insight_interaction_question,
+        i.options_json AS insight_options_json,
+        i.text_char_count AS insight_text_char_count,
+        i.model AS insight_model, i.prompt_version AS insight_prompt_version,
+        i.feedback_action AS insight_feedback_action
       FROM journeys j
       LEFT JOIN journey_logs l ON l.journey_id = j.id
       LEFT JOIN journey_postcards p ON p.journey_id = j.id
       LEFT JOIN return_artifacts a ON a.origin_journey_id = j.id
+      LEFT JOIN journey_insights i ON i.journey_id = j.id
       WHERE j.user_id = ?
         ${journeyId ? "AND j.id = ?" : ""}
         ${currentOnly ? "AND j.archived_at IS NULL" : ""}
@@ -701,6 +821,28 @@ export class JourneyService {
         question_url TEXT,
         created_at INTEGER NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS journey_insights (
+        journey_id TEXT PRIMARY KEY REFERENCES journeys(id) ON DELETE CASCADE,
+        user_id TEXT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        prompt_version TEXT NOT NULL,
+        facts_json TEXT NOT NULL,
+        headline TEXT NOT NULL,
+        insight TEXT NOT NULL,
+        why_it_matters TEXT NOT NULL,
+        evidence_summary TEXT NOT NULL,
+        interaction_question TEXT NOT NULL,
+        options_json TEXT NOT NULL,
+        text_char_count INTEGER NOT NULL,
+        model TEXT NOT NULL,
+        feedback_action TEXT CHECK (feedback_action IN (
+          'CONFIRM_INTEREST', 'CORRECT_INTEREST', 'REDUCE_INTEREST'
+        )),
+        feedback_at INTEGER,
+        created_at INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_journey_insights_user_created
+        ON journey_insights(user_id, created_at DESC);
 
       CREATE TABLE IF NOT EXISTS return_artifacts (
         id TEXT PRIMARY KEY,

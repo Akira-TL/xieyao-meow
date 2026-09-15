@@ -6,7 +6,7 @@ import {
   type SocialAgent,
   type SocialDialogueGateway,
 } from "@/lib/social";
-import type { ZhidaRequest } from "@/lib/zhihu";
+import type { NarrativeGenerationRequest } from "@/lib/narrative/deepseek";
 
 const self: SocialAgent = {
   id: "self",
@@ -69,16 +69,16 @@ const memory: PersonaExperienceMemory = {
 };
 
 class FakeGateway implements SocialDialogueGateway {
-  requests: ZhidaRequest[] = [];
+  requests: NarrativeGenerationRequest[] = [];
   private index = 0;
 
   constructor(private readonly payloads: string[]) {}
 
-  async askZhida(input: ZhidaRequest) {
+  async generateJson(input: NarrativeGenerationRequest) {
     this.requests.push(input);
     const content = this.payloads[Math.min(this.index, this.payloads.length - 1)] ?? "not-json";
     this.index += 1;
-    return { model: input.model, content, finishReason: "stop" };
+    return { model: "deepseek-flash" as const, content };
   }
 }
 
@@ -102,7 +102,7 @@ describe("SocialDialogueService", () => {
 
     const result = await service.nextRound({ actor: self, target: other, topic, history: [], memory });
 
-    expect(result.mode).toBe("zhida");
+    expect(result.mode).toBe("deepseek");
     expect(result.turns).toEqual([
       { speaker: "self", text: "先把决定权分层，不然所有自主性都混在一起了。" },
       { speaker: "other", text: "分层可以，但用户真的会去看你那四层开关吗？" },
@@ -110,10 +110,12 @@ describe("SocialDialogueService", () => {
     expect(result.shouldStop).toBe(false);
     expect(result.roundNumber).toBe(1);
     expect(gateway.requests).toHaveLength(2);
-    expect(gateway.requests[0]?.messages[0]?.content).toContain("最近更愿意先听完反方再拆结构");
-    expect(gateway.requests[0]?.messages[0]?.content).toContain("中文表达约束（Humanizer-zh）");
-    expect(gateway.requests[1]?.messages[0]?.content).toContain("先把决定权分层");
-    expect(gateway.requests[1]?.messages[0]?.content).toContain("JSON 结构必须原样遵守");
+    expect(gateway.requests[0]?.prompt).toContain("最近更愿意先听完反方再拆结构");
+    expect(gateway.requests[0]?.prompt).toContain("中文表达约束（Humanizer-zh）");
+    expect(gateway.requests[1]?.prompt).toContain("先把决定权分层");
+    expect(gateway.requests[1]?.prompt).toContain("JSON 结构必须原样遵守");
+    expect(gateway.requests[0]?.maxTokens).toBe(180);
+    expect(gateway.requests[1]?.maxTokens).toBe(220);
   });
 
   it("allows a natural stop from round two and forces a stop at round four", async () => {
@@ -148,7 +150,7 @@ describe("SocialDialogueService", () => {
     expect(fourth.shouldStop).toBe(true);
   });
 
-  it("falls back to persona-aware dialogue when Zhida is unavailable", async () => {
+  it("falls back to persona-aware dialogue when DeepSeek is unavailable", async () => {
     const service = new SocialDialogueService(new FakeGateway(["not-json"]));
 
     const result = await service.nextRound({ actor: self, target: other, topic, history: [], memory });
