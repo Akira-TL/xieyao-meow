@@ -480,6 +480,27 @@ export function LiveAtlasSection() {
   const interests = composition?.interests.slice(0, 4).map((item) => item.name) ?? fallback.interests;
   const counts = composition?.sourceCounts;
   const production = process.env.NODE_ENV === "production";
+  const [journeyAtlas, setJourneyAtlas] = useState<JourneyAtlasView | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/atlas", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`atlas HTTP ${response.status}`);
+        return (await response.json()) as JourneyAtlasView;
+      })
+      .then((next) => {
+        if (!cancelled) setJourneyAtlas(next);
+      })
+      .catch(() => {
+        if (!cancelled) setJourneyAtlas({ journeys: [], memories: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const recentJourneys = journeyAtlas?.journeys.slice(0, 4) ?? [];
 
   const observations = composition
     ? [
@@ -534,6 +555,19 @@ export function LiveAtlasSection() {
         </details>
         <Link href="/encounter"><b>关系图鉴</b><span>{production ? "真实相遇发生后，会在这里留下关系" : `${DEMO_FIXTURE.atlas.relationships.length} 个关系 · 去看看它遇见了谁`}</span></Link>
         <details>
+          <summary><b>旅行册</b><span>{journeyAtlas === null ? "正在翻页…" : recentJourneys.length ? `${recentJourneys.length} 趟真实旅途` : "还没有完成的旅途"}</span></summary>
+          <div className="atlas-mobile-journeys">
+            {recentJourneys.length ? recentJourneys.map((entry, index) => (
+              <article key={entry.journeyId}>
+                <b>{String(index + 1).padStart(2, "0")} · {entry.postcard.headline}</b>
+                <span>{formatJourneyDate(entry.completedAt)} · 纸条「{entry.routeBias ?? "随便逛"}」</span>
+                <p>{compact(entry.postcard.body, 92)}</p>
+                {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">看知乎原问题 →</a> : <em>这趟没有留下问题票根</em>}
+              </article>
+            )) : <p className="atlas-mobile-trace">等它第一次真正回家，这里会出现第一张旅行页。</p>}
+          </div>
+        </details>
+        <details>
           <summary><b>人格轨迹</b><span>{primaryInterest} → {title}</span></summary>
           <p className="atlas-mobile-trace">知乎成分「{primaryInterest}」正在把它推向「{title}」。人格会随之后的旅途继续变化。</p>
         </details>
@@ -563,6 +597,27 @@ export function LiveAtlasSection() {
           ) : null}
         </PaperCard>
       </div>
+
+      <PaperCard className="atlas-journey-book">
+        <div className="section-heading-row"><h2>旅行册</h2><span>REAL JOURNEY LOG</span></div>
+        {recentJourneys.length ? (
+          <div className="atlas-journey-list">
+            {recentJourneys.map((entry, index) => (
+              <article key={entry.journeyId}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <strong>{entry.postcard.headline}</strong>
+                  <small>{formatJourneyDate(entry.completedAt)} · 纸条「{entry.routeBias ?? "随便逛"}」</small>
+                  <p>{compact(entry.postcard.body, 128)}</p>
+                  {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">查看知乎原问题 →</a> : <em>这趟没有留下问题票根</em>}
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="atlas-real-relationship-empty"><strong>旅行册还没写下第一页。</strong><p>等它真正完成一次旅途，这里会保留那次出门，而不是用假票根填满。</p></div>
+        )}
+      </PaperCard>
 
       <div className="atlas-grid atlas-grid-bottom">
         <PaperCard>

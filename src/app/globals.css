@@ -2182,6 +2182,14 @@ a { color: inherit; text-decoration: none; }
 .atlas-collection-strip b { display: block; color: #176fd2; font-size: 22px; }
 .atlas-collection-strip small { display: block; margin-top: 2px; color: #6a655e; font-size: 8px; }
 .atlas-grid .art-slot--wide { margin-top: 14px; }
+.atlas-journey-book { margin-top: 18px; }
+.atlas-journey-list { margin-top: 12px; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.atlas-journey-list article { display: grid; grid-template-columns: 34px minmax(0,1fr); gap: 10px; border: 1px solid rgba(0,0,0,.12); background: rgba(255,255,255,.22); padding: 12px; }
+.atlas-journey-list article > span { color: #176fd2; font-size: 18px; font-weight: 900; }
+.atlas-journey-list strong { display: block; font-size: 14px; line-height: 1.35; }
+.atlas-journey-list small { display: block; margin-top: 4px; color: #756f66; font-size: 9px; }
+.atlas-journey-list p { margin: 7px 0 0; color: #5f5a54; font-size: 10px; line-height: 1.55; }
+.atlas-journey-list a, .atlas-journey-list em { display: inline-block; margin-top: 7px; color: #176fd2; font-size: 9px; font-style: normal; font-weight: 800; }
 .atlas-relationship-polaroids { margin-top: 14px; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
 .atlas-relationship-polaroids .art-slot { width: 100%; }
 .atlas-relationship-polaroids span { display: block; margin-top: 8px; color: #5f5a54; font-size: 10px; text-align: center; }
@@ -2223,6 +2231,13 @@ a { color: inherit; text-decoration: none; }
   .atlas-mobile-stats span { color: #818790; font-size: 8px; text-align: center; }
   .atlas-mobile-stats b { display: block; color: #69a9ff; font-size: 18px; }
   .atlas-mobile-trace { border-top: 1px solid rgba(255,255,255,.08); padding: 10px 12px; }
+  .atlas-mobile-journeys { display:grid; gap:7px; border-top:1px solid rgba(255,255,255,.08); padding:8px 10px 10px; }
+  .atlas-mobile-journeys article { border:1px solid rgba(255,255,255,.08); padding:9px; }
+  .atlas-mobile-journeys article b { display:block; color:#f2f3f5; font-size:11px; }
+  .atlas-mobile-journeys article span { display:block; margin-top:3px; color:#818790; font-size:8px; }
+  .atlas-mobile-journeys article p { margin:6px 0 0; color:#a4a9b0; font-size:9px; line-height:1.5; }
+  .atlas-mobile-journeys article a, .atlas-mobile-journeys article em { display:inline-block; margin-top:6px; color:#69a9ff; font-size:8px; font-style:normal; }
+  .atlas-journey-book { display:none; }
   .atlas-grid, .atlas-grid-bottom { display: none; }
 }
 
