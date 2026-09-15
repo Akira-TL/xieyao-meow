@@ -1169,9 +1169,20 @@ body {
 @media (max-width: 760px) {
   :root { --target-header-h: 72px; }
 
+  html,
+  body { scrollbar-width:none; }
+  body::-webkit-scrollbar { width:0; height:0; display:none; }
+
   .theatre-page,
-  .theatre-page--activation { padding: 0 0 calc(62px + env(safe-area-inset-bottom)); }
-  .theatre-page--activation { padding-bottom: 0; }
+  .theatre-page--activation { padding:0; }
+  .theatre-page:has(.app-bottom-nav) { padding-bottom:calc(62px + env(safe-area-inset-bottom)); }
+  .theatre-page:has(.app-bottom-nav) > .relative { min-height:calc(100dvh - 62px); }
+  .theatre-page:has(.journey-detail-stage),
+  .theatre-page:has(.relationship-detail-stage),
+  .theatre-page:has(.atlas-stage) { padding-bottom:0; }
+  .theatre-page:has(.journey-detail-stage) > .relative,
+  .theatre-page:has(.relationship-detail-stage) > .relative,
+  .theatre-page:has(.atlas-stage) > .relative { min-height:100dvh; }
   .theatre-page > .relative,
   .theatre-page--activation > .relative { padding-inline:0; }
 
@@ -1206,9 +1217,6 @@ body {
   }
   .app-bottom-nav a { font-size:8px; }
   .app-bottom-icon { font-size:20px; }
-  .theatre-page:has(.journey-detail-stage),
-  .theatre-page:has(.relationship-detail-stage),
-  .theatre-page:has(.atlas-stage) { padding-bottom:0; }
   .theatre-page:has(.journey-detail-stage) .app-bottom-nav,
   .theatre-page:has(.relationship-detail-stage) .app-bottom-nav,
   .theatre-page:has(.atlas-stage) .app-bottom-nav { display:none; }
@@ -1341,6 +1349,7 @@ body {
   .reveal-action .theatre-button { min-height:54px; font-size:16px; }
 
   /* home */
+  .app-stage-shell { min-height:calc(100dvh - 134px); }
   .home-at-home {
     min-height:calc(100dvh - 134px);
     grid-template-columns:1fr;
@@ -1368,6 +1377,8 @@ body {
   .home-context-strip--stats small { font-size:7px; }
   .home-context-strip--stats b { font-size:15px; }
   .home-context-strip--stats em { display:none; }
+  .outing-empty-stage { min-height:calc(100dvh - 134px); }
+  .outing-note-card { width:calc(100% - 28px); max-width:347px; margin-inline:auto; }
 
   /* explore */
   .explore-stage,
@@ -1381,17 +1392,19 @@ body {
   }
   .explore-hero-copy h1 { max-width:7.5ch; font-size:48px; line-height:.82; }
   .explore-hero-copy > p:not(.stage-caption) { font-size:10px; line-height:1.5; }
-  .explore-stage--app .journey-gate-scene { min-height:230px; }
+  .explore-hero-art { padding-bottom:0; }
+  .explore-stage--app .journey-gate-scene { min-height:164px; max-height:164px; }
+  .explore-stage--app .explore-persona-art { width:150px; min-height:150px; bottom:-4%; }
   .explore-stage--app .explore-cards,
   .explore-stage--public .explore-cards { grid-template-columns:1fr; gap:6px; }
   .explore-stage--app .explore-card.is-featured,
-  .explore-stage--public .explore-card.is-featured { padding:10px; }
+  .explore-stage--public .explore-card.is-featured { max-height:205px; overflow:hidden; padding:10px; }
   .explore-stage--app .explore-card.is-featured h2,
   .explore-stage--public .explore-card.is-featured h2 { margin-top:5px; font-size:17px; line-height:1.12; }
   .explore-stage--app .explore-card.is-featured > p,
-  .explore-stage--public .explore-card.is-featured > p { margin-top:5px; font-size:8px; line-height:1.35; }
+  .explore-stage--public .explore-card.is-featured > p { display:-webkit-box; margin-top:5px; overflow:hidden; font-size:8px; line-height:1.35; -webkit-box-orient:vertical; -webkit-line-clamp:1; }
   .explore-stage--app .explore-card.is-featured .art-slot,
-  .explore-stage--public .explore-card.is-featured .art-slot { min-height:92px; max-height:92px; margin-top:6px; }
+  .explore-stage--public .explore-card.is-featured .art-slot { min-height:64px; max-height:64px; margin-top:6px; }
   .explore-stage--app .explore-card.is-featured .explore-why,
   .explore-stage--public .explore-card.is-featured .explore-why { margin-top:5px; font-size:7px; line-height:1.35; }
   .explore-stage--app .explore-card.is-featured .explore-card-link,
@@ -1455,15 +1468,17 @@ body {
   .journey-collect { grid-area:collect; width:100%; min-height:50px; }
 
   /* encounter */
-  .shared-encounter-stage { min-height:calc(100dvh - 134px); padding:12px 14px 16px; }
+  .encounter-hub-stage { min-height:calc(100dvh - 134px); height:calc(100dvh - 134px); padding:0; overflow:hidden; }
+  .shared-encounter-stage { min-height:0; height:100%; padding:12px 14px 10px; }
   .encounter-side-rail { display:none; }
   .encounter-audience-silhouette { right:2%; top:154px; width:124px; min-height:125px; opacity:.16; }
   .shared-encounter-hero { text-align:left; margin-bottom:10px; }
   .shared-encounter-hero h1 { max-width:none; margin:5px 0 0; font-size:47px; line-height:.82; }
   .shared-encounter-hero > p { max-width:32ch; margin:8px 0 0; font-size:10px; line-height:1.5; }
-  .shared-encounter-empty { width:100%; margin-top:10px; padding:16px; text-align:left; transform:none; }
-  .shared-encounter-empty h2 { font-size:24px; }
-  .shared-encounter-empty .theatre-button { width:100%; }
+  .shared-encounter-empty { width:100%; margin-top:8px; padding:14px 16px; text-align:left; transform:none; }
+  .shared-encounter-empty h2 { font-size:23px; }
+  .shared-encounter-empty p { display:-webkit-box; margin-top:8px; overflow:hidden; font-size:10px; line-height:1.45; -webkit-box-orient:vertical; -webkit-line-clamp:3; }
+  .shared-encounter-empty .theatre-button { width:100%; min-height:48px; margin-top:12px; }
   .shared-encounter-cast { grid-template-columns:1fr 34px 1fr; gap:4px; }
   .shared-encounter-persona { min-height:155px; }
   .shared-encounter-match-mark { font-size:24px; }
@@ -1562,16 +1577,23 @@ body {
   /* atlas */
   .atlas-stage {
     min-height:auto;
-    grid-template-columns:1fr;
+    grid-template-columns:minmax(0,1fr);
     grid-template-areas:"hero" "persona" "mobile";
     gap:9px;
     padding:12px 14px 16px;
   }
+  .atlas-stage > *,
+  .atlas-hero-copy,
+  .atlas-persona-card,
+  .atlas-mobile-index,
+  .atlas-mobile-detail,
+  .atlas-mobile-stats,
+  .atlas-mobile-journeys { min-width:0; width:100%; max-width:100%; }
   .atlas-hero-copy { text-align:left; }
-  .atlas-hero-copy h1 { max-width:none; margin:5px 0 0; font-size:46px; line-height:.82; }
-  .atlas-target-title-second { width:8.5ch; white-space:normal !important; }
+  .atlas-hero-copy h1 { width:100%; max-width:100%; margin:5px 0 0; font-size:42px; line-height:.84; overflow-wrap:anywhere; }
+  .atlas-target-title-second { width:auto; max-width:100%; white-space:normal !important; }
   .atlas-hero-copy > p:not(.stage-caption) { margin:7px 0 0; font-size:10px; line-height:1.5; }
-  .atlas-persona-card { min-height:0; margin:0; padding:12px; }
+  .atlas-persona-card { min-height:0; margin:0; padding:11px; overflow:hidden; }
   .atlas-persona-card > .art-slot, .atlas-current-persona-art { max-width:105px; min-height:120px; }
   .atlas-persona-card h2 { font-size:28px; }
   .atlas-persona-card h3 { font-size:13px; }
