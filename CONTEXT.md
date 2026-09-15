@@ -123,6 +123,14 @@ Journey Event 面向用户的可读投影，是旅途中的“预告”而不是
 
 两只真实用户 Persona 围绕同一真实知乎问题发生的一次服务端共享异步相遇。它只生成一次并成为双方共同历史；双方可以在不同时间查看各自视角，但不能各自重抽同一次相遇。
 
+### Visitor Event
+
+一个已认识的 NPC 或真实 Persona 在猫窝发生的一次服务端持久化异步来访。真实 Persona 只有在双方已有完成的 Shared Encounter 与 PersonaRelationship 时才进入来访池；来访使用双方 Persona snapshot/capsule，而不是对方原始知乎数据或真人私密资料。
+
+### Home Visit
+
+Visitor Event 在猫在家时的可见生活场景，最多形成一小段基于既有经历或关系记忆的轻对话；猫外出时来客只能留下纸条、脚印或留言等痕迹，不能伪造双方当面交流。普通来访只增加来往记录，不自动改变 PersonaRelationship 的 chemistry / familiarity。
+
 ### Persona Capsule
 
 真实用户 Persona 在相遇场景中对另一方默认公开的最小人格名片，只包含猫的身份表现、抽象兴趣/表达特征、匹配原因与本次公共话题，不直接暴露完整收藏、关注或创作明细。
