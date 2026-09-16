@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { LandingActions } from "@/features/demo/client";
 import {
   DemoPage,
@@ -6,6 +8,8 @@ import {
   PublicHeader,
 } from "@/features/demo/components";
 import { LiveLandingSignal } from "@/features/demo/live/daily-live-client";
+import { getRequestOAuthIdentity } from "@/lib/auth/request-session";
+import { getSharedEncounterStore } from "@/lib/social/runtime";
 
 function LandingVisual() {
   return (
@@ -21,7 +25,14 @@ function LandingVisual() {
   );
 }
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  if (process.env.NODE_ENV === "production") {
+    const identity = await getRequestOAuthIdentity();
+    if (identity && getSharedEncounterStore().getPersonaSnapshot(identity.userId)) {
+      redirect("/home");
+    }
+  }
+
   return (
     <DemoPage scene="landing" sceneOverlay={<LandingVisual />}>
       <PublicHeader right={<span className="public-kicker">知乎 × 谢邀喵 · AI 数字人格</span>} />

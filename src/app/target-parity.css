@@ -1356,11 +1356,9 @@ body {
   .theatre-page:has(.app-bottom-nav) { padding-bottom:calc(62px + env(safe-area-inset-bottom)); }
   .theatre-page:has(.app-bottom-nav) > .relative { min-height:calc(100dvh - 62px); }
   .theatre-page:has(.journey-detail-stage),
-  .theatre-page:has(.relationship-detail-stage),
-  .theatre-page:has(.atlas-stage) { padding-bottom:0; }
+  .theatre-page:has(.relationship-detail-stage) { padding-bottom:0; }
   .theatre-page:has(.journey-detail-stage) > .relative,
-  .theatre-page:has(.relationship-detail-stage) > .relative,
-  .theatre-page:has(.atlas-stage) > .relative { min-height:100dvh; }
+  .theatre-page:has(.relationship-detail-stage) > .relative { min-height:100dvh; }
   .theatre-page > .relative,
   .theatre-page--activation > .relative { padding-inline:0; }
 
@@ -1396,8 +1394,7 @@ body {
   .app-bottom-nav a { font-size:8px; }
   .app-bottom-icon { font-size:20px; }
   .theatre-page:has(.journey-detail-stage) .app-bottom-nav,
-  .theatre-page:has(.relationship-detail-stage) .app-bottom-nav,
-  .theatre-page:has(.atlas-stage) .app-bottom-nav { display:none; }
+  .theatre-page:has(.relationship-detail-stage) .app-bottom-nav { display:none; }
 
   .stage-caption { font-size:7px; letter-spacing:.24em; }
   .paper-card { box-shadow:0 8px 22px rgba(0,0,0,.28); }
@@ -1483,15 +1480,26 @@ body {
 
   /* scanning */
   .scanning-layout { width:100vw; height:calc(100dvh - 72px); top:72px; transform:translateX(-50%); }
-  .scanning-hero { top:4%; left:9%; width:82%; text-align:left; }
-  .scanning-hero .stage-caption { text-align:right; }
-  .scanning-hero h1 { max-width:7.5ch; margin-top:6px; font-size:46px; line-height:.82; }
-  .scanning-stage-egg-anchor { left:50%; top:54px; bottom:auto; width:68%; }
-  .scanning-stage-cast .kanshan-art--casting { left:4%; bottom:14%; width:34%; }
-  .scanning-guide-persona { min-height:190px; }
+  .scanning-hero { top:3.5%; left:7%; width:86%; text-align:left; }
+  .scanning-hero .stage-caption { text-align:left; }
+  .scanning-hero h1 { max-width:9ch; margin-top:5px; font-size:42px; line-height:.82; }
+  .scanning-stage-egg-anchor { left:50%; top:22%; bottom:auto; width:58%; }
+  .scanning-stage-cast .kanshan-art--casting { left:5%; top:62%; bottom:auto; width:27%; max-width:112px; }
+  .scanning-guide-persona { min-height:0; }
   .scanning-guide-persona.kanshan-art { height:auto; min-height:0; }
-  .scanning-stage-status { bottom:34%; left:8%; font-size:10px; }
-  .scanning-cues-panel { right:14px; left:14px; bottom:3%; width:auto; }
+  .scanning-stage-status {
+    top:74%;
+    right:6%;
+    bottom:auto;
+    left:30%;
+    max-width:none;
+    padding:7px 10px;
+    font-size:9px;
+    line-height:1.35;
+    white-space:normal;
+    transform:none;
+  }
+  .scanning-cues-panel { right:14px; left:14px; bottom:2%; width:auto; }
   .scanning-cues-panel .scan-cues { gap:5px; }
   .scan-cue { min-height:58px; padding:7px 9px; opacity:1 !important; }
   .scan-cue--waiting { opacity:.68 !important; }
@@ -1576,7 +1584,7 @@ body {
   .explore-stage--app .explore-cards,
   .explore-stage--public .explore-cards { grid-template-columns:1fr; gap:6px; }
   .explore-stage--app .explore-card.is-featured,
-  .explore-stage--public .explore-card.is-featured { max-height:205px; overflow:hidden; padding:10px; }
+  .explore-stage--public .explore-card.is-featured { max-height:none; overflow:visible; padding:12px; }
   .explore-stage--app .explore-card.is-featured h2,
   .explore-stage--public .explore-card.is-featured h2 { margin-top:5px; font-size:17px; line-height:1.12; }
   .explore-stage--app .explore-card.is-featured > p,
@@ -1585,13 +1593,11 @@ body {
   .explore-stage--public .explore-card.is-featured .art-slot { min-height:64px; max-height:64px; margin-top:6px; }
   .explore-stage--app .explore-card.is-featured .explore-why,
   .explore-stage--public .explore-card.is-featured .explore-why { margin-top:5px; font-size:7px; line-height:1.35; }
-  .explore-stage--app .explore-card.is-featured .explore-card-link,
-  .explore-stage--public .explore-card.is-featured .explore-card-link { margin-top:5px; font-size:8px; }
   .explore-stage--app .explore-card:not(.is-featured),
   .explore-stage--public .explore-card:not(.is-featured) {
     display:grid;
     grid-template-columns:32px 1fr auto;
-    grid-template-areas:"number title link";
+    grid-template-areas:"number title arrow";
     gap:8px;
     align-items:center;
     padding:10px;
@@ -1605,7 +1611,9 @@ body {
   .explore-stage--public .explore-card:not(.is-featured) .art-slot,
   .explore-stage--public .explore-card:not(.is-featured) .explore-why { display:none; }
   .explore-stage--app .explore-card:not(.is-featured) h2,
-  .explore-stage--public .explore-card:not(.is-featured) h2 { margin:0; font-size:13px; }
+  .explore-stage--public .explore-card:not(.is-featured) h2 { grid-area:title; margin:0; font-size:13px; }
+  .explore-stage--app .explore-card:not(.is-featured)::after,
+  .explore-stage--public .explore-card:not(.is-featured)::after { grid-area:arrow; content:"›"; color:#176fd2; font-size:22px; line-height:1; }
   .explore-stage--public .explore-hero-art { width:100%; }
   .public-explore-action { width:100%; }
 

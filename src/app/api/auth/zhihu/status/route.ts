@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getRequestOAuthIdentity } from "@/lib/auth/request-session";
+import { getSharedEncounterStore } from "@/lib/social/runtime";
 import { getZhihuRuntimeStatus } from "@/lib/zhihu/env";
 
 export const dynamic = "force-dynamic";
@@ -8,12 +9,16 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const runtime = getZhihuRuntimeStatus();
   const identity = await getRequestOAuthIdentity();
+  const activated = identity
+    ? Boolean(getSharedEncounterStore().getPersonaSnapshot(identity.userId))
+    : false;
 
   return NextResponse.json(
     {
       oauthConfigured: runtime.oauthConfigured,
       oauthPartiallyConfigured: runtime.oauthPartiallyConfigured,
       connected: Boolean(identity),
+      activated,
       developmentIdentityAvailable:
         process.env.NODE_ENV !== "production" && runtime.accessSecretConfigured,
       demoIdentityAvailable:

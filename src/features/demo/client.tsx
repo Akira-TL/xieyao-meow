@@ -24,9 +24,11 @@ function persistStage(stage: DemoActivationStage) {
 }
 
 export function LandingActions() {
+  const router = useRouter();
   const production = process.env.NODE_ENV === "production";
   const [stage, setStage] = useState<DemoActivationStage>("VISITOR");
   const [connected, setConnected] = useState<boolean | null>(production ? null : false);
+  const [activated, setActivated] = useState<boolean | null>(production ? null : false);
 
   useEffect(() => {
     if (!production) {
@@ -38,10 +40,12 @@ export function LandingActions() {
     fetch("/api/auth/zhihu/status", { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) throw new Error("auth status unavailable");
-        return (await response.json()) as { connected?: boolean };
+        return (await response.json()) as { connected?: boolean; activated?: boolean };
       })
       .then((status) => {
-        if (!cancelled) setConnected(Boolean(status.connected));
+        if (cancelled) return;
+        setConnected(Boolean(status.connected));
+        setActivated(Boolean(status.activated));
       })
       .catch(() => {
         if (!cancelled) setConnected(false);
@@ -51,11 +55,27 @@ export function LandingActions() {
     };
   }, [production]);
 
+  useEffect(() => {
+    if (production && connected && activated) {
+      router.replace("/home");
+    }
+  }, [activated, connected, production, router]);
+
   if (production) {
+    if (connected === null || (connected && activated)) {
+      return (
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button className="theatre-button theatre-button-primary" disabled type="button">
+            {connected ? "正在回到窝里…" : "正在确认你的猫…"}
+          </button>
+        </div>
+      );
+    }
+
     if (connected) {
       return (
         <div className="flex flex-col gap-3 sm:flex-row">
-          <DemoFlowButton href="/home">开幕</DemoFlowButton>
+          <DemoFlowButton href="/hatch/scanning?oauth=connected">继续孵化</DemoFlowButton>
         </div>
       );
     }
@@ -137,7 +157,7 @@ export function DemoRouteGuard({ children }: { children: ReactNode }) {
     fetch("/api/auth/zhihu/status", { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) throw new Error("auth status unavailable");
-        return (await response.json()) as { connected?: boolean };
+        return (await response.json()) as { connected?: boolean; activated?: boolean };
       })
       .then((status) => {
         if (cancelled) return;
@@ -150,8 +170,14 @@ export function DemoRouteGuard({ children }: { children: ReactNode }) {
           return;
         }
 
+        if (status.activated && pathname.startsWith("/hatch/")) {
+          persistStage(advanceActivationStage(currentStage(), "ACTIVATED"));
+          router.replace("/home");
+          return;
+        }
+
         if (consentPage) {
-          router.replace(currentStage() === "ACTIVATED" ? "/home" : "/hatch/scanning?oauth=connected");
+          router.replace("/hatch/scanning?oauth=connected");
           return;
         }
 

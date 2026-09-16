@@ -7,7 +7,7 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Image from "next/image";
 import Link from "next/link";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 
 import { resolveP0Art, type PersonaEggState } from "@/lib/art/p0";
 import { resolvePersonaArt, type PersonaArtState, type PlayerPersona } from "@/lib/persona";
@@ -456,6 +456,15 @@ export function StageCaption({ children }: { children: ReactNode }) {
   return <p className="stage-caption">{children}</p>;
 }
 
-export function PaperCard({ children, className = "", id }: { children: ReactNode; className?: string; id?: string }) {
-  return <article className={`paper-card ${className}`} id={id}>{children}</article>;
+export function PaperCard({
+  children,
+  className = "",
+  id,
+  ...props
+}: {
+  children: ReactNode;
+  className?: string;
+  id?: string;
+} & Omit<HTMLAttributes<HTMLElement>, "className" | "id">) {
+  return <article className={`paper-card ${className}`} id={id} {...props}>{children}</article>;
 }

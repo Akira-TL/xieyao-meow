@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { OAUTH_SESSION_COOKIE } from "@/lib/auth/request-session";
 import { getAccountStore } from "@/lib/auth/runtime";
 import { ANONYMOUS_PROFILE_COOKIE } from "@/lib/profile/cookies";
+import { getSharedEncounterStore } from "@/lib/social/runtime";
 import { createZhihuGatewayFromEnv } from "@/lib/zhihu/env";
 
 export const dynamic = "force-dynamic";
@@ -79,7 +80,10 @@ export async function GET(request: Request) {
       store.deleteSession(previousSessionId);
     }
 
-    const response = NextResponse.redirect(externalUrl(request, "/hatch/scanning?oauth=connected"));
+    const alreadyActivated = Boolean(getSharedEncounterStore().getPersonaSnapshot(userId));
+    const response = NextResponse.redirect(
+      externalUrl(request, alreadyActivated ? "/home" : "/hatch/scanning?oauth=connected"),
+    );
     response.cookies.set(OAUTH_SESSION_COOKIE, session.id, {
       httpOnly: true,
       sameSite: "lax",

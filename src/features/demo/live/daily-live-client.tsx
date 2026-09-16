@@ -123,7 +123,19 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
 
       <div className={`explore-cards explore-cards--${questions.length}`}>
         {questions.map((item, index) => (
-          <PaperCard className={index === 0 ? `explore-card is-featured${questions.length === 1 ? " is-single" : ""}` : "explore-card"} key={`${item.url}-${index}`}>
+          <PaperCard
+            aria-label={`打开知乎原问题：${item.title}`}
+            className={`${index === 0 ? `explore-card is-featured${questions.length === 1 ? " is-single" : ""}` : "explore-card"} is-clickable`}
+            key={`${item.url}-${index}`}
+            onClick={() => window.open(item.url, "_blank", "noopener,noreferrer")}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" && event.key !== " ") return;
+              event.preventDefault();
+              window.open(item.url, "_blank", "noopener,noreferrer");
+            }}
+            role="link"
+            tabIndex={0}
+          >
             <div className="explore-card-number">{String(index + 1).padStart(2, "0")}</div>
             <span className="explore-card-badge">{showingLivePool
               ? (index === 0 ? "现在热榜" : index === 1 ? "顺路看看" : "再逛一题")
@@ -143,9 +155,6 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
                 ? `来自当前知乎公开发现池。它会结合「${primaryInterest}」和你塞进包里的纸条，在真正出门时自己挑一题。`
                 : `${item.completedAt ? formatJourneyDate(item.completedAt) : ""} · 纸条「${item.routeBias ?? "随便逛"}」${item.artifactType === "RELATION_TICKET" ? " · 途中还遇见了另一只猫" : ""}`}
             </div>
-            <a className="explore-card-link" href={item.url} rel="noreferrer" target="_blank">
-              查看知乎原问题 <OpenInNewRoundedIcon fontSize="inherit" />
-            </a>
           </PaperCard>
         ))}
       </div>

@@ -319,11 +319,15 @@ export function BottomSheet({
 
   useEffect(() => {
     if (!open) return;
+    document.body.classList.add("sheet-open");
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      document.body.classList.remove("sheet-open");
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
   return (
