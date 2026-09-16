@@ -99,6 +99,14 @@ Waiting Game v2 的唯一基础资源，是猫窝随时间自然积累并由 Jou
 
 猫窝里管理已解锁小物与灵感叶的固定交互位置，不是商城。它不包含限时刷新、礼包、抽卡或折扣机制；永久主道具通过经历里程碑解锁，而不是用灵感叶购买。
 
+### Return Bundle
+
+一次 Journey 进入 `RETURNED` 时一次性持久化的返家物件集合。P0 由旅途照、灵感叶、问题票根、关系纸条、奇怪纪念物和里程碑解锁等 Return Item 组成；打开旅包只是查看这些已存在的事实，不是领取或重新抽取。
+
+### Return Item
+
+Return Bundle 中可独立收藏或展示的返家对象，必须保留 owner、来源 Journey / Event、provenance 与创建时间。JourneyInsight 不属于 Return Item，而是独立的理解层；同一个真实知乎问题按 URL 去重，关系事件按真实 Encounter / Visitor Event 留痕。
+
 ### Knowledge Layer
 
 围绕已经选中的真实知乎问题建立可追溯的信息基础：知乎问题/回答摘要是证据锚点，知乎直答可以在这些证据与不确定性边界内做语义整理，但不是内容是否真实存在的证明，也不代表知乎官方观点。
