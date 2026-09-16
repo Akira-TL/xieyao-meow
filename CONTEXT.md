@@ -147,6 +147,14 @@ Return Bundle 中可独立收藏或展示的返家对象，必须保留 owner、
 
 Visitor Event 在猫在家时的可见生活场景，最多形成一小段基于既有经历或关系记忆的轻对话；猫外出时来客只能留下纸条、脚印或留言等痕迹，不能伪造双方当面交流。普通来访只增加来往记录，不自动改变 PersonaRelationship 的 chemistry / familiarity。
 
+### Home Activity
+
+猫处于 `AT_HOME` 时独立于 Journey 生命周期的当前生活活动窗口。P0 canonical 状态为 `RESTING / READING / SORTING / WINDOW_WATCHING / IDLING`；服务端只持久化当前窗口及其时间/seed，不把每次发呆、看书或睡觉都写成永久历史。
+
+### 房间痕迹
+
+Journey Event、Return Bundle、Visitor Event、留言和资源等在 Home 中留下的可见世界变化。它们可以与当前 Home Activity 同时存在，用户晚查看也不会阻塞猫的生活或 Journey 推进。
+
 ### Persona Capsule
 
 真实用户 Persona 在相遇场景中对另一方默认公开的最小人格名片，只包含猫的身份表现、抽象兴趣/表达特征、匹配原因与本次公共话题，不直接暴露完整收藏、关注或创作明细。
