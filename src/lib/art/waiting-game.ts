@@ -31,6 +31,8 @@ export type WaitingGameCollectionArt =
   | "souvenir_shelf"
   | "ticket_box";
 
+export type WaitingGameReturnItemArt = "question_ticket" | "relation_note" | "oddity";
+
 const PERSONA_SLUG: Record<PersonaVisualVariant, string> = {
   "engineer-blue": "engineer",
   "analyst-black": "analyst",
@@ -67,6 +69,12 @@ export function resolveWaitingGameHomeTable(state: WaitingGameHomeTableState): s
 
 export function resolveWaitingGameCollectionArt(asset: WaitingGameCollectionArt): string {
   return `${ROOT}/collections/${asset}.png`;
+}
+
+export function resolveWaitingGameReturnItemArt(asset: WaitingGameReturnItemArt): string {
+  if (asset === "question_ticket") return `${ROOT}/return-bundle/tickets/bundle_item_question_ticket_01.png`;
+  if (asset === "relation_note") return `${ROOT}/return-bundle/relations/bundle_item_relation_note_01.png`;
+  return `${ROOT}/return-bundle/oddities/bundle_item_oddity_bookmark.png`;
 }
 
 export function resolveWaitingGameWorldSubzone(interest: InterestName | string): string {

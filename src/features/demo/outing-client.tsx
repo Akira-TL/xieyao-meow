@@ -7,6 +7,7 @@ import {
   resolveWaitingGameHomeRoom,
   resolveWaitingGameHomeTable,
   resolveWaitingGamePersonaActivity,
+  resolveWaitingGameReturnItemArt,
   type WaitingGamePersonaActivity,
 } from "@/lib/art/waiting-game";
 import type { JourneyInsightAction, JourneyProjection, JourneyView } from "@/lib/journey/types";
@@ -64,6 +65,20 @@ function HomeTableArt({ state, alt }: { state: "unopened_bag" | "open_bundle"; a
         fill
         sizes="(max-width: 760px) 78vw, 420px"
         src={resolveWaitingGameHomeTable(state)}
+      />
+    </div>
+  );
+}
+
+function ReturnItemArt({ kind, alt }: { kind: "question_ticket" | "relation_note" | "oddity"; alt: string }) {
+  return (
+    <div className="returned-item-art">
+      <Image
+        alt={alt}
+        className="returned-item-art-image"
+        fill
+        sizes="(max-width: 760px) 32vw, 180px"
+        src={resolveWaitingGameReturnItemArt(kind)}
       />
     </div>
   );
@@ -372,6 +387,13 @@ function ReturnedStage({
             ? "新认识 · ABOUT YOU"
             : "旅途札记 · POSTCARD";
   const legacyScentArtifact = journey.artifact?.type === "NEW_SCENT";
+  const returnItemArt = relationTicket
+    ? { kind: "relation_note" as const, alt: "这一趟留下的关系纸条" }
+    : question
+      ? { kind: "question_ticket" as const, alt: "这一趟带回的问题票根" }
+      : journey.artifact?.type === "ODDITY_SPECIMEN"
+        ? { kind: "oddity" as const, alt: "这一趟带回的奇怪纪念物" }
+        : null;
   const artifactTitle = legacyScentArtifact
     ? insight?.headline ?? "这一趟留下的旅行记录"
     : journey.artifact?.title ?? question?.title ?? insight?.headline ?? journey.postcard?.headline ?? "这一趟的旅行札记";
@@ -418,6 +440,7 @@ function ReturnedStage({
         <PaperCard className="returned-artifact is-opened">
           <span>{artifactLabel}</span>
           <HomeTableArt alt="旅包已经在桌上摊开" state="open_bundle" />
+          {returnItemArt ? <ReturnItemArt alt={returnItemArt.alt} kind={returnItemArt.kind} /> : null}
           <h2>{artifactTitle}</h2>
           <p>你塞的纸条：{journey.routeBias ?? "随便逛"}</p>
           {question || relationTicket ? <blockquote>“{thought}”</blockquote> : null}
