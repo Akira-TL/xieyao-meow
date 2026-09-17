@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { resolveP0Art } from "@/lib/art/p0";
+import { resolveWaitingGameWorldSubzone } from "@/lib/art/waiting-game";
 import type { JourneyAtlasView } from "@/lib/journey/types";
 
 import { DemoFlowButton } from "../client";
@@ -103,7 +104,7 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
       <div className="explore-hero-art">
         <div
           className={`journey-gate-scene${appMode ? " is-app" : " is-public"}`}
-          style={{ backgroundImage: `url(${resolveP0Art("journey-zhihu-gate")})` }}
+          style={{ backgroundImage: `url(${appMode ? resolveWaitingGameWorldSubzone(primaryInterest) : resolveP0Art("journey-zhihu-gate")})` }}
         >
           {appMode ? (
             <PersonaArt alt={`${catName}背着包走进知乎知识世界`} aspect="portrait" className="explore-persona-art" persona={playerPersona} state="walking" />
@@ -321,7 +322,7 @@ export function LiveJourneyDetail() {
         <div className="journey-art-and-topic">
           <div
             className="journey-scene-visual"
-            style={{ backgroundImage: `url(${resolveP0Art("journey-zhihu-gate")})` }}
+            style={{ backgroundImage: `url(${resolveWaitingGameWorldSubzone(primaryInterest)})` }}
           >
             <PersonaArt alt={`${catName}穿过知乎知识世界`} className="journey-persona-art" persona={playerPersona} state="walking" />
           </div>

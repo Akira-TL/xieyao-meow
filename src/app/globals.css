@@ -1648,7 +1648,31 @@ body.sheet-open .app-bottom-nav { opacity: 0; pointer-events: none; }
   inset: 0;
   background: linear-gradient(90deg, rgba(7,9,12,.88) 0%, rgba(7,9,12,.54) 42%, rgba(7,9,12,.18) 72%, rgba(7,9,12,.52) 100%);
 }
+.home-room-backdrop--waiting-game {
+  opacity: .78;
+  filter: saturate(.94) brightness(.72) contrast(1.03);
+}
 .home-room-stage > :not(.home-room-backdrop) { position: relative; z-index: 1; }
+.waiting-game-persona-art {
+  position: relative;
+  overflow: visible;
+}
+.waiting-game-persona-art-image {
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 18px 34px rgba(0,0,0,.44));
+}
+.home-table-art {
+  position: relative;
+  width: min(100%, 420px);
+  min-height: 180px;
+  margin: 14px auto 0;
+  overflow: hidden;
+}
+.home-table-art-image {
+  object-fit: contain;
+  object-position: center;
+}
 .outing-loading { min-height: 460px; display: grid; place-items: center; color: #6f757d; font-size: 12px; }
 .home-at-home {
   min-height: min(700px, calc(100dvh - 145px));
@@ -1831,9 +1855,12 @@ body.sheet-open .app-bottom-nav { opacity: 0; pointer-events: none; }
   .home-story-polaroid > p { display: none; }
   .home-story-polaroid > a { margin-top: 8px; font-size: 9px; }
   .home-room-backdrop { opacity: .52; filter: saturate(.82) brightness(.68); }
+  .home-room-backdrop--waiting-game { opacity: .68; filter: saturate(.92) brightness(.64) contrast(1.02); }
   .home-room-backdrop::after { background: linear-gradient(180deg, rgba(7,9,12,.50) 0%, rgba(7,9,12,.16) 44%, rgba(7,9,12,.28) 100%); }
   .home-hero-art::before { width: min(96%, 390px); bottom: -4%; background: radial-gradient(circle, rgba(255,241,207,.24) 0 26%, rgba(23,114,246,.14) 42%, rgba(23,114,246,0) 72%); }
-  .home-hero-art .art-slot, .home-persona-art { width: min(58vw, 220px); min-height: 230px; }
+  .home-hero-art .art-slot, .home-persona-art { width: min(66vw, 250px); min-height: 250px; }
+  .waiting-game-persona-art-image { object-position: center bottom; }
+  .home-table-art { width: 100%; min-height: 150px; margin-top: 10px; }
   .home-resting-note { bottom: 10px; right: 4px; font-size: 9px; opacity: .72; }
   .home-event-actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
   .home-event-actions .sheet-trigger { width: 100%; min-width: 0; }

@@ -1,12 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
-import { resolveP0Art } from "@/lib/art/p0";
+import {
+  resolveWaitingGameHomeRoom,
+  resolveWaitingGameHomeTable,
+  resolveWaitingGamePersonaActivity,
+  type WaitingGamePersonaActivity,
+} from "@/lib/art/waiting-game";
 import type { JourneyInsightAction, JourneyProjection, JourneyView } from "@/lib/journey/types";
 import type { PlayerPersona, ZhihuComposition } from "@/lib/persona";
 
-import { PaperCard, PersonaArt } from "./components";
+import { PaperCard } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import { BottomSheet } from "./interaction-client";
 import { useCatProfile } from "./profile/client";
@@ -16,9 +22,50 @@ function RoomBackdrop({ empty = false }: { empty?: boolean }) {
   return (
     <div
       aria-hidden="true"
-      className="home-room-backdrop"
-      style={{ backgroundImage: `url(${resolveP0Art(empty ? "room-empty-night" : "room-study-night-empty")})` }}
+      className="home-room-backdrop home-room-backdrop--waiting-game"
+      style={{ backgroundImage: `url(${resolveWaitingGameHomeRoom(empty)})` }}
     />
+  );
+}
+
+function WaitingGamePersonaArt({
+  persona,
+  activity,
+  alt,
+  className = "",
+  priority = false,
+}: {
+  persona: Pick<PlayerPersona, "visualVariant">;
+  activity: WaitingGamePersonaActivity;
+  alt: string;
+  className?: string;
+  priority?: boolean;
+}) {
+  return (
+    <div className={`waiting-game-persona-art ${className}`} data-activity={activity} data-persona-variant={persona.visualVariant}>
+      <Image
+        alt={alt}
+        className="waiting-game-persona-art-image"
+        fill
+        priority={priority}
+        sizes="(max-width: 760px) 62vw, 360px"
+        src={resolveWaitingGamePersonaActivity(persona, activity)}
+      />
+    </div>
+  );
+}
+
+function HomeTableArt({ state, alt }: { state: "unopened_bag" | "open_bundle"; alt: string }) {
+  return (
+    <div className="home-table-art">
+      <Image
+        alt={alt}
+        className="home-table-art-image"
+        fill
+        sizes="(max-width: 760px) 78vw, 420px"
+        src={resolveWaitingGameHomeTable(state)}
+      />
+    </div>
   );
 }
 
@@ -172,13 +219,12 @@ function AtHomeStage({
       </PaperCard>
 
       <div className="home-hero-art">
-        <PersonaArt
-          alt={resting ? `${catName}刚回来，正在窝里睡觉` : `${catName}在窝里准备下一趟旅途`}
-          aspect={resting ? "wide" : "portrait"}
+        <WaitingGamePersonaArt
+          activity={resting ? "sleep_curl" : "window_sit"}
+          alt={resting ? `${catName}刚回来，正在窝里睡觉` : `${catName}坐在窗边，等着下一趟知识漫游`}
           className={`home-persona-art${resting ? " is-sleeping" : ""}`}
           persona={playerPersona}
           priority
-          state={resting ? "sleeping" : "thinking"}
         />
         <span className="home-resting-note">{resting ? <>刚回来。<br />先歇会儿。</> : <>好奇心已经<br />开始转了。</>}</span>
       </div>
@@ -251,7 +297,7 @@ function PreparingStage({
       <RoomBackdrop />
       <p className="stage-caption">PACKING · 别催，它自己决定什么时候走</p>
       <h1>它开始<br />收行囊了。</h1>
-      <PersonaArt alt={`${catName}收拾出门装备`} className="outing-state-persona" persona={playerPersona} state="thinking" />
+      <WaitingGamePersonaArt activity="packing_bag" alt={`${catName}正在收拾行囊`} className="outing-state-persona" persona={playerPersona} priority />
       <PaperCard className="outing-note-card">
         <span>行囊里唯一由你放进去的东西</span>
         <strong>「{routeBias ?? "随便逛"}」</strong>
@@ -353,18 +399,25 @@ function ReturnedStage({
         <h1>{catName}<br />回窝了。</h1>
         <p>{opened ? "这一趟留下的东西，都在这里。" : "先拆包。里面是什么，打开以后才知道。"}</p>
       </div>
-      <PersonaArt alt={`${catName}背着旅包回到窝里`} className="returned-persona-art" persona={playerPersona} state="returned" />
+      <WaitingGamePersonaArt
+        activity={question ? "carry_ticket" : "carry_photo"}
+        alt={question ? `${catName}带着问题票根回到窝里` : `${catName}带着旅途照片回到窝里`}
+        className="returned-persona-art"
+        persona={playerPersona}
+        priority
+      />
       {!opened ? (
         <PaperCard className="returned-artifact returned-artifact--sealed">
           <span>旅包 · SEALED</span>
           <h2>东西还没摊开。</h2>
           <p>可能是一张问题票，也可能是它对你的一个新发现。这一趟回来，总会留下能继续看的东西。</p>
-          <div className="returned-package-mark" aria-hidden="true">?</div>
+          <HomeTableArt alt="桌边还没拆开的旅包" state="unopened_bag" />
           <button className="theatre-button theatre-button-primary" onClick={() => setOpened(true)} type="button">拆开它的包 <span>→</span></button>
         </PaperCard>
       ) : (
         <PaperCard className="returned-artifact is-opened">
           <span>{artifactLabel}</span>
+          <HomeTableArt alt="旅包已经在桌上摊开" state="open_bundle" />
           <h2>{artifactTitle}</h2>
           <p>你塞的纸条：{journey.routeBias ?? "随便逛"}</p>
           {question || relationTicket ? <blockquote>“{thought}”</blockquote> : null}
