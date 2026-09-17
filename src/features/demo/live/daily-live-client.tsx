@@ -149,7 +149,7 @@ function LiveKnowledgeWorldExplore() {
               <p>{zone.unlocked ? zone.description : "这里还没有真实旅途痕迹。等它自己走进去以后，这块地图才会展开。"}</p>
               <div className="knowledge-zone-traces">
                 {zone.unlocked ? zone.entries.slice(0, 2).map((entry) => (
-                  <small key={entry.journeyId}>· {entry.postcard.headline}</small>
+                  <small key={entry.journeyId}>· {entry.postcard.question?.title ?? entry.postcard.headline}</small>
                 )) : <small>不是目的地按钮，也不会提前剧透下一趟。</small>}
               </div>
             </div>
