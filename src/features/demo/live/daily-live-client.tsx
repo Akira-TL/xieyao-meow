@@ -74,7 +74,6 @@ function journeyWorldZone(entry: JourneyAtlasEntry): WaitingGameWorldZone {
   return inferWaitingGameWorldZone({
     routeBias: entry.routeBias,
     questionTitle: entry.postcard.question?.title,
-    questionSummary: entry.postcard.question?.summary,
   });
 }
 

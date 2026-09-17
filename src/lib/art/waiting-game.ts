@@ -71,11 +71,11 @@ const WORLD_ZONE_FILE: Record<Exclude<WaitingGameWorldZone, "ai">, { locked: str
 };
 
 const WORLD_ZONE_KEYWORDS: Record<Exclude<WaitingGameWorldZone, "unknown">, string[]> = {
-  ai: ["ai", "人工智能", "大模型", "模型", "算法", "deepseek", "openai", "agent", "芯片", "数码", "软件", "编程", "程序", "计算机", "互联网"],
-  science: ["科学", "研究", "实验", "证据", "物理", "化学", "生物", "医学", "数学", "天文", "基因", "细胞", "学术"],
-  career: ["职场", "工作", "公司", "创业", "商业", "管理", "职业", "招聘", "薪资", "面试", "同事", "老板", "行业"],
+  ai: ["ai", "人工智能", "大模型", "算法", "deepseek", "openai", "anthropic", "agent", "芯片", "数码", "编程", "计算机"],
+  science: ["科学", "实验", "物理", "化学", "生物", "医学", "数学", "天文", "基因", "细胞", "量子", "航天"],
+  career: ["职场", "工作", "创业", "职业", "招聘", "薪资", "面试", "同事", "老板", "裁员", "升职"],
   pets: ["宠物", "养猫", "养狗", "猫咪", "狗狗", "动物"],
-  life: ["生活", "电影", "文学", "历史", "音乐", "摄影", "艺术", "美食", "情感", "教育", "家庭", "住房", "城市", "婚姻"],
+  life: ["生活", "电影", "影视", "演员", "文学", "历史", "音乐", "摄影", "艺术", "美食", "情感", "教育", "家庭", "住房", "婚姻"],
 };
 
 const NPC_ENCOUNTER_POSTCARD_FILE: Record<string, string> = {
@@ -125,11 +125,9 @@ export function resolveWaitingGameWorldZone(zone: WaitingGameWorldZone, unlocked
 export function inferWaitingGameWorldZone({
   routeBias,
   questionTitle = "",
-  questionSummary = "",
 }: {
   routeBias: string | null;
   questionTitle?: string;
-  questionSummary?: string;
 }): WaitingGameWorldZone {
   const route = (routeBias ?? "").toLocaleLowerCase("zh-CN");
   if (route.includes("ai") || route.includes("数码")) return "ai";
@@ -138,7 +136,7 @@ export function inferWaitingGameWorldZone({
   if (route.includes("宠物")) return "pets";
   if (route.includes("生活") || route.includes("文化")) return "life";
 
-  const text = `${questionTitle}\n${questionSummary}`.toLocaleLowerCase("zh-CN");
+  const text = questionTitle.toLocaleLowerCase("zh-CN");
   let best: WaitingGameWorldZone = "unknown";
   let bestScore = 0;
   let tied = false;
