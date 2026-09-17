@@ -113,4 +113,40 @@ export function resolveWaitingGameEncounterPostcard(participantName: string, sha
   return `${ROOT}/postcards/encounter/${filename}`;
 }
 
+function stablePostcardVariant(key: string): number {
+  let hash = 0;
+  for (const character of key) hash = ((hash * 31) + character.charCodeAt(0)) >>> 0;
+  return (hash % 3) + 1;
+}
+
+export function resolveWaitingGameJourneyPostcard({
+  journeyKey,
+  routeBias,
+  fallbackInterest = "综合",
+  participantName,
+  sharedUser = false,
+}: {
+  journeyKey: string;
+  routeBias: string | null;
+  fallbackInterest?: InterestName | string;
+  participantName?: string | null;
+  sharedUser?: boolean;
+}): string {
+  if (participantName) return resolveWaitingGameEncounterPostcard(participantName, sharedUser);
+
+  const route = (routeBias ?? "").toLocaleLowerCase("zh-CN");
+  const interest = route.includes("ai") || route.includes("数码")
+    ? "AI 与数码"
+    : route.includes("科学")
+      ? "科学"
+      : route.includes("职场") || route.includes("创业")
+        ? "职场与创业"
+        : route.includes("宠物")
+          ? "宠物"
+          : route.includes("生活") || route.includes("文化")
+            ? "文化与生活"
+            : fallbackInterest;
+  return resolveWaitingGamePostcard(interest, stablePostcardVariant(journeyKey));
+}
+
 export const WAITING_GAME_ART_ROOT = ROOT;

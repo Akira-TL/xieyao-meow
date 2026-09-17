@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   resolveWaitingGameHomeRoom,
   resolveWaitingGameHomeTable,
+  resolveWaitingGameJourneyPostcard,
   resolveWaitingGamePersonaActivity,
   resolveWaitingGameReturnItemArt,
   type WaitingGamePersonaActivity,
@@ -85,6 +86,34 @@ function ReturnItemArt({ kind, alt }: { kind: "question_ticket" | "relation_note
   );
 }
 
+function JourneyPostcardArt({
+  journey,
+  fallbackInterest,
+}: {
+  journey: JourneyView;
+  fallbackInterest: string;
+}) {
+  const src = resolveWaitingGameJourneyPostcard({
+    journeyKey: journey.id,
+    routeBias: journey.routeBias,
+    fallbackInterest,
+    participantName: journey.conversation?.participantName,
+    sharedUser: journey.conversation?.kind === "USER",
+  });
+  return (
+    <figure className="returned-postcard-art">
+      <Image
+        alt="这一趟知识漫游留下的插画"
+        className="returned-postcard-art-image"
+        fill
+        sizes="(max-width: 760px) 86vw, 420px"
+        src={src}
+      />
+      <figcaption>这一趟的知识漫游插画</figcaption>
+    </figure>
+  );
+}
+
 export function DemoOutingHome() {
   const [projection, setProjection] = useState<JourneyProjection | null>(null);
   const [journeyError, setJourneyError] = useState<string | null>(null);
@@ -92,6 +121,7 @@ export function DemoOutingHome() {
   const basePersona = (personaSnapshot?.persona ?? DEMO_FIXTURE.persona) as PlayerPersona;
   const { profile, persona: playerPersona } = useCatProfile(basePersona);
   const catName = profile.catName;
+  const primaryInterest = personaSnapshot?.composition?.primaryInterest ?? basePersona.interests[0] ?? "综合";
 
   const refreshJourney = useCallback(async () => {
     try {
@@ -168,6 +198,7 @@ export function DemoOutingHome() {
         catName={catName}
         journey={projection.journey}
         playerPersona={playerPersona}
+        primaryInterest={primaryInterest}
         onArchive={() => void runAction({ action: "archive" })}
         onInsightFeedback={async (response) => {
           await runAction({ action: "insight_feedback", journeyId: projection.journey!.id, response });
@@ -362,12 +393,14 @@ function ReturnedStage({
   onArchive,
   onInsightFeedback,
   playerPersona,
+  primaryInterest,
 }: {
   catName: string;
   journey: JourneyView;
   onArchive: () => void;
   onInsightFeedback: (response: JourneyInsightAction) => Promise<void>;
   playerPersona: PlayerPersona;
+  primaryInterest: string;
 }) {
   const [opened, setOpened] = useState(false);
   const [feedbackBusy, setFeedbackBusy] = useState(false);
@@ -441,6 +474,7 @@ function ReturnedStage({
         <PaperCard className="returned-artifact is-opened">
           <span>{artifactLabel}</span>
           <HomeTableArt alt="旅包已经在桌上摊开" state="open_bundle" />
+          <JourneyPostcardArt fallbackInterest={primaryInterest} journey={journey} />
           {returnItemArt ? <ReturnItemArt alt={returnItemArt.alt} kind={returnItemArt.kind} /> : null}
           <h2>{artifactTitle}</h2>
           <p>你塞的纸条：{journey.routeBias ?? "随便逛"}</p>
