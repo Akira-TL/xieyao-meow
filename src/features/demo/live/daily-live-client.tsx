@@ -5,6 +5,7 @@ import BookmarkBorderRoundedIcon from "@mui/icons-material/BookmarkBorderRounded
 import CreateOutlinedIcon from "@mui/icons-material/CreateOutlined";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -13,6 +14,8 @@ import {
   resolveWaitingGameCollectionArt,
   resolveWaitingGameJourneyPostcard,
   resolveWaitingGameWorldSubzone,
+  resolveWaitingGameWorldZone,
+  type WaitingGameWorldZone,
 } from "@/lib/art/waiting-game";
 import type { JourneyAtlasEntry, JourneyAtlasView } from "@/lib/journey/types";
 
@@ -53,17 +56,42 @@ function formatJourneyDate(value: number) {
   }).format(new Date(value));
 }
 
+const KNOWLEDGE_WORLD_ZONES: Array<{
+  key: WaitingGameWorldZone;
+  label: string;
+  description: string;
+}> = [
+  { key: "ai", label: "AI 与数码", description: "模型、工具、计算与人如何使用技术。" },
+  { key: "science", label: "科学", description: "证据、机制、自然现象与可验证的问题。" },
+  { key: "career", label: "职场与创业", description: "工作、组织、选择与真实代价。" },
+  { key: "pets", label: "宠物", description: "陪伴、行为与人和动物之间的关系。" },
+  { key: "life", label: "文化与生活", description: "书、影像、日常经验与生活方式。" },
+  { key: "unknown", label: "未知边界", description: "那些不属于既有兴趣、却值得停一下的地方。" },
+];
+
+function journeyWorldZone(entry: JourneyAtlasEntry): WaitingGameWorldZone {
+  const route = (entry.routeBias ?? "").toLocaleLowerCase("zh-CN");
+  if (route.includes("ai") || route.includes("数码")) return "ai";
+  if (route.includes("科学")) return "science";
+  if (route.includes("职场") || route.includes("创业")) return "career";
+  if (route.includes("宠物")) return "pets";
+  if (route.includes("生活") || route.includes("文化")) return "life";
+  return "unknown";
+}
+
 export function LiveExploreSection({ appMode }: { appMode: boolean }) {
+  return appMode ? <LiveKnowledgeWorldExplore /> : <LivePublicExplore />;
+}
+
+function LiveKnowledgeWorldExplore() {
   const personaSnapshot = useLivePersonaSnapshot();
-  const questionSnapshot = useLiveQuestionSnapshot();
   const primaryInterest = personaSnapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.interests[0];
   const basePersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
-  const { profile, persona: playerPersona } = useCatProfile(basePersona, appMode);
+  const { profile, persona: playerPersona } = useCatProfile(basePersona, true);
   const catName = profile.catName;
   const [atlas, setAtlas] = useState<JourneyAtlasView | null>(null);
 
   useEffect(() => {
-    if (!appMode) return;
     let cancelled = false;
     fetch("/api/atlas", { cache: "no-store" })
       .then(async (response) => {
@@ -79,60 +107,101 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
     return () => {
       cancelled = true;
     };
-  }, [appMode]);
+  }, []);
 
+  const journeys = atlas?.journeys ?? [];
+  const zoneRows = KNOWLEDGE_WORLD_ZONES.map((zone) => {
+    const entries = journeys.filter((entry) => journeyWorldZone(entry) === zone.key);
+    return { ...zone, entries, unlocked: entries.length > 0 };
+  });
+  const unlockedCount = zoneRows.filter((zone) => zone.unlocked).length;
+
+  return (
+    <section className="explore-stage explore-stage--app explore-stage--knowledge">
+      <div className="explore-hero-copy">
+        <p className="stage-caption">KNOWLEDGE WORLD · 它正在认识哪里</p>
+        <h1>它走过的，<br />是你的<span>知识世界</span>。</h1>
+        <p>这里不是现实地图。每个地带只有在真实 Journey 留下痕迹以后才会亮起来；你不能点一个地带命令它出发。</p>
+      </div>
+
+      <div className="explore-hero-art">
+        <div
+          className="journey-gate-scene is-app"
+          style={{ backgroundImage: `url(${resolveWaitingGameWorldSubzone(primaryInterest)})` }}
+        >
+          <PersonaArt alt={`${catName}背着包走进知乎知识世界`} aspect="portrait" className="explore-persona-art" persona={playerPersona} state="walking" />
+        </div>
+      </div>
+
+      <div className="knowledge-zone-grid" aria-label="已经认识的知识地带">
+        {zoneRows.map((zone) => (
+          <article className={`knowledge-zone-card${zone.unlocked ? " is-unlocked" : " is-locked"}`} data-zone={zone.key} key={zone.key}>
+            <div className="knowledge-zone-art">
+              <Image
+                alt={`${zone.label}${zone.unlocked ? "已留下旅途痕迹" : "尚未走到"}`}
+                fill
+                sizes="(max-width: 760px) 92vw, 360px"
+                src={resolveWaitingGameWorldZone(zone.key, zone.unlocked)}
+              />
+              <span>{zone.unlocked ? `走过 ${zone.entries.length} 趟` : "还没走到"}</span>
+            </div>
+            <div className="knowledge-zone-copy">
+              <h2>{zone.label}</h2>
+              <p>{zone.unlocked ? zone.description : "这里还没有真实旅途痕迹。等它自己走进去以后，这块地图才会展开。"}</p>
+              <div className="knowledge-zone-traces">
+                {zone.unlocked ? zone.entries.slice(0, 2).map((entry) => (
+                  <small key={entry.journeyId}>· {entry.postcard.headline}</small>
+                )) : <small>不是目的地按钮，也不会提前剧透下一趟。</small>}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="explore-log-strip">
+        <strong>知识世界</strong>
+        <span>{atlas === null
+          ? "正在翻旅行册……"
+          : `${unlockedCount} / ${KNOWLEDGE_WORLD_ZONES.length} 个地带已经留下痕迹 · ${journeys.length} 趟真实 Journey`}</span>
+        <a href="/home">回窝看看它在不在 →</a>
+      </div>
+    </section>
+  );
+}
+
+function LivePublicExplore() {
+  const personaSnapshot = useLivePersonaSnapshot();
+  const questionSnapshot = useLiveQuestionSnapshot();
+  const primaryInterest = personaSnapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.interests[0];
   const liveQuestions = questionSnapshot?.questions?.length
     ? questionSnapshot.questions
     : questionSnapshot?.question
       ? [questionSnapshot.question]
       : [];
-  const publicQuestions = liveQuestions.slice(0, 3).map((item) => ({
-    ...item,
-    completedAt: null as number | null,
-    routeBias: null as string | null,
-    artifactType: null as string | null,
-  }));
-  const journeyQuestions = (atlas?.journeys ?? [])
-    .filter((entry) => entry.postcard.question)
-    .slice(0, 3)
-    .map((entry) => ({
-      title: entry.postcard.question!.title,
-      url: entry.postcard.question!.url,
-      summary: entry.postcard.body,
-      thumbnailUrl: entry.postcard.question!.thumbnailUrl ?? "",
-      completedAt: entry.completedAt,
-      routeBias: entry.routeBias,
-      artifactType: entry.artifact?.type ?? null,
-    }));
-  const showingLivePool = publicQuestions.length > 0;
-  const questions = showingLivePool ? publicQuestions : journeyQuestions;
+  const questions = liveQuestions.slice(0, 3);
 
   return (
-    <section className={`explore-stage ${appMode ? "explore-stage--app" : "explore-stage--public"}`}>
+    <section className="explore-stage explore-stage--public">
       <div className="explore-hero-copy">
-        <p className="stage-caption">{appMode ? "JOURNEY LOG · 它今天去了哪里" : "PUBLIC EXPLORE · 看看别人养出了什么"}</p>
-        <h1>{appMode ? <>它今天去了<br /><span>知乎</span>。</> : <>在这个世界里，<br />问题会让<span>灵魂</span>相遇。</>}</h1>
-        <p>{appMode ? `它现在知道你最常停留在「${primaryInterest}」，但不会只去那里。` : "这里展示的是当前知乎公开问题如何进入谢邀喵的世界。"}</p>
+        <p className="stage-caption">PUBLIC EXPLORE · 看看别人养出了什么</p>
+        <h1>在这个世界里，<br />问题会让<span>灵魂</span>相遇。</h1>
+        <p>这里展示的是当前知乎公开问题如何进入谢邀喵的世界。</p>
       </div>
 
       <div className="explore-hero-art">
         <div
-          className={`journey-gate-scene${appMode ? " is-app" : " is-public"}`}
-          style={{ backgroundImage: `url(${appMode ? resolveWaitingGameWorldSubzone(primaryInterest) : resolveP0Art("journey-zhihu-gate")})` }}
+          className="journey-gate-scene is-public"
+          style={{ backgroundImage: `url(${resolveP0Art("journey-zhihu-gate")})` }}
         >
-          {appMode ? (
-            <PersonaArt alt={`${catName}背着包走进知乎知识世界`} aspect="portrait" className="explore-persona-art" persona={playerPersona} state="walking" />
-          ) : (
-            <div className="public-world-ensemble" aria-label="社区居民群像">
-              {DEMO_FIXTURE.residents.slice(0, 4).map((resident, index) => (
-                <div className={`public-world-resident public-world-resident--${index + 1}`} key={resident.id}>
-                  <ArtSlot name={`npc/${resident.id}/idle`} label={resident.displayName} aspect="portrait" fit="contain" />
-                  <span>{resident.displayName}</span>
-                  <small>{resident.species}</small>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="public-world-ensemble" aria-label="社区居民群像">
+            {DEMO_FIXTURE.residents.slice(0, 4).map((resident, index) => (
+              <div className={`public-world-resident public-world-resident--${index + 1}`} key={resident.id}>
+                <ArtSlot name={`npc/${resident.id}/idle`} label={resident.displayName} aspect="portrait" fit="contain" />
+                <span>{resident.displayName}</span>
+                <small>{resident.species}</small>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -152,9 +221,7 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
             tabIndex={0}
           >
             <div className="explore-card-number">{String(index + 1).padStart(2, "0")}</div>
-            <span className="explore-card-badge">{showingLivePool
-              ? (index === 0 ? "现在热榜" : index === 1 ? "顺路看看" : "再逛一题")
-              : (index === 0 ? "最近带回" : `旅途 ${index + 1}`)}</span>
+            <span className="explore-card-badge">{index === 0 ? "现在热榜" : index === 1 ? "顺路看看" : "再逛一题"}</span>
             <h2>{item.title}</h2>
             <p>{compact(item.summary)}</p>
             {item.thumbnailUrl ? (
@@ -166,31 +233,15 @@ export function LiveExploreSection({ appMode }: { appMode: boolean }) {
               />
             ) : null}
             <div className="explore-why">
-              <b>{showingLivePool ? "现在为什么会看到：" : "这一趟："}</b>{showingLivePool
-                ? `来自当前知乎公开发现池。它会结合「${primaryInterest}」和你塞进包里的纸条，在真正出门时自己挑一题。`
-                : `${item.completedAt ? formatJourneyDate(item.completedAt) : ""} · 纸条「${item.routeBias ?? "随便逛"}」${item.artifactType === "RELATION_TICKET" ? " · 途中还遇见了另一只猫" : ""}`}
+              <b>现在为什么会看到：</b>来自当前知乎公开发现池。它会结合「{primaryInterest}」和用户给出的模糊方向，在真正出门时自己挑一题。
             </div>
           </PaperCard>
         ))}
       </div>
 
-      {appMode ? (
-        <div className="explore-log-strip">
-          <strong>{showingLivePool ? "当前知乎发现池" : "真实旅途航迹"}</strong>
-          <span>{showingLivePool
-            ? `现在刷到 ${questions.length} 个真实公开问题 · 旅行时会从更大的候选池里自己挑`
-            : atlas === null
-              ? "正在翻旅行册……"
-              : journeyQuestions.length
-                ? `${primaryInterest} · 最近 ${journeyQuestions.length} 趟带回了问题`
-                : "知乎发现暂时不可用，旅行册里也还没有问题票根。"}</span>
-          <a href="/home">回窝看看它在不在 →</a>
-        </div>
-      ) : (
-        <div className="public-explore-action">
-          <DemoFlowButton href="/hatch/consent" stage="PRE_AUTH">我也想养一个</DemoFlowButton>
-        </div>
-      )}
+      <div className="public-explore-action">
+        <DemoFlowButton href="/hatch/consent" stage="PRE_AUTH">我也想养一个</DemoFlowButton>
+      </div>
     </section>
   );
 }

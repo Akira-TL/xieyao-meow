@@ -32,6 +32,7 @@ export type WaitingGameCollectionArt =
   | "ticket_box";
 
 export type WaitingGameReturnItemArt = "question_ticket" | "relation_note" | "oddity";
+export type WaitingGameWorldZone = "ai" | "science" | "career" | "pets" | "life" | "unknown";
 
 const PERSONA_SLUG: Record<PersonaVisualVariant, string> = {
   "engineer-blue": "engineer",
@@ -59,6 +60,14 @@ const POSTCARD_FOLDER: Record<InterestName, string> = {
   "游戏": "unknown",
   "文化与生活": "life",
   "综合": "unknown",
+};
+
+const WORLD_ZONE_FILE: Record<Exclude<WaitingGameWorldZone, "ai">, { locked: string; unlocked: string }> = {
+  science: { locked: "world_zone_science_locked.png", unlocked: "world_zone_science_unlocked.png" },
+  career: { locked: "world_zone_career_locked.png", unlocked: "world_zone_career_unlocked.png" },
+  pets: { locked: "world_zone_pets_locked.png", unlocked: "world_zone_pets_unlocked.png" },
+  life: { locked: "world_zone_life_locked.png", unlocked: "world_zone_life_unlocked.png" },
+  unknown: { locked: "world_zone_unknown_locked.png", unlocked: "world_zone_unknown_unlocked.png" },
 };
 
 const NPC_ENCOUNTER_POSTCARD_FILE: Record<string, string> = {
@@ -97,6 +106,12 @@ export function resolveWaitingGameReturnItemArt(asset: WaitingGameReturnItemArt)
 
 export function resolveWaitingGameWorldSubzone(interest: InterestName | string): string {
   return `${ROOT}/world/zones/${WORLD_SUBZONE_FILE[interest as InterestName] ?? "world_subzone_unknown_border.png"}`;
+}
+
+export function resolveWaitingGameWorldZone(zone: WaitingGameWorldZone, unlocked: boolean): string {
+  if (zone === "ai") return `${ROOT}/world/zones/world_subzone_ai_tools.png`;
+  const file = WORLD_ZONE_FILE[zone][unlocked ? "unlocked" : "locked"];
+  return `${ROOT}/world/zones/${file}`;
 }
 
 export function resolveWaitingGamePostcard(interest: InterestName | string, variant = 1): string {
