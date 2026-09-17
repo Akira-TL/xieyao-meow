@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 
 import { resolveP0Art } from "@/lib/art/p0";
 import {
+  inferWaitingGameWorldZone,
   resolveWaitingGameCollectionArt,
   resolveWaitingGameJourneyPostcard,
   resolveWaitingGameWorldSubzone,
@@ -70,13 +71,11 @@ const KNOWLEDGE_WORLD_ZONES: Array<{
 ];
 
 function journeyWorldZone(entry: JourneyAtlasEntry): WaitingGameWorldZone {
-  const route = (entry.routeBias ?? "").toLocaleLowerCase("zh-CN");
-  if (route.includes("ai") || route.includes("数码")) return "ai";
-  if (route.includes("科学")) return "science";
-  if (route.includes("职场") || route.includes("创业")) return "career";
-  if (route.includes("宠物")) return "pets";
-  if (route.includes("生活") || route.includes("文化")) return "life";
-  return "unknown";
+  return inferWaitingGameWorldZone({
+    routeBias: entry.routeBias,
+    questionTitle: entry.postcard.question?.title,
+    questionSummary: entry.postcard.question?.summary,
+  });
 }
 
 export function LiveExploreSection({ appMode }: { appMode: boolean }) {

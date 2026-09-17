@@ -70,6 +70,14 @@ const WORLD_ZONE_FILE: Record<Exclude<WaitingGameWorldZone, "ai">, { locked: str
   unknown: { locked: "world_zone_unknown_locked.png", unlocked: "world_zone_unknown_unlocked.png" },
 };
 
+const WORLD_ZONE_KEYWORDS: Record<Exclude<WaitingGameWorldZone, "unknown">, string[]> = {
+  ai: ["ai", "人工智能", "大模型", "模型", "算法", "deepseek", "openai", "agent", "芯片", "数码", "软件", "编程", "程序", "计算机", "互联网"],
+  science: ["科学", "研究", "实验", "证据", "物理", "化学", "生物", "医学", "数学", "天文", "基因", "细胞", "学术"],
+  career: ["职场", "工作", "公司", "创业", "商业", "管理", "职业", "招聘", "薪资", "面试", "同事", "老板", "行业"],
+  pets: ["宠物", "养猫", "养狗", "猫咪", "狗狗", "动物"],
+  life: ["生活", "电影", "文学", "历史", "音乐", "摄影", "艺术", "美食", "情感", "教育", "家庭", "住房", "城市", "婚姻"],
+};
+
 const NPC_ENCOUNTER_POSTCARD_FILE: Record<string, string> = {
   "齿轮": "postcard_encounter_gear.png",
   "糯米": "postcard_encounter_rice.png",
@@ -112,6 +120,39 @@ export function resolveWaitingGameWorldZone(zone: WaitingGameWorldZone, unlocked
   if (zone === "ai") return `${ROOT}/world/zones/world_subzone_ai_tools.png`;
   const file = WORLD_ZONE_FILE[zone][unlocked ? "unlocked" : "locked"];
   return `${ROOT}/world/zones/${file}`;
+}
+
+export function inferWaitingGameWorldZone({
+  routeBias,
+  questionTitle = "",
+  questionSummary = "",
+}: {
+  routeBias: string | null;
+  questionTitle?: string;
+  questionSummary?: string;
+}): WaitingGameWorldZone {
+  const route = (routeBias ?? "").toLocaleLowerCase("zh-CN");
+  if (route.includes("ai") || route.includes("数码")) return "ai";
+  if (route.includes("科学")) return "science";
+  if (route.includes("职场") || route.includes("创业")) return "career";
+  if (route.includes("宠物")) return "pets";
+  if (route.includes("生活") || route.includes("文化")) return "life";
+
+  const text = `${questionTitle}\n${questionSummary}`.toLocaleLowerCase("zh-CN");
+  let best: WaitingGameWorldZone = "unknown";
+  let bestScore = 0;
+  let tied = false;
+  for (const [zone, keywords] of Object.entries(WORLD_ZONE_KEYWORDS) as Array<[Exclude<WaitingGameWorldZone, "unknown">, string[]]>) {
+    const score = keywords.reduce((sum, keyword) => sum + (text.includes(keyword.toLocaleLowerCase("zh-CN")) ? 1 : 0), 0);
+    if (score > bestScore) {
+      best = zone;
+      bestScore = score;
+      tied = false;
+    } else if (score > 0 && score === bestScore) {
+      tied = true;
+    }
+  }
+  return bestScore > 0 && !tied ? best : "unknown";
 }
 
 export function resolveWaitingGamePostcard(interest: InterestName | string, variant = 1): string {
