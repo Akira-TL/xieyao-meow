@@ -2313,6 +2313,12 @@ body.sheet-open .app-bottom-nav { opacity: 0; pointer-events: none; }
 .atlas-collection-strip b { display: block; color: #176fd2; font-size: 22px; }
 .atlas-collection-strip small { display: block; margin-top: 2px; color: #6a655e; font-size: 8px; }
 .atlas-grid .art-slot--wide { margin-top: 14px; }
+.atlas-collection-art {
+  min-height: 150px;
+  border-color: rgba(0,0,0,.10);
+  background-color: rgba(255,255,255,.16);
+  box-shadow: inset 0 -34px 48px rgba(0,0,0,.08);
+}
 .atlas-journey-book { margin-top: 18px; }
 .atlas-journey-list { margin-top: 12px; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
 .atlas-journey-list article { display: grid; grid-template-columns: 34px minmax(0,1fr); gap: 10px; border: 1px solid rgba(0,0,0,.12); background: rgba(255,255,255,.22); padding: 12px; }

@@ -24,6 +24,13 @@ export type WaitingGameHomeTableState =
   | "unopened_bag"
   | "visitor_note";
 
+export type WaitingGameCollectionArt =
+  | "album_cover"
+  | "album_page"
+  | "relationship_book"
+  | "souvenir_shelf"
+  | "ticket_box";
+
 const PERSONA_SLUG: Record<PersonaVisualVariant, string> = {
   "engineer-blue": "engineer",
   "analyst-black": "analyst",
@@ -56,6 +63,10 @@ export function resolveWaitingGameHomeRoom(empty = false): string {
 
 export function resolveWaitingGameHomeTable(state: WaitingGameHomeTableState): string {
   return `${ROOT}/home/tables/home_table_${state}.png`;
+}
+
+export function resolveWaitingGameCollectionArt(asset: WaitingGameCollectionArt): string {
+  return `${ROOT}/collections/${asset}.png`;
 }
 
 export function resolveWaitingGameWorldSubzone(interest: InterestName | string): string {

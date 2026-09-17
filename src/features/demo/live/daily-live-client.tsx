@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { resolveP0Art } from "@/lib/art/p0";
-import { resolveWaitingGameWorldSubzone } from "@/lib/art/waiting-game";
+import { resolveWaitingGameCollectionArt, resolveWaitingGameWorldSubzone } from "@/lib/art/waiting-game";
 import type { JourneyAtlasView } from "@/lib/journey/types";
 
 import { DemoFlowButton } from "../client";
@@ -599,6 +599,13 @@ export function LiveAtlasSection() {
         </PaperCard>
         <PaperCard>
           <div className="section-heading-row"><h2>旅途收藏</h2><span>JOURNEY COLLECTION</span></div>
+          <ArtSlot
+            name="waiting-game/collection-ticket-box"
+            label="问题票根盒"
+            aspect="wide"
+            className="atlas-collection-art"
+            src={resolveWaitingGameCollectionArt("ticket_box")}
+          />
           <div className="atlas-stats atlas-journey-stats">
             <b>{journeyCount}<small><AutoAwesomeRoundedIcon fontSize="inherit" /> 真实旅途</small></b>
             <b>{questionTicketCount}<small><BookmarkBorderRoundedIcon fontSize="inherit" /> 问题票根</small></b>
@@ -614,6 +621,13 @@ export function LiveAtlasSection() {
       <div className="atlas-grid atlas-grid-bottom">
         <PaperCard>
           <div className="section-heading-row"><h2>关系图鉴</h2><a href="/encounter">查看全部 →</a></div>
+          <ArtSlot
+            name="waiting-game/relationship-book"
+            label="关系簿"
+            aspect="wide"
+            className="atlas-collection-art"
+            src={resolveWaitingGameCollectionArt("relationship_book")}
+          />
           {production ? (
             <div className="atlas-real-relationship-empty">
               <strong>真实关系从 Shared Encounter 开始。</strong>
