@@ -572,6 +572,13 @@ export function LiveAtlasSection() {
         </details>
         <details>
           <summary><b>旅途收藏</b><span>{journeyAtlas === null ? "正在翻页…" : `${journeyCount} 趟 · ${questionTicketCount} 张问题票`}</span></summary>
+          <ArtSlot
+            name="waiting-game/mobile-ticket-box"
+            label="问题票根盒"
+            aspect="wide"
+            className="atlas-mobile-collection-art"
+            src={resolveWaitingGameCollectionArt("ticket_box")}
+          />
           <div className="atlas-mobile-journeys">
             {recentJourneys.length ? recentJourneys.map((entry, index) => (
               <article key={entry.journeyId}>
@@ -583,7 +590,19 @@ export function LiveAtlasSection() {
             )) : <p className="atlas-mobile-trace">等它第一次真正回家，这里会出现第一张旅行页。</p>}
           </div>
         </details>
-        <Link href="/encounter"><b>关系图鉴</b><span>{production ? "真实相遇发生后，会在这里留下关系" : `${DEMO_FIXTURE.atlas.relationships.length} 个关系 · 去看看它遇见了谁`}</span></Link>
+        <Link className="atlas-mobile-relationship-link" href="/encounter">
+          <ArtSlot
+            name="waiting-game/mobile-relationship-book"
+            label="关系簿"
+            aspect="wide"
+            className="atlas-mobile-relationship-art"
+            src={resolveWaitingGameCollectionArt("relationship_book")}
+          />
+          <span className="atlas-mobile-relationship-copy">
+            <b>关系图鉴</b>
+            <small>{production ? "真实相遇发生后，会在这里留下关系" : `${DEMO_FIXTURE.atlas.relationships.length} 个关系 · 去看看它遇见了谁`}</small>
+          </span>
+        </Link>
         <details>
           <summary><b>人格历史</b><span>{primaryInterest} → {title}</span></summary>
           <p className="atlas-mobile-trace">知乎成分「{primaryInterest}」正在把它推向「{title}」。人格会随之后的旅途继续变化。</p>
