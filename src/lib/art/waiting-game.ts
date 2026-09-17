@@ -61,6 +61,14 @@ const POSTCARD_FOLDER: Record<InterestName, string> = {
   "综合": "unknown",
 };
 
+const NPC_ENCOUNTER_POSTCARD_FILE: Record<string, string> = {
+  "齿轮": "postcard_encounter_gear.png",
+  "糯米": "postcard_encounter_rice.png",
+  "刻度": "postcard_encounter_thesis.png",
+  "墨点": "postcard_encounter_ink.png",
+  "路标": "postcard_encounter_waypoint.png",
+};
+
 export function resolveWaitingGamePersonaActivity(
   persona: Pick<PlayerPersona, "visualVariant">,
   activity: WaitingGamePersonaActivity,
@@ -96,6 +104,13 @@ export function resolveWaitingGamePostcard(interest: InterestName | string, vari
   const folder = POSTCARD_FOLDER[normalizedInterest];
   const safeVariant = Math.max(1, Math.min(3, Math.trunc(variant)));
   return `${ROOT}/postcards/${folder}/postcard_${folder}_${String(safeVariant).padStart(2, "0")}.png`;
+}
+
+export function resolveWaitingGameEncounterPostcard(participantName: string, sharedUser = false): string {
+  const filename = sharedUser
+    ? "postcard_encounter_two_player_cats.png"
+    : NPC_ENCOUNTER_POSTCARD_FILE[participantName] ?? "postcard_encounter_glimpse_01.png";
+  return `${ROOT}/postcards/encounter/${filename}`;
 }
 
 export const WAITING_GAME_ART_ROOT = ROOT;

@@ -9,8 +9,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { resolveP0Art } from "@/lib/art/p0";
-import { resolveWaitingGameCollectionArt, resolveWaitingGamePostcard, resolveWaitingGameWorldSubzone } from "@/lib/art/waiting-game";
-import type { JourneyAtlasView } from "@/lib/journey/types";
+import {
+  resolveWaitingGameCollectionArt,
+  resolveWaitingGameEncounterPostcard,
+  resolveWaitingGamePostcard,
+  resolveWaitingGameWorldSubzone,
+} from "@/lib/art/waiting-game";
+import type { JourneyAtlasEntry, JourneyAtlasView } from "@/lib/journey/types";
 
 import { DemoFlowButton } from "../client";
 import { ArtSlot, PaperCard, PersonaArt } from "../components";
@@ -38,6 +43,13 @@ function postcardInterest(routeBias: string | null, fallbackInterest: string) {
   if (route.includes("宠物")) return "宠物";
   if (route.includes("生活") || route.includes("文化")) return "文化与生活";
   return fallbackInterest;
+}
+
+function journeyPostcardArt(entry: JourneyAtlasEntry, fallbackInterest: string, index: number) {
+  if (entry.conversation) {
+    return resolveWaitingGameEncounterPostcard(entry.conversation.participantName, entry.conversation.kind === "USER");
+  }
+  return resolveWaitingGamePostcard(postcardInterest(entry.routeBias, fallbackInterest), (index % 3) + 1);
 }
 
 function formatJourneyDate(value: number) {
@@ -597,7 +609,7 @@ export function LiveAtlasSection() {
                   label={`${entry.postcard.headline} · 知识漫游插画`}
                   aspect="wide"
                   className="atlas-mobile-postcard-art"
-                  src={resolveWaitingGamePostcard(postcardInterest(entry.routeBias, primaryInterest), (index % 3) + 1)}
+                  src={journeyPostcardArt(entry, primaryInterest, index)}
                 />
                 <b>{String(index + 1).padStart(2, "0")} · {entry.postcard.headline}</b>
                 <span>{formatJourneyDate(entry.completedAt)} · 纸条「{entry.routeBias ?? "随便逛"}」</span>
@@ -659,7 +671,7 @@ export function LiveAtlasSection() {
                     name={`waiting-game/postcard-${index + 1}`}
                     label={`${entry.postcard.headline} · 知识漫游插画`}
                     aspect="wide"
-                    src={resolveWaitingGamePostcard(postcardInterest(entry.routeBias, primaryInterest), (index % 3) + 1)}
+                    src={journeyPostcardArt(entry, primaryInterest, index)}
                   />
                   <span>{entry.postcard.headline}</span>
                 </article>
