@@ -1,0 +1,2677 @@
+{
+  "assets": [
+    {
+      "category": "home/traces",
+      "filename": "home_trace_open_book.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_open_book.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/32_home_micro_traces/home_trace_open_book.png",
+      "sha256": "39ba52a38479db979d039cfd0d56e6f2d719fd7774b7c7d2213ab95dbe6ba374"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_sleep_blanket.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_sleep_blanket.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/32_home_micro_traces/home_trace_sleep_blanket.png",
+      "sha256": "b37dbdace9c809766df8817d09fd3b015c0185bceb259b4112e18783cbc843ae"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_crumpled_paper.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_crumpled_paper.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/32_home_micro_traces/home_trace_crumpled_paper.png",
+      "sha256": "55d090f6bc000f1be99b30616bf55a5296adc3f2f3ae3e9351c795bb66670f05"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_pencil_shavings.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_pencil_shavings.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/32_home_micro_traces/home_trace_pencil_shavings.png",
+      "sha256": "a0fe5b84afc69e403c0aa34c1998d1e5553ec5ce20e121ce9e4970398cb545bd"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_dust_motes.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_dust_motes.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/32_home_micro_traces/home_trace_dust_motes.png",
+      "sha256": "f84ef7ba6946fe38c5ea82799fc433443b5bf1516fcd1cfc7630d4ecb6c80985"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_tiny_feather.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_tiny_feather.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/32_home_micro_traces/home_trace_tiny_feather.png",
+      "sha256": "3e00c351b4ea51df3776c278675d425f4a7d32236d84bd900ed86e893c262e18"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_blue_thread.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_blue_thread.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/32_home_micro_traces/home_trace_blue_thread.png",
+      "sha256": "864589a6eb0e3d5fa94c6fd05ebbbb9d2353e6bbd4b7e5a0e1868f7c5e3b6291"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_steam_cup.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_steam_cup.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/32_home_micro_traces/home_trace_steam_cup.png",
+      "sha256": "ba9e5684ed02ab935609d4c9bdbe2cebbf8cfda09d7c09796e94fdead64319f0"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_rain_drops.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_rain_drops.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/32_home_micro_traces/home_trace_rain_drops.png",
+      "sha256": "ec3e9bbc3e60c25e344b4285d11db59f29ff8203a8c117a70d7ed2b582f6a99f"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_torn_tape.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_torn_tape.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/32_home_micro_traces/home_trace_torn_tape.png",
+      "sha256": "a2009f7fdea58370dd5e602f066e4998e5de5894d1f34f648aba8c73cdd5e2ee"
+    },
+    {
+      "category": "home/supply-shelves",
+      "filename": "supply_shelf_full.png",
+      "url": "/art/waiting-game-v2/home/supply-shelves/supply_shelf_full.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/31_supply_shelf_states/supply_shelf_full.png",
+      "sha256": "9bb91f264b4930fba7a45e84655d2cc42a0b3ab432e112ca1275ca34abab84af"
+    },
+    {
+      "category": "home/supply-shelves",
+      "filename": "supply_shelf_paper.png",
+      "url": "/art/waiting-game-v2/home/supply-shelves/supply_shelf_paper.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/31_supply_shelf_states/supply_shelf_paper.png",
+      "sha256": "a14702fb64b95b12bd29b625d98eec1f942b08e2b21bf5ed60916f5afcda0c32"
+    },
+    {
+      "category": "home/supply-shelves",
+      "filename": "supply_shelf_empty.png",
+      "url": "/art/waiting-game-v2/home/supply-shelves/supply_shelf_empty.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/31_supply_shelf_states/supply_shelf_empty.png",
+      "sha256": "83f284221fe79b1f15c146a48f5c3f0a6bff61f44dcb32e514caa68ba3007ed0"
+    },
+    {
+      "category": "home/supply-shelves",
+      "filename": "supply_shelf_restock_trace.png",
+      "url": "/art/waiting-game-v2/home/supply-shelves/supply_shelf_restock_trace.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/31_supply_shelf_states/supply_shelf_restock_trace.png",
+      "sha256": "ae6aa5d1fbce9055d96d56e702ea96c80606defeee665c6dc0f7cbf8b2e04b04"
+    },
+    {
+      "category": "home/supply-shelves",
+      "filename": "supply_shelf_normal.png",
+      "url": "/art/waiting-game-v2/home/supply-shelves/supply_shelf_normal.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/31_supply_shelf_states/supply_shelf_normal.png",
+      "sha256": "cd3003353cdf697d07261032d2c4b495f8a20305a4cf7b429671213c6876a107"
+    },
+    {
+      "category": "home/supply-shelves",
+      "filename": "supply_shelf_open_drawer.png",
+      "url": "/art/waiting-game-v2/home/supply-shelves/supply_shelf_open_drawer.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/31_supply_shelf_states/supply_shelf_open_drawer.png",
+      "sha256": "6efef66f8f0f59d3eabe375f703024d3da2c3fe5405f1813f8b1e50f2102f461"
+    },
+    {
+      "category": "home/supply-shelves",
+      "filename": "supply_shelf_leaves.png",
+      "url": "/art/waiting-game-v2/home/supply-shelves/supply_shelf_leaves.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/31_supply_shelf_states/supply_shelf_leaves.png",
+      "sha256": "9411b80001aed4e96f28ade3aa8376eb8a4bc08ff52ecfafee344043beb71bbc"
+    },
+    {
+      "category": "home/supply-shelves",
+      "filename": "supply_shelf_snacks.png",
+      "url": "/art/waiting-game-v2/home/supply-shelves/supply_shelf_snacks.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/31_supply_shelf_states/supply_shelf_snacks.png",
+      "sha256": "9018373138804023a404ce6bd53e0af803be0d24705d61699934c008cfb845cd"
+    },
+    {
+      "category": "home/supply-shelves",
+      "filename": "supply_shelf_charms.png",
+      "url": "/art/waiting-game-v2/home/supply-shelves/supply_shelf_charms.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/31_supply_shelf_states/supply_shelf_charms.png",
+      "sha256": "097a96c8294e7701c0fe37b44540da5a5a8a858541e322e2a77f157b2cf9897e"
+    },
+    {
+      "category": "home/supply-shelves",
+      "filename": "supply_shelf_low.png",
+      "url": "/art/waiting-game-v2/home/supply-shelves/supply_shelf_low.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_expansion_02_groups_31_32/31_supply_shelf_states/supply_shelf_low.png",
+      "sha256": "deccc2b75f0daeb8d541f56b0461882b8465d8f8cde2ed4cf71a8349300491d7"
+    },
+    {
+      "category": "home/props",
+      "filename": "home_prop_wall_hook.png",
+      "url": "/art/waiting-game-v2/home/props/home_prop_wall_hook.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/29_home_architecture_overlays/home_prop_wall_hook.png",
+      "sha256": "9d67af9abd056004214d705aca1da2bc9d03951a677d17d489f11d57aa09daff"
+    },
+    {
+      "category": "home/props",
+      "filename": "home_prop_door_ajar.png",
+      "url": "/art/waiting-game-v2/home/props/home_prop_door_ajar.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/29_home_architecture_overlays/home_prop_door_ajar.png",
+      "sha256": "2cb2514a047d11021a03c30ed986c3dcad9e4ccb37391742dd68f0a6f0e1b5c5"
+    },
+    {
+      "category": "home/props",
+      "filename": "home_prop_window_dusk.png",
+      "url": "/art/waiting-game-v2/home/props/home_prop_window_dusk.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/29_home_architecture_overlays/home_prop_window_dusk.png",
+      "sha256": "f4e92f336b005ab370b2f5452b84290a39832dad16f88af9c55185945b673053"
+    },
+    {
+      "category": "home/props",
+      "filename": "home_prop_door_open.png",
+      "url": "/art/waiting-game-v2/home/props/home_prop_door_open.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/29_home_architecture_overlays/home_prop_door_open.png",
+      "sha256": "51019d65c1a73c16a3ebdcbcdcbcfeec2a8b403a9af00ee590420a4ef8d5848d"
+    },
+    {
+      "category": "home/props",
+      "filename": "home_prop_window_clear.png",
+      "url": "/art/waiting-game-v2/home/props/home_prop_window_clear.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/29_home_architecture_overlays/home_prop_window_clear.png",
+      "sha256": "aa4786df2aff693564e3a8e4448f2148c5ebeb802285e83accc3b196a1cf8397"
+    },
+    {
+      "category": "home/props",
+      "filename": "home_prop_small_crate.png",
+      "url": "/art/waiting-game-v2/home/props/home_prop_small_crate.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/29_home_architecture_overlays/home_prop_small_crate.png",
+      "sha256": "88b4c1721dab0b61677f82fcaade292ca77a20659a5ab6a8c8d403399007ac67"
+    },
+    {
+      "category": "home/props",
+      "filename": "home_prop_window_rain.png",
+      "url": "/art/waiting-game-v2/home/props/home_prop_window_rain.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/29_home_architecture_overlays/home_prop_window_rain.png",
+      "sha256": "5a039b24552aa28a66386b089d5c6d603ca0f5570e2bc5daf55e9456aa4b406b"
+    },
+    {
+      "category": "home/props",
+      "filename": "home_prop_floor_cushion.png",
+      "url": "/art/waiting-game-v2/home/props/home_prop_floor_cushion.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/29_home_architecture_overlays/home_prop_floor_cushion.png",
+      "sha256": "73a055b2bca91017521562cd5926e20acd36008106df2afb8815e8a06ebaa15d"
+    },
+    {
+      "category": "home/props",
+      "filename": "home_prop_window_night.png",
+      "url": "/art/waiting-game-v2/home/props/home_prop_window_night.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/29_home_architecture_overlays/home_prop_window_night.png",
+      "sha256": "bf9bc4ae1ebe0ce09f25c5200ae39cd597ed65b2143ca332e586e644b6732355"
+    },
+    {
+      "category": "home/props",
+      "filename": "home_prop_door_closed.png",
+      "url": "/art/waiting-game-v2/home/props/home_prop_door_closed.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/29_home_architecture_overlays/home_prop_door_closed.png",
+      "sha256": "eb257afa5feb70d6a8488ee68a9b037c1acdf5afe4aff4190b4087e0a81bf75f"
+    },
+    {
+      "category": "personas/traveler",
+      "filename": "player_traveler_desk_reading.png",
+      "url": "/art/waiting-game-v2/personas/traveler/player_traveler_desk_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/27_traveler_home_activities/player_traveler_desk_reading.png",
+      "sha256": "082fb266a819177c5b1f5d544e7f864840b514f25bb3d5bb8a2caa4505e2c99a"
+    },
+    {
+      "category": "personas/traveler",
+      "filename": "player_traveler_floor_reading.png",
+      "url": "/art/waiting-game-v2/personas/traveler/player_traveler_floor_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/27_traveler_home_activities/player_traveler_floor_reading.png",
+      "sha256": "d739b9b37f1633dd0b1c52be89e168a5e95218ebc7780ac24a342dfa6eb4ae3e"
+    },
+    {
+      "category": "personas/traveler",
+      "filename": "player_traveler_stretching.png",
+      "url": "/art/waiting-game-v2/personas/traveler/player_traveler_stretching.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/27_traveler_home_activities/player_traveler_stretching.png",
+      "sha256": "0e81f70356dbe6b6e9655a04d04957cf31946bd9ed84d75e9825fcbaa7337685"
+    },
+    {
+      "category": "personas/traveler",
+      "filename": "player_traveler_carry_photo.png",
+      "url": "/art/waiting-game-v2/personas/traveler/player_traveler_carry_photo.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/27_traveler_home_activities/player_traveler_carry_photo.png",
+      "sha256": "d60ba8dae83ce70bf7f812dffadc3c5a1466b59870be3f5fd01e96ac05be81de"
+    },
+    {
+      "category": "personas/traveler",
+      "filename": "player_traveler_carry_ticket.png",
+      "url": "/art/waiting-game-v2/personas/traveler/player_traveler_carry_ticket.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/27_traveler_home_activities/player_traveler_carry_ticket.png",
+      "sha256": "8ab8c426c8807a27fc4f777b6389055ec0278ccd164cad3e7a5b65d180e1dd08"
+    },
+    {
+      "category": "personas/traveler",
+      "filename": "player_traveler_wake_up.png",
+      "url": "/art/waiting-game-v2/personas/traveler/player_traveler_wake_up.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/27_traveler_home_activities/player_traveler_wake_up.png",
+      "sha256": "69aaa4c6305922e707909626828bd6189c63138f781ba236501c43cc899efc49"
+    },
+    {
+      "category": "personas/traveler",
+      "filename": "player_traveler_packing_bag.png",
+      "url": "/art/waiting-game-v2/personas/traveler/player_traveler_packing_bag.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/27_traveler_home_activities/player_traveler_packing_bag.png",
+      "sha256": "ec31d393f59dbd524e2bdf37c28a7069e774e04c3d7cd38eaede4526672e6339"
+    },
+    {
+      "category": "personas/traveler",
+      "filename": "player_traveler_window_sit.png",
+      "url": "/art/waiting-game-v2/personas/traveler/player_traveler_window_sit.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/27_traveler_home_activities/player_traveler_window_sit.png",
+      "sha256": "55930d6e5fc4b725fb4003d6b97fe60ad50923d7d420bd7bc67ebdd914a77851"
+    },
+    {
+      "category": "personas/traveler",
+      "filename": "player_traveler_sorting_tickets.png",
+      "url": "/art/waiting-game-v2/personas/traveler/player_traveler_sorting_tickets.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/27_traveler_home_activities/player_traveler_sorting_tickets.png",
+      "sha256": "e576b6582c63817658b4a4e8619196c77387d63e510e5baa7422a8592a2cc74b"
+    },
+    {
+      "category": "personas/traveler",
+      "filename": "player_traveler_sleep_curl.png",
+      "url": "/art/waiting-game-v2/personas/traveler/player_traveler_sleep_curl.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/27_traveler_home_activities/player_traveler_sleep_curl.png",
+      "sha256": "1f1b80b43280375b6a0a5b036132f6dcb2683d10b3ee8c99973ad3fb0755ed74"
+    },
+    {
+      "category": "personas/transitions",
+      "filename": "player_transition_return_happy.png",
+      "url": "/art/waiting-game-v2/personas/transitions/player_transition_return_happy.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/28_player_transition_poses/player_transition_return_happy.png",
+      "sha256": "1cbcc620fe4873a2ff9f14fecf9664e264c7eac471961b9eb8e4bab7e0c5ca1a"
+    },
+    {
+      "category": "personas/transitions",
+      "filename": "player_transition_visitor_notice.png",
+      "url": "/art/waiting-game-v2/personas/transitions/player_transition_visitor_notice.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/28_player_transition_poses/player_transition_visitor_notice.png",
+      "sha256": "03fae2239eeab61a6e169b3ad84cf2ca6325f7494d0af19cf5124f36242dfafe"
+    },
+    {
+      "category": "personas/transitions",
+      "filename": "player_transition_check_mail.png",
+      "url": "/art/waiting-game-v2/personas/transitions/player_transition_check_mail.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/28_player_transition_poses/player_transition_check_mail.png",
+      "sha256": "d8af198d62287c7e5a4d770281e46284757a591f3b22d8f8868305e30118c4a5"
+    },
+    {
+      "category": "personas/transitions",
+      "filename": "player_transition_shelf_reach.png",
+      "url": "/art/waiting-game-v2/personas/transitions/player_transition_shelf_reach.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/28_player_transition_poses/player_transition_shelf_reach.png",
+      "sha256": "0b86eb05db674dec104769935e16d0db024260b589b7d349d4e78a9dec56f748"
+    },
+    {
+      "category": "personas/transitions",
+      "filename": "player_transition_bag_check.png",
+      "url": "/art/waiting-game-v2/personas/transitions/player_transition_bag_check.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/28_player_transition_poses/player_transition_bag_check.png",
+      "sha256": "1055b6e874c5db75715f8cdc9dfe709754f9fb16e7158d9024b24cc9118899a3"
+    },
+    {
+      "category": "personas/transitions",
+      "filename": "player_transition_drop_bag.png",
+      "url": "/art/waiting-game-v2/personas/transitions/player_transition_drop_bag.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/28_player_transition_poses/player_transition_drop_bag.png",
+      "sha256": "dbc921d29d83ce404ef2455bed0445d00f519fe2930e9ce140c526a3ca09401a"
+    },
+    {
+      "category": "personas/transitions",
+      "filename": "player_transition_window_leave.png",
+      "url": "/art/waiting-game-v2/personas/transitions/player_transition_window_leave.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/28_player_transition_poses/player_transition_window_leave.png",
+      "sha256": "f6af06a5fb45b97f4b79505b8bff61402642f8a653beb3b8cc9260a00bd4df9b"
+    },
+    {
+      "category": "personas/transitions",
+      "filename": "player_transition_table_reach.png",
+      "url": "/art/waiting-game-v2/personas/transitions/player_transition_table_reach.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/28_player_transition_poses/player_transition_table_reach.png",
+      "sha256": "ddbc001d024db88f90fba00c3e12ef4347cf7251744341e8590763be69fb9b98"
+    },
+    {
+      "category": "personas/transitions",
+      "filename": "player_transition_door_look.png",
+      "url": "/art/waiting-game-v2/personas/transitions/player_transition_door_look.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/28_player_transition_poses/player_transition_door_look.png",
+      "sha256": "c76256d30444c6a9d958f6d9b126b99ba74985dabdf5bc7e3ffec4dff2ff0cb5"
+    },
+    {
+      "category": "personas/transitions",
+      "filename": "player_transition_return_tired.png",
+      "url": "/art/waiting-game-v2/personas/transitions/player_transition_return_tired.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/28_player_transition_poses/player_transition_return_tired.png",
+      "sha256": "a0259a6da9985a61faf45300b5fe5481769049175af9e67115888a3c714627e9"
+    },
+    {
+      "category": "home/tables",
+      "filename": "home_table_prepare_trip.png",
+      "url": "/art/waiting-game-v2/home/tables/home_table_prepare_trip.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/30_home_table_states/home_table_prepare_trip.png",
+      "sha256": "e5763f69f936ad7fb31b0b6ad20b0fe439745480968fee4f92cc2279a4e15948"
+    },
+    {
+      "category": "home/tables",
+      "filename": "home_table_empty.png",
+      "url": "/art/waiting-game-v2/home/tables/home_table_empty.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/30_home_table_states/home_table_empty.png",
+      "sha256": "5db07530498acf37366ac8830aa154b4d13bebcd66ca96faa3686f6a96d741ed"
+    },
+    {
+      "category": "home/tables",
+      "filename": "home_table_photo_sorting.png",
+      "url": "/art/waiting-game-v2/home/tables/home_table_photo_sorting.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/30_home_table_states/home_table_photo_sorting.png",
+      "sha256": "140d1e132d58c077db2a332d469cdf50e4bdcf226617ee1a4faabce477e9e055"
+    },
+    {
+      "category": "home/tables",
+      "filename": "home_table_unopened_bag.png",
+      "url": "/art/waiting-game-v2/home/tables/home_table_unopened_bag.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/30_home_table_states/home_table_unopened_bag.png",
+      "sha256": "508d5ab9d4fab92f8bbfc04610e01d1b77eede99c44e11872d3c3bad7f56ad1c"
+    },
+    {
+      "category": "home/tables",
+      "filename": "home_table_ticket_sorting.png",
+      "url": "/art/waiting-game-v2/home/tables/home_table_ticket_sorting.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/30_home_table_states/home_table_ticket_sorting.png",
+      "sha256": "3bf21032f016afc5a394fea10822107cb6f9bcb82de0728f51ac62cf4be8a014"
+    },
+    {
+      "category": "home/tables",
+      "filename": "home_table_messy_cozy.png",
+      "url": "/art/waiting-game-v2/home/tables/home_table_messy_cozy.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/30_home_table_states/home_table_messy_cozy.png",
+      "sha256": "e2268c40d221a3c83414672f5ad05926ddc62a62130f51177d261f35bbc815ab"
+    },
+    {
+      "category": "home/tables",
+      "filename": "home_table_visitor_note.png",
+      "url": "/art/waiting-game-v2/home/tables/home_table_visitor_note.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/30_home_table_states/home_table_visitor_note.png",
+      "sha256": "ccbd9d80d706b46b891ecba7a532f2e82fe71f206e2c67183002db844715e126"
+    },
+    {
+      "category": "home/tables",
+      "filename": "home_table_reading.png",
+      "url": "/art/waiting-game-v2/home/tables/home_table_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/30_home_table_states/home_table_reading.png",
+      "sha256": "0d5cfcaf98d08ea84bc74e90007a8e41962ec8ecdc0361f769d78c0898d5c215"
+    },
+    {
+      "category": "home/tables",
+      "filename": "home_table_milestone.png",
+      "url": "/art/waiting-game-v2/home/tables/home_table_milestone.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/30_home_table_states/home_table_milestone.png",
+      "sha256": "30e278458e7ea8def766fb3e8b11634dea1c7f16f0040bae693d972109484cd6"
+    },
+    {
+      "category": "home/tables",
+      "filename": "home_table_open_bundle.png",
+      "url": "/art/waiting-game-v2/home/tables/home_table_open_bundle.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_27_30.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_27_30/30_home_table_states/home_table_open_bundle.png",
+      "sha256": "f004350ef088850ef6d25c7e74b5beaea0b44ab29ff9efe5871d455b06dfbfb7"
+    },
+    {
+      "category": "collections",
+      "filename": "album_cover.png",
+      "url": "/art/waiting-game-v2/collections/album_cover.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/10_visitors_collection_containers/album_cover.png",
+      "sha256": "6fac8dfa94b4908988622e3a78d6111aabad5d4b8c7f91b4bd68ec1f5a482f2d"
+    },
+    {
+      "category": "collections",
+      "filename": "ticket_box.png",
+      "url": "/art/waiting-game-v2/collections/ticket_box.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/10_visitors_collection_containers/ticket_box.png",
+      "sha256": "03bf186e7f3871e190691607b4d4470ecca1c33116cffc3365b9421fc6de4279"
+    },
+    {
+      "category": "visitors",
+      "filename": "resident_ink_visit.png",
+      "url": "/art/waiting-game-v2/visitors/resident_ink_visit.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/10_visitors_collection_containers/resident_ink_visit.png",
+      "sha256": "de4e946754a4aa07fbf0cf4f86c5bb0071463b33e455063188c745f750152744"
+    },
+    {
+      "category": "visitors",
+      "filename": "resident_generic_note_01.png",
+      "url": "/art/waiting-game-v2/visitors/resident_generic_note_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/10_visitors_collection_containers/resident_generic_note_01.png",
+      "sha256": "6addb81630ef16b278264def2cc83282f3a18b87414bf391028146af44d6ba3f"
+    },
+    {
+      "category": "collections",
+      "filename": "album_page.png",
+      "url": "/art/waiting-game-v2/collections/album_page.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/10_visitors_collection_containers/album_page.png",
+      "sha256": "371d5587081f3a352b118417167dbc9034c13d36c41ac5bce94a7510dbe1f1dc"
+    },
+    {
+      "category": "milestones",
+      "filename": "milestone_first_encounter.png",
+      "url": "/art/waiting-game-v2/milestones/milestone_first_encounter.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/10_visitors_collection_containers/milestone_first_encounter.png",
+      "sha256": "a2c9d71c33c34a14efdcc8127d68635c43b51560d1f998ed1545fe95444d8c68"
+    },
+    {
+      "category": "collections",
+      "filename": "souvenir_shelf.png",
+      "url": "/art/waiting-game-v2/collections/souvenir_shelf.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/10_visitors_collection_containers/souvenir_shelf.png",
+      "sha256": "0cbad96c7a95ca61871dce6ba53d48d886e576db0306a49075d460cfadb4d424"
+    },
+    {
+      "category": "visitors",
+      "filename": "resident_ink_note.png",
+      "url": "/art/waiting-game-v2/visitors/resident_ink_note.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/10_visitors_collection_containers/resident_ink_note.png",
+      "sha256": "73d90ffb25e398d7bf86878593910070f434b5b52095dd907a993cb9c8433b81"
+    },
+    {
+      "category": "visitors",
+      "filename": "resident_generic_visit_01.png",
+      "url": "/art/waiting-game-v2/visitors/resident_generic_visit_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/10_visitors_collection_containers/resident_generic_visit_01.png",
+      "sha256": "1be1198489dc5b4ca4e02f2b4c48871d7e714a04e2f4a668b091dc7832d31265"
+    },
+    {
+      "category": "collections",
+      "filename": "relationship_book.png",
+      "url": "/art/waiting-game-v2/collections/relationship_book.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/10_visitors_collection_containers/relationship_book.png",
+      "sha256": "13e888ef9c60ca89d1ad5f4186f8d874dcc5e11a57b180780363abdbc39b6938"
+    },
+    {
+      "category": "return-bundle/photos",
+      "filename": "bundle_item_trip_photo_03.png",
+      "url": "/art/waiting-game-v2/return-bundle/photos/bundle_item_trip_photo_03.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/03_return_bundle_photos_tickets/bundle_item_trip_photo_03.png",
+      "sha256": "f22bc75fff316dd51b1f78266bfd41955695dc2f0a5dd43f9135a2c1ff81f7d7"
+    },
+    {
+      "category": "return-bundle/oddities",
+      "filename": "desk_item_small_pin.png",
+      "url": "/art/waiting-game-v2/return-bundle/oddities/desk_item_small_pin.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/03_return_bundle_photos_tickets/desk_item_small_pin.png",
+      "sha256": "a09ae8677dc2c9d02b8169880772f2e171a4091f1b7b625f68538e2c019ee61c"
+    },
+    {
+      "category": "return-bundle/photos",
+      "filename": "bundle_item_trip_photo_01.png",
+      "url": "/art/waiting-game-v2/return-bundle/photos/bundle_item_trip_photo_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/03_return_bundle_photos_tickets/bundle_item_trip_photo_01.png",
+      "sha256": "304e369c718bc0fea083338d281604563986770d97ce99096eb7f0f567a67ce9"
+    },
+    {
+      "category": "return-bundle/photos",
+      "filename": "bundle_item_trip_photo_02.png",
+      "url": "/art/waiting-game-v2/return-bundle/photos/bundle_item_trip_photo_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/03_return_bundle_photos_tickets/bundle_item_trip_photo_02.png",
+      "sha256": "ec90f44f67fcedd5d8f81f214a17b3ec5124e3f06395dacc95aafb6ac1d6a412"
+    },
+    {
+      "category": "return-bundle/tickets",
+      "filename": "bundle_item_question_ticket_02.png",
+      "url": "/art/waiting-game-v2/return-bundle/tickets/bundle_item_question_ticket_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/03_return_bundle_photos_tickets/bundle_item_question_ticket_02.png",
+      "sha256": "ec942ddaf59c2674a3021ff31b83fad857191c9dacdd541956a992a367192054"
+    },
+    {
+      "category": "return-bundle/relations",
+      "filename": "desk_item_folded_note.png",
+      "url": "/art/waiting-game-v2/return-bundle/relations/desk_item_folded_note.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/03_return_bundle_photos_tickets/desk_item_folded_note.png",
+      "sha256": "7f995204f6698aa396de54ac95441398b1422057b6592c7680c518266a2f44b8"
+    },
+    {
+      "category": "return-bundle/photos",
+      "filename": "desk_item_photo_stack.png",
+      "url": "/art/waiting-game-v2/return-bundle/photos/desk_item_photo_stack.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/03_return_bundle_photos_tickets/desk_item_photo_stack.png",
+      "sha256": "049372a0d41a60d7f17745266bcf614c6b8105f22e109ef85f478c6c657a2a8e"
+    },
+    {
+      "category": "return-bundle/tickets",
+      "filename": "bundle_item_question_ticket_01.png",
+      "url": "/art/waiting-game-v2/return-bundle/tickets/bundle_item_question_ticket_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/03_return_bundle_photos_tickets/bundle_item_question_ticket_01.png",
+      "sha256": "49130decf422ce448fd2019394e0adceac3bacd184ee79e8a1d98ae337902ee0"
+    },
+    {
+      "category": "return-bundle/oddities",
+      "filename": "desk_item_bookmark.png",
+      "url": "/art/waiting-game-v2/return-bundle/oddities/desk_item_bookmark.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/03_return_bundle_photos_tickets/desk_item_bookmark.png",
+      "sha256": "f92f7fd6051c060cd076334e09b1a2e9ff8cfe4e6e6a1c74edc2d25bae9f196e"
+    },
+    {
+      "category": "return-bundle/tickets",
+      "filename": "desk_item_old_ticket.png",
+      "url": "/art/waiting-game-v2/return-bundle/tickets/desk_item_old_ticket.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/03_return_bundle_photos_tickets/desk_item_old_ticket.png",
+      "sha256": "01436ee31f67816a25e62f6eea433e2642047697ad0579cf76bf132c0eb9ca51"
+    },
+    {
+      "category": "return-bundle/oddities",
+      "filename": "bundle_item_oddity_blue_pin.png",
+      "url": "/art/waiting-game-v2/return-bundle/oddities/bundle_item_oddity_blue_pin.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/04_return_bundle_relation_souvenirs/bundle_item_oddity_blue_pin.png",
+      "sha256": "8cf2414692360cfbde581e863c6412f97ee41f806510083630a74544bd4e5055"
+    },
+    {
+      "category": "return-bundle/relations",
+      "filename": "bundle_item_relation_note_02.png",
+      "url": "/art/waiting-game-v2/return-bundle/relations/bundle_item_relation_note_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/04_return_bundle_relation_souvenirs/bundle_item_relation_note_02.png",
+      "sha256": "f09cbeeff8b75f037feaed800aea14629bdf7ffd7a93fa603019ba1bdcabc8fa"
+    },
+    {
+      "category": "return-bundle/oddities",
+      "filename": "bundle_item_oddity_bookmark.png",
+      "url": "/art/waiting-game-v2/return-bundle/oddities/bundle_item_oddity_bookmark.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/04_return_bundle_relation_souvenirs/bundle_item_oddity_bookmark.png",
+      "sha256": "82ba3d3c50d537eb221206bb92d8a9aa159c2b27a96ab6de227ba6d5c6507534"
+    },
+    {
+      "category": "return-bundle/unlocks",
+      "filename": "bundle_item_unlock_tool_01.png",
+      "url": "/art/waiting-game-v2/return-bundle/unlocks/bundle_item_unlock_tool_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/04_return_bundle_relation_souvenirs/bundle_item_unlock_tool_01.png",
+      "sha256": "efc650b2d9c0790fa9b2a0882bd2bde4d3ced6e88a738c78901ea1281d3c7678"
+    },
+    {
+      "category": "return-bundle/resources",
+      "filename": "bundle_item_inspiration_leaves_02.png",
+      "url": "/art/waiting-game-v2/return-bundle/resources/bundle_item_inspiration_leaves_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/04_return_bundle_relation_souvenirs/bundle_item_inspiration_leaves_02.png",
+      "sha256": "b1847b14546b26b7f00b7e77faeba3c025a622e3adc9ed8305b7cc5acce1a5d0"
+    },
+    {
+      "category": "return-bundle/oddities",
+      "filename": "bundle_item_oddity_string_tag.png",
+      "url": "/art/waiting-game-v2/return-bundle/oddities/bundle_item_oddity_string_tag.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/04_return_bundle_relation_souvenirs/bundle_item_oddity_string_tag.png",
+      "sha256": "b0ae10bc95070dcc8dbc235d220a8958da9180c043ae2dbe2fc4a0a2a7fe37c3"
+    },
+    {
+      "category": "return-bundle/relations",
+      "filename": "bundle_item_relation_note_01.png",
+      "url": "/art/waiting-game-v2/return-bundle/relations/bundle_item_relation_note_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/04_return_bundle_relation_souvenirs/bundle_item_relation_note_01.png",
+      "sha256": "c0b0dc8b921723430439ae7dd73a225d7b618768e3467bac5b7d51aab88d44d9"
+    },
+    {
+      "category": "return-bundle/unlocks",
+      "filename": "bundle_item_unlock_tool_02.png",
+      "url": "/art/waiting-game-v2/return-bundle/unlocks/bundle_item_unlock_tool_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/04_return_bundle_relation_souvenirs/bundle_item_unlock_tool_02.png",
+      "sha256": "d947a20d654f17926a955df615b49feedd22e0af36f04e0f0369e4559da5ec64"
+    },
+    {
+      "category": "return-bundle/oddities",
+      "filename": "bundle_item_oddity_tiny_badge.png",
+      "url": "/art/waiting-game-v2/return-bundle/oddities/bundle_item_oddity_tiny_badge.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/04_return_bundle_relation_souvenirs/bundle_item_oddity_tiny_badge.png",
+      "sha256": "47b9beb33782c06dce395ed176464cd0cd6066e715de5c12d132f9ef17044b00"
+    },
+    {
+      "category": "return-bundle/resources",
+      "filename": "bundle_item_inspiration_leaves_01.png",
+      "url": "/art/waiting-game-v2/return-bundle/resources/bundle_item_inspiration_leaves_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/04_return_bundle_relation_souvenirs/bundle_item_inspiration_leaves_01.png",
+      "sha256": "64dd02f9515496966cabdf3ab60624efbbe55f1a7192c95f6c75401a8119e250"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_02.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/05_postcards_ai_science_career/postcard_career_02.png",
+      "sha256": "f11095c8fb404eb015e97f617401c28011f82238e576ed8b85b89f2499741352"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_03.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_03.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/05_postcards_ai_science_career/postcard_ai_03.png",
+      "sha256": "3b90b7d650f0f3141e009785badf603ab5d4c2128f89fa05ae130b7bfa4fa9ad"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_02.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/05_postcards_ai_science_career/postcard_science_02.png",
+      "sha256": "3ccc2a03f443bd12794bd606c950b48ba2ba565b5768bed3a4314c6b5672b4fe"
+    },
+    {
+      "category": "postcards/misc",
+      "filename": "postcard_crossover_01.png",
+      "url": "/art/waiting-game-v2/postcards/misc/postcard_crossover_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/05_postcards_ai_science_career/postcard_crossover_01.png",
+      "sha256": "5fcedce55ea91820d628a0728a5e072d6d3f26235782c5643b9807446546ce5b"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_01.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/05_postcards_ai_science_career/postcard_ai_01.png",
+      "sha256": "cfdf74838b3c60852de45444947635ece9595febcf008ddeeb56eb24d6d59ee6"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_02.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/05_postcards_ai_science_career/postcard_ai_02.png",
+      "sha256": "bff41169b7d0c4d02011fb4c2cbe87428b77ac2b37177e79c80878fe5a7003de"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_03.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_03.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/05_postcards_ai_science_career/postcard_science_03.png",
+      "sha256": "7e9bcbe8aba5b8b456a2d3d70aaf8cfd6378e64e9867fe1210667e1a50cb7d60"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_01.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/05_postcards_ai_science_career/postcard_science_01.png",
+      "sha256": "e5d5fccaa22b58368097ca9736f2226e4a084c8f038269a1d80b071e29328061"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_03.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_03.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/05_postcards_ai_science_career/postcard_career_03.png",
+      "sha256": "b92bfa46cf7e88a274bbd10be93ed2901cf7ae7497b678d1e8b160e1b4372c71"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_01.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/05_postcards_ai_science_career/postcard_career_01.png",
+      "sha256": "8810d4ba51c52cc597972264961d1807b37b79f57d37029d420caaf489550677"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_blue_ribbon_marker.png",
+      "url": "/art/waiting-game-v2/tools/tool_blue_ribbon_marker.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/08_world_unknown_and_main_tools/tool_blue_ribbon_marker.png",
+      "sha256": "835f863299fb0a19ec0fcdecb5bce97f0599f1ea9efe9cb35eff0bff9bb5ec90"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_notebook.png",
+      "url": "/art/waiting-game-v2/tools/tool_notebook.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/08_world_unknown_and_main_tools/tool_notebook.png",
+      "sha256": "496743b181fe7108b07cce6393cc40782eb64eda246a306a884cffad111dd991"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_old_camera.png",
+      "url": "/art/waiting-game-v2/tools/tool_old_camera.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/08_world_unknown_and_main_tools/tool_old_camera.png",
+      "sha256": "82ddfd90eeae1a59b4b8b0c65e7401152c4475a2d1c70902cbbbb1aee087b444"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_cloth_bag.png",
+      "url": "/art/waiting-game-v2/tools/tool_cloth_bag.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/08_world_unknown_and_main_tools/tool_cloth_bag.png",
+      "sha256": "eaa1a4b98d6e6664d0f7e5d08dd58d4e925a0f602907189705cbf3d19179e496"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_red_pencil.png",
+      "url": "/art/waiting-game-v2/tools/tool_red_pencil.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/08_world_unknown_and_main_tools/tool_red_pencil.png",
+      "sha256": "e90875d4bdaed5c1a01229a919aad206142022473babca6174035f2de5a707d1"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_old_ticket.png",
+      "url": "/art/waiting-game-v2/tools/tool_old_ticket.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/08_world_unknown_and_main_tools/tool_old_ticket.png",
+      "sha256": "91846261cdc10fa209eae1867b57c8fe79185298f898f7428881e502afaf14a7"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_unknown_unlocked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_unknown_unlocked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/08_world_unknown_and_main_tools/world_zone_unknown_unlocked.png",
+      "sha256": "7580cc82dba3996967238f9be64538d45e96533cedfaa5964c052756dabc417f"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_index_cards.png",
+      "url": "/art/waiting-game-v2/tools/tool_index_cards.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/08_world_unknown_and_main_tools/tool_index_cards.png",
+      "sha256": "2cd819ca2f656782c2f24aeeeb5ef54028e796b7161c5be5ad92d335804c1cb9"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_magnifier.png",
+      "url": "/art/waiting-game-v2/tools/tool_magnifier.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/08_world_unknown_and_main_tools/tool_magnifier.png",
+      "sha256": "ab4fe52edace6249728eff33ee39d1d908ed705391e0e70c991ca97f9077fa95"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_unknown_locked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_unknown_locked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/08_world_unknown_and_main_tools/world_zone_unknown_locked.png",
+      "sha256": "d62c7f27d6075499558cf75c95219d0653a8ea635143a22341c47fd14b2da492"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_empty_02.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_empty_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/02_home_traces_and_empty_variants/home_room_empty_02.png",
+      "sha256": "971b4219a7919e6c10283acec8afda72d12cce42e9ca2d6e29fe383a4d343d3e"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_opened_bundle.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_opened_bundle.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/02_home_traces_and_empty_variants/home_trace_opened_bundle.png",
+      "sha256": "35bd6225baa9d020523996a065d2b6a3ff39b5c4e9fd5e2e1ec5339485835f96"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_letter.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_letter.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/02_home_traces_and_empty_variants/home_trace_letter.png",
+      "sha256": "c3a2df6cfcc597a4d2abd3e90c2741fdc102435c239509833c51fdb0991aaf51"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_visit_02.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_visit_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/02_home_traces_and_empty_variants/home_room_visit_02.png",
+      "sha256": "953db7d6ed3467519abb023d9439c0ce32f0befaeab3f5a0b175a5c66613e7ed"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_guest_note.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_guest_note.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/02_home_traces_and_empty_variants/home_trace_guest_note.png",
+      "sha256": "675002ec652e1ceaf93053b07c68f9b60561b559b0f40d499725c2bacd0c9888"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_leaf_cluster.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_leaf_cluster.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/02_home_traces_and_empty_variants/home_trace_leaf_cluster.png",
+      "sha256": "9835ebd48cea74dcd71e335d64ce3b836a0cdc72b6c3728700f2ad279b14d19e"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_postcard.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_postcard.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/02_home_traces_and_empty_variants/home_trace_postcard.png",
+      "sha256": "40a0434307a015a91990b99478c10d022b069745c371723cdf21a907efca5b5d"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_window_02.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_window_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/02_home_traces_and_empty_variants/home_room_window_02.png",
+      "sha256": "02ccb8049e4b75f45a5ba66262c7005baec7f5278ef9ce3869207c036a74bed0"
+    },
+    {
+      "category": "home/traces",
+      "filename": "home_trace_small_package.png",
+      "url": "/art/waiting-game-v2/home/traces/home_trace_small_package.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/02_home_traces_and_empty_variants/home_trace_small_package.png",
+      "sha256": "4deef2e0cd8ca32a34f029481bb63f33f81c1f2c330d51aa29b7fc9f07def858"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_resting_02.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_resting_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/02_home_traces_and_empty_variants/home_room_resting_02.png",
+      "sha256": "f9deb46c435e7e443c00599b069eacc2de13875d1e111c4d65460b1acc4f029d"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_03.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_03.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/06_postcards_pets_life_unknown/postcard_life_03.png",
+      "sha256": "07847571b93b8eb51db9dfa89d1f8d9510567681160086316bbc3164428deda0"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_01.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/06_postcards_pets_life_unknown/postcard_life_01.png",
+      "sha256": "ef011be5a088bec441ca41d0ae6011d853948d966fdaff7f370f891b085904d6"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_01.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/06_postcards_pets_life_unknown/postcard_unknown_01.png",
+      "sha256": "1ab701eb5eee7bd8cad2f25f978c71e6206bc92bd3ecd25b1a092ad2a0959796"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_02.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/06_postcards_pets_life_unknown/postcard_life_02.png",
+      "sha256": "2d88c32218012da9b48418d4069ace1a8a3ffb7751d3db15e69a90cc1ba61cf6"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_01.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/06_postcards_pets_life_unknown/postcard_pets_01.png",
+      "sha256": "510ac33a12dbf5e2d84d82cd3fbcdffee7617e0e7f0166c47704f34f081a1154"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_03.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_03.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/06_postcards_pets_life_unknown/postcard_unknown_03.png",
+      "sha256": "726bdff0a4671d2fd5ee9b1c0fbd107f4468b75d6efd888796c6176c9d21283d"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_glimpse_01.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_glimpse_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/06_postcards_pets_life_unknown/postcard_encounter_glimpse_01.png",
+      "sha256": "303c6c1b6ba1f945808cb5a66a4e7c2b64ab5079ef2bd486d95547350af1c414"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_02.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/06_postcards_pets_life_unknown/postcard_unknown_02.png",
+      "sha256": "87173e9512ff3568613190bcd54f8d996aba888a94cc9e06b0e423d3e038e1b4"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_03.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_03.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/06_postcards_pets_life_unknown/postcard_pets_03.png",
+      "sha256": "4c4ef6374ba1af99c5348985b435a202a3319b82bd6d0b8ecb912e545c9c5d62"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_02.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/06_postcards_pets_life_unknown/postcard_pets_02.png",
+      "sha256": "04bf0048db5f92f5e74e2b4a406e072d5771f9581b45f19c3527286d8218d1d1"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_reading_01.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_reading_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/01_home_room_core/home_room_reading_01.png",
+      "sha256": "0f25dddf68e687a37abbcb1e8617c1030a1c8544a13b7c4c99aba5dd0ec225e0"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_empty_01.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_empty_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/01_home_room_core/home_room_empty_01.png",
+      "sha256": "22e18eed1279928423e70c5df60a714e4e4259649abf5ab1d0edb174387eb176"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_reading_02.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_reading_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/01_home_room_core/home_room_reading_02.png",
+      "sha256": "a05bba3e48272aedf26fd7d1264c962da3b97e4497b28e7e34b0f50edd8b1bd8"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_visit_01.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_visit_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/01_home_room_core/home_room_visit_01.png",
+      "sha256": "667cdf27d80dc519bb70faaa7b04ee0c01f7b3f1e43fd15ad32c6aac8c70e477"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_idle_02.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_idle_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/01_home_room_core/home_room_idle_02.png",
+      "sha256": "e4061ea42b85c05639a93ba1bb4d6f656b5b764096059f39cd955ecbd04a7c07"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_sorting_02.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_sorting_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/01_home_room_core/home_room_sorting_02.png",
+      "sha256": "c01f8fb3690dc60ae2a3dba2292a0d8aa2092660515c2bcb3100ef42a4bf7d6e"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_idle_01.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_idle_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/01_home_room_core/home_room_idle_01.png",
+      "sha256": "b851dec50c96ee3512d528ed2ae899dd05bc19c89a9c399fc7ef311dd4aca5d9"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_window_01.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_window_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/01_home_room_core/home_room_window_01.png",
+      "sha256": "004eb79ba9138b163471d67eea598609de11576c5d67b21ec85c725226d3185a"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_sorting_01.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_sorting_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/01_home_room_core/home_room_sorting_01.png",
+      "sha256": "a47d97d49ebc047ab5f92da7ff13bdc254e4c1261071e5da9dead4abd906dc38"
+    },
+    {
+      "category": "home/rooms",
+      "filename": "home_room_resting_01.png",
+      "url": "/art/waiting-game-v2/home/rooms/home_room_resting_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/01_home_room_core/home_room_resting_01.png",
+      "sha256": "c79f681d0a2731c1038578817ed925db9393e55fc2c58811c16bf52c8516f148"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_lucky_button.png",
+      "url": "/art/waiting-game-v2/supplies/supply_lucky_button.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/09_supplies_and_resource/supply_lucky_button.png",
+      "sha256": "bdcc9abb538c8fc6101eb745e02d0e4437f74075727f2250764c22f5bde26403"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_tiny_badge.png",
+      "url": "/art/waiting-game-v2/supplies/supply_tiny_badge.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/09_supplies_and_resource/supply_tiny_badge.png",
+      "sha256": "684662f6097208601ecdebb15128797ab730ad131366a1d5af2dbc2c2993b00e"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_dried_fish.png",
+      "url": "/art/waiting-game-v2/supplies/supply_dried_fish.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/09_supplies_and_resource/supply_dried_fish.png",
+      "sha256": "e1a5dea943d577317828df563e29288bea4046ca01f9f69bfb78e2b5e7416d76"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_snack_box.png",
+      "url": "/art/waiting-game-v2/supplies/supply_snack_box.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/09_supplies_and_resource/supply_snack_box.png",
+      "sha256": "d93704e724008917f143cbe4e84c333403dcf54ca505451e6c29f94ba9370a7d"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_small_paper_bag.png",
+      "url": "/art/waiting-game-v2/supplies/supply_small_paper_bag.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/09_supplies_and_resource/supply_small_paper_bag.png",
+      "sha256": "62208b537949c7c250e794d401d88eeb0fb03ef05c92890b25e5c51d64cbc50a"
+    },
+    {
+      "category": "supplies",
+      "filename": "resource_inspiration_leaf_01.png",
+      "url": "/art/waiting-game-v2/supplies/resource_inspiration_leaf_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/09_supplies_and_resource/resource_inspiration_leaf_01.png",
+      "sha256": "621f3e1881d4fd899e646be64cf2f418d8cd5e2cd5abdc6880e26d0e6ef9b0b3"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_catnip.png",
+      "url": "/art/waiting-game-v2/supplies/supply_catnip.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/09_supplies_and_resource/supply_catnip.png",
+      "sha256": "f549b8aeedf449cd7b8fb9a8ad582248c57eed681c5118156704fea27fbcc7ad"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_folded_note.png",
+      "url": "/art/waiting-game-v2/supplies/supply_folded_note.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/09_supplies_and_resource/supply_folded_note.png",
+      "sha256": "f86b8db8298cb57359cc148830049e17b483a163ae1d8a7a32c970dc3b6fbdf2"
+    },
+    {
+      "category": "supplies",
+      "filename": "resource_inspiration_leaf_cluster.png",
+      "url": "/art/waiting-game-v2/supplies/resource_inspiration_leaf_cluster.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/09_supplies_and_resource/resource_inspiration_leaf_cluster.png",
+      "sha256": "20b02f3156dfccb8535031f09f95a435a642644e0c43b047eb83f28068c301bd"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_blue_ribbon.png",
+      "url": "/art/waiting-game-v2/supplies/supply_blue_ribbon.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/09_supplies_and_resource/supply_blue_ribbon.png",
+      "sha256": "952f4d0b08b88d238488d7447e265e19e8e56742a4cf337389e920f1f97a0ae9"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_ai_unlocked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_ai_unlocked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/07_world_zones/world_zone_ai_unlocked.png",
+      "sha256": "4b86b9b2ca386d4439a4d47a1e30a4727f24761c7bba85304828ec5907a62533"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_science_locked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_science_locked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/07_world_zones/world_zone_science_locked.png",
+      "sha256": "0d39c7fdd869617e7b49be95ca40ff49139f8dc4c86cceea829190df75c0d610"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_life_unlocked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_life_unlocked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/07_world_zones/world_zone_life_unlocked.png",
+      "sha256": "b28504b9ef12b18d10515687fcfa08dfdee32ed01c61017f123b8dddb90735aa"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_pets_unlocked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_pets_unlocked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/07_world_zones/world_zone_pets_unlocked.png",
+      "sha256": "a94d5ee658ab00c66c56550519512357a3ae985904a2598e2bb1c0f7de7b43aa"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_ai_locked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_ai_locked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/07_world_zones/world_zone_ai_locked.png",
+      "sha256": "b78f2f757f9282fad0522628eefc908edcc2df449fead7177ead335716259f64"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_life_locked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_life_locked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/07_world_zones/world_zone_life_locked.png",
+      "sha256": "6ed5acaf004921e277ad4136c6b00b2ebd6806cf8c2205ed224219fbfa3d5c36"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_pets_locked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_pets_locked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/07_world_zones/world_zone_pets_locked.png",
+      "sha256": "628b23f79cc3db82dd4fe97cb1c5b96648171701f6e943b9dcb44c15f7548d7d"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_science_unlocked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_science_unlocked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/07_world_zones/world_zone_science_unlocked.png",
+      "sha256": "b4c1b5bd6c60d6b3ffc8575c4d6fc9a9c77d117ae9184700857117066b4fb1d8"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_career_locked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_career_locked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/07_world_zones/world_zone_career_locked.png",
+      "sha256": "f57dec4bfbb7c5cdac4f31425bb9cdf7b76c12868ddc1ae60c74ab0a9139555a"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_zone_career_unlocked.png",
+      "url": "/art/waiting-game-v2/world/zones/world_zone_career_unlocked.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_generated_assets.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_generated_assets/07_world_zones/world_zone_career_unlocked.png",
+      "sha256": "07b178922abecffb54f3ed83273531930c4764cde910b83afbc7878da5e1cc60"
+    },
+    {
+      "category": "return-bundle/relations",
+      "filename": "relation_note_03.png",
+      "url": "/art/waiting-game-v2/return-bundle/relations/relation_note_03.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_04__14_return_bundle_more_tickets_notes/relation_note_03.png",
+      "sha256": "15867bcfd53e33d6150882f8ae31299d2b704cde71d65d660ae2c00be32c865d"
+    },
+    {
+      "category": "return-bundle/oddities",
+      "filename": "oddity_blue_stamp.png",
+      "url": "/art/waiting-game-v2/return-bundle/oddities/oddity_blue_stamp.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_04__14_return_bundle_more_tickets_notes/oddity_blue_stamp.png",
+      "sha256": "b789b8946630f9f62a7a6d46ed70b689c9fa24c60995fcb04e91147b3ce27d74"
+    },
+    {
+      "category": "return-bundle/oddities",
+      "filename": "oddity_paper_clip.png",
+      "url": "/art/waiting-game-v2/return-bundle/oddities/oddity_paper_clip.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_04__14_return_bundle_more_tickets_notes/oddity_paper_clip.png",
+      "sha256": "750e0e3e83fa94077635e20f6e73c16ff09283b8a5bbae7a79f45ef48f4e8ace"
+    },
+    {
+      "category": "return-bundle/oddities",
+      "filename": "oddity_old_receipt.png",
+      "url": "/art/waiting-game-v2/return-bundle/oddities/oddity_old_receipt.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_04__14_return_bundle_more_tickets_notes/oddity_old_receipt.png",
+      "sha256": "e63062890e93411f54f5a04715a6822121b234bf88300db2034877ae7b35265d"
+    },
+    {
+      "category": "return-bundle/oddities",
+      "filename": "oddity_twine_bundle.png",
+      "url": "/art/waiting-game-v2/return-bundle/oddities/oddity_twine_bundle.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_04__14_return_bundle_more_tickets_notes/oddity_twine_bundle.png",
+      "sha256": "6404876b0cd986133befb30296c69a98bbc0bd895f122f09e914e172bc6a94ad"
+    },
+    {
+      "category": "return-bundle/tickets",
+      "filename": "question_ticket_05.png",
+      "url": "/art/waiting-game-v2/return-bundle/tickets/question_ticket_05.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_04__14_return_bundle_more_tickets_notes/question_ticket_05.png",
+      "sha256": "5f7c9f2732e30b4cd5bfacf864a660b9409198c67a579eb98c3da74ca374b9d5"
+    },
+    {
+      "category": "return-bundle/relations",
+      "filename": "relation_note_04.png",
+      "url": "/art/waiting-game-v2/return-bundle/relations/relation_note_04.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_04__14_return_bundle_more_tickets_notes/relation_note_04.png",
+      "sha256": "c46eef9e5f425e6a4be3cbfcc9e96307a2a306edf9408ab1926452ba4ec0888b"
+    },
+    {
+      "category": "return-bundle/relations",
+      "filename": "relation_note_05.png",
+      "url": "/art/waiting-game-v2/return-bundle/relations/relation_note_05.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_04__14_return_bundle_more_tickets_notes/relation_note_05.png",
+      "sha256": "4065e0734036a5968f79ab5809c4e24824dd80a5fcdc69cfc77ff388cc164e94"
+    },
+    {
+      "category": "return-bundle/tickets",
+      "filename": "question_ticket_03.png",
+      "url": "/art/waiting-game-v2/return-bundle/tickets/question_ticket_03.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_04__14_return_bundle_more_tickets_notes/question_ticket_03.png",
+      "sha256": "97b071765230f149198489c9d9dda58767bd51592917c111f6b477e94642aa53"
+    },
+    {
+      "category": "return-bundle/tickets",
+      "filename": "question_ticket_04.png",
+      "url": "/art/waiting-game-v2/return-bundle/tickets/question_ticket_04.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_04__14_return_bundle_more_tickets_notes/question_ticket_04.png",
+      "sha256": "5dd620ed09bb1429ddca1e0f0b91595246d28d403d459e685dd8095b42dda509"
+    },
+    {
+      "category": "postcards/misc",
+      "filename": "postcard_question_glimpse_02.png",
+      "url": "/art/waiting-game-v2/postcards/misc/postcard_question_glimpse_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_05__15_postcards_more_ai_science/postcard_question_glimpse_02.png",
+      "sha256": "123560b2770a9e2f76c56d95ccddef8c29983b65522f0ef4f3be1aa6902638a6"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_06.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_06.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_05__15_postcards_more_ai_science/postcard_science_06.png",
+      "sha256": "5f5b3d7cf3c22f905173e8dbea66b5e4018b86f4b06078af808637f73f3d909f"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_04.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_04.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_05__15_postcards_more_ai_science/postcard_science_04.png",
+      "sha256": "b656f893f253f5e483f3f81b787666a45b884e3ce6c9f8f5139fec6d4d1f93ce"
+    },
+    {
+      "category": "postcards/misc",
+      "filename": "postcard_debate_01.png",
+      "url": "/art/waiting-game-v2/postcards/misc/postcard_debate_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_05__15_postcards_more_ai_science/postcard_debate_01.png",
+      "sha256": "bfdea721e2e8af218608f30fc31ddfe7a052e21668f13d488e1b17c48c4f93a4"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_05.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_05.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_05__15_postcards_more_ai_science/postcard_ai_05.png",
+      "sha256": "6a739b872ee422a19d7890671f7a765678009441f3880f5c0a103e805754cc14"
+    },
+    {
+      "category": "postcards/misc",
+      "filename": "postcard_question_glimpse_01.png",
+      "url": "/art/waiting-game-v2/postcards/misc/postcard_question_glimpse_01.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_05__15_postcards_more_ai_science/postcard_question_glimpse_01.png",
+      "sha256": "bdd51be67dc4e1f98362f97e687b939710b48d1a0770d1793057468eeea4cde9"
+    },
+    {
+      "category": "postcards/misc",
+      "filename": "postcard_debate_02.png",
+      "url": "/art/waiting-game-v2/postcards/misc/postcard_debate_02.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_05__15_postcards_more_ai_science/postcard_debate_02.png",
+      "sha256": "1c7caefe666d76ff404ca056500b978904bf86c598d92c2b0642322fdd3ac809"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_05.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_05.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_05__15_postcards_more_ai_science/postcard_science_05.png",
+      "sha256": "11bc7a51c44bb5f948262ca104649c5d585d58bc1b26f0c377b20c774ed8087f"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_06.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_06.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_05__15_postcards_more_ai_science/postcard_ai_06.png",
+      "sha256": "67cbb9d3fc1021dedd93e9a37ba6fde12c9c763c40b749ed7b69a7641060747c"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_04.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_04.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_05__15_postcards_more_ai_science/postcard_ai_04.png",
+      "sha256": "41119c680b23fc74227b055a442488d0fcd85395d8dc7e34b3e4d5499de5e060"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_clipboard.png",
+      "url": "/art/waiting-game-v2/tools/tool_clipboard.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_08__18_more_main_tools/tool_clipboard.png",
+      "sha256": "eb485ce711284ee7a69bfce71d21f76023fc7cd036f731f4162137a3017c78d3"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_stamper.png",
+      "url": "/art/waiting-game-v2/tools/tool_stamper.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_08__18_more_main_tools/tool_stamper.png",
+      "sha256": "7ef6e03c5ac7aa8a02c6bc04e3ba6475f6720fd76511bd1a6c126de4792cc340"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_pin_set.png",
+      "url": "/art/waiting-game-v2/tools/tool_pin_set.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_08__18_more_main_tools/tool_pin_set.png",
+      "sha256": "042a25964faa96bcc161f4e459ea8e56fa79944d076ea36db011452f3fdc34cf"
+    },
+    {
+      "category": "tools",
+      "filename": "tool_blueprint_roll.png",
+      "url": "/art/waiting-game-v2/tools/tool_blueprint_roll.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_08__18_more_main_tools/tool_blueprint_roll.png",
+      "sha256": "3f5250479375e7fb025f81eb1933607d7e6296d3c749434cb825bae3185b6748"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_cloth_patch.png",
+      "url": "/art/waiting-game-v2/supplies/supply_cloth_patch.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_09__19_more_supplies/supply_cloth_patch.png",
+      "sha256": "5e4adc16190db81d7372b65e46409f0db35983d8e7ac80637a2e0a522df099fb"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_luck_charm.png",
+      "url": "/art/waiting-game-v2/supplies/supply_luck_charm.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_09__19_more_supplies/supply_luck_charm.png",
+      "sha256": "75b2dfabe3d12dec5ee67c3ac4e6a51b2257fa045d5ea04d900a7a438d3ee299"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_mint_candy_tin.png",
+      "url": "/art/waiting-game-v2/supplies/supply_mint_candy_tin.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_09__19_more_supplies/supply_mint_candy_tin.png",
+      "sha256": "36155439d229d2c8810691771fb7830fa86378455d5b5bb1a2de86ade7e8e054"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_pocket_calendar.png",
+      "url": "/art/waiting-game-v2/supplies/supply_pocket_calendar.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_09__19_more_supplies/supply_pocket_calendar.png",
+      "sha256": "4a5dc546365f8f246b2ef0fdd4a66f3f60e908c78b7ddc3cb364f76a0ed6cb07"
+    },
+    {
+      "category": "supplies",
+      "filename": "resource_inspiration_leaf_cluster_alt.png",
+      "url": "/art/waiting-game-v2/supplies/resource_inspiration_leaf_cluster_alt.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_09__19_more_supplies/resource_inspiration_leaf_cluster_alt.png",
+      "sha256": "69533ba0aa4ff31297b67f9eccc77f8e34ceb00a77e43180c6c26fc98a05a0da"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_paper_stars.png",
+      "url": "/art/waiting-game-v2/supplies/supply_paper_stars.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_09__19_more_supplies/supply_paper_stars.png",
+      "sha256": "82054c9c888bcb170cd784ca39b9a6d833f86665184d48ab377ef23ebc6e4b8f"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_travel_snack_wrap.png",
+      "url": "/art/waiting-game-v2/supplies/supply_travel_snack_wrap.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_09__19_more_supplies/supply_travel_snack_wrap.png",
+      "sha256": "fbf32b932c1826ecb70b6dac652815b4775e03d56522350a41f0f36854a7b364"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_blue_envelope.png",
+      "url": "/art/waiting-game-v2/supplies/supply_blue_envelope.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_09__19_more_supplies/supply_blue_envelope.png",
+      "sha256": "ba7f720f322c2fdad794abebdfbccc56871799ec95bfdec020e29775f04abd90"
+    },
+    {
+      "category": "supplies",
+      "filename": "resource_inspiration_leaf_03.png",
+      "url": "/art/waiting-game-v2/supplies/resource_inspiration_leaf_03.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_09__19_more_supplies/resource_inspiration_leaf_03.png",
+      "sha256": "3b88e88b4a58d054e261fd0aef50c7a52d648d094ce76f75906fcdfc54effe95"
+    },
+    {
+      "category": "supplies",
+      "filename": "supply_thread_spool.png",
+      "url": "/art/waiting-game-v2/supplies/supply_thread_spool.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789.zip",
+      "source_entry": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_01_correct_45789/batch_09__19_more_supplies/supply_thread_spool.png",
+      "sha256": "d3796465f903a90d41157a28e7edbef556a498235cee8aaed083511432368493"
+    },
+    {
+      "category": "personas/engineer",
+      "filename": "player_engineer_wake_up.png",
+      "url": "/art/waiting-game-v2/personas/engineer/player_engineer_wake_up.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_engineer_wake_up.png",
+      "sha256": "5c9b2f811ce6ba2db0707922640339c64187fc5f7e3b95ceecb532fda6121394"
+    },
+    {
+      "category": "personas/engineer",
+      "filename": "player_engineer_stretching.png",
+      "url": "/art/waiting-game-v2/personas/engineer/player_engineer_stretching.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_engineer_stretching.png",
+      "sha256": "f68e813b354edf743f7379627e68ff4534ffb0923372ef1160ee4aa17cef4e84"
+    },
+    {
+      "category": "personas/analyst",
+      "filename": "player_analyst_floor_reading.png",
+      "url": "/art/waiting-game-v2/personas/analyst/player_analyst_floor_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_analyst_floor_reading.png",
+      "sha256": "c82fb498ec9c76f310226386f5f9425b8144dfff71fc129eb153a147b595fac1"
+    },
+    {
+      "category": "personas/thinker",
+      "filename": "player_thinker_stretching.png",
+      "url": "/art/waiting-game-v2/personas/thinker/player_thinker_stretching.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_thinker_stretching.png",
+      "sha256": "6b7e79ed69a4363e905e7a5562c4701c9eca4c346dbf45710c490cc4e17f59be"
+    },
+    {
+      "category": "personas/engineer",
+      "filename": "player_engineer_carry_photo.png",
+      "url": "/art/waiting-game-v2/personas/engineer/player_engineer_carry_photo.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_engineer_carry_photo.png",
+      "sha256": "ca6995e542eb6d8650b3aec1e77eb0ec439980d1b6d94491628d4113fe08b5f9"
+    },
+    {
+      "category": "personas/engineer",
+      "filename": "player_engineer_window_sit.png",
+      "url": "/art/waiting-game-v2/personas/engineer/player_engineer_window_sit.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_engineer_window_sit.png",
+      "sha256": "5c6f2358fc3ce658271248e68151a2efdea87173ffa75f6c9ce17ca794fb6c26"
+    },
+    {
+      "category": "personas/analyst",
+      "filename": "player_analyst_desk_reading.png",
+      "url": "/art/waiting-game-v2/personas/analyst/player_analyst_desk_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_analyst_desk_reading.png",
+      "sha256": "d148181dac7adb8f2ba67f6f67efff8c4e268f7c54bb6ecf71422d110e9c62f6"
+    },
+    {
+      "category": "personas/thinker",
+      "filename": "player_thinker_window_sit.png",
+      "url": "/art/waiting-game-v2/personas/thinker/player_thinker_window_sit.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_thinker_window_sit.png",
+      "sha256": "fe90ab45ad834c5027b6d464e67043733c6ef7e210948fb77bd8edd8ae1f1101"
+    },
+    {
+      "category": "personas/analyst",
+      "filename": "player_analyst_carry_photo.png",
+      "url": "/art/waiting-game-v2/personas/analyst/player_analyst_carry_photo.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_analyst_carry_photo.png",
+      "sha256": "49b43dc110a8cdcf3f2e4067a7b7c62018abfd43107c27889b063222ba392c29"
+    },
+    {
+      "category": "personas/analyst",
+      "filename": "player_analyst_window_sit.png",
+      "url": "/art/waiting-game-v2/personas/analyst/player_analyst_window_sit.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_analyst_window_sit.png",
+      "sha256": "e6b2bd81c166343ad6cfc9d52bdb946a31d120c51ee75e37c382d6dcd117ba2c"
+    },
+    {
+      "category": "personas/engineer",
+      "filename": "player_engineer_desk_reading.png",
+      "url": "/art/waiting-game-v2/personas/engineer/player_engineer_desk_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_engineer_desk_reading.png",
+      "sha256": "6e9c436b04b3533def9101abe805b5bd627f941ed77bf3215de3169d84c9b339"
+    },
+    {
+      "category": "personas/observer",
+      "filename": "player_observer_carry_photo.png",
+      "url": "/art/waiting-game-v2/personas/observer/player_observer_carry_photo.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_observer_carry_photo.png",
+      "sha256": "53cd94f0bb79a445f1f3ee03ae14bf89a283ba666693ce8da1dbbaa1af0a267b"
+    },
+    {
+      "category": "personas/observer",
+      "filename": "player_observer_packing_bag.png",
+      "url": "/art/waiting-game-v2/personas/observer/player_observer_packing_bag.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_observer_packing_bag.png",
+      "sha256": "a0914e1b1974e3bc3a9ac75e21d46a83b8999245dfa93fec33bf5b257711d356"
+    },
+    {
+      "category": "personas/engineer",
+      "filename": "player_engineer_carry_ticket.png",
+      "url": "/art/waiting-game-v2/personas/engineer/player_engineer_carry_ticket.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_engineer_carry_ticket.png",
+      "sha256": "1945a615af0010dc6c57bb0876b6403c5c71a43c11ef1610fe2e2bf20436b21a"
+    },
+    {
+      "category": "personas/observer",
+      "filename": "player_observer_stretching.png",
+      "url": "/art/waiting-game-v2/personas/observer/player_observer_stretching.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_observer_stretching.png",
+      "sha256": "229ea01b439b069842c03b0b3d19033bb54273ddd49dcde5140a1893cb08d39c"
+    },
+    {
+      "category": "personas/observer",
+      "filename": "player_observer_floor_reading.png",
+      "url": "/art/waiting-game-v2/personas/observer/player_observer_floor_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_observer_floor_reading.png",
+      "sha256": "40eeefbcb9ca5a1bc4fb2abee9ae934c41faaf5a14a77fa8a02d839c57144654"
+    },
+    {
+      "category": "personas/engineer",
+      "filename": "player_engineer_sleep_curl.png",
+      "url": "/art/waiting-game-v2/personas/engineer/player_engineer_sleep_curl.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_engineer_sleep_curl.png",
+      "sha256": "196fb940357607357fa5ec2eaa0518c9078e53e2ffa173214ca2b0c14fa20e0b"
+    },
+    {
+      "category": "personas/analyst",
+      "filename": "player_analyst_sorting_tickets.png",
+      "url": "/art/waiting-game-v2/personas/analyst/player_analyst_sorting_tickets.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_analyst_sorting_tickets.png",
+      "sha256": "3dfd8aedc8ad612460ea22311e5e2185d36b882cbb39e06ba00632103ada03bf"
+    },
+    {
+      "category": "personas/thinker",
+      "filename": "player_thinker_sorting_tickets.png",
+      "url": "/art/waiting-game-v2/personas/thinker/player_thinker_sorting_tickets.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_thinker_sorting_tickets.png",
+      "sha256": "4148eb40cafdf3c81f34970c930de0b1f832e1046cd6cb8347c9a0c6b1ad350b"
+    },
+    {
+      "category": "personas/thinker",
+      "filename": "player_thinker_carry_photo.png",
+      "url": "/art/waiting-game-v2/personas/thinker/player_thinker_carry_photo.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_thinker_carry_photo.png",
+      "sha256": "b707554e72ee8446370d786ee459bc751fb0a4f784640efd0ab909131a2a9046"
+    },
+    {
+      "category": "personas/observer",
+      "filename": "player_observer_window_sit.png",
+      "url": "/art/waiting-game-v2/personas/observer/player_observer_window_sit.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_observer_window_sit.png",
+      "sha256": "613b68a670bc15cb1beacf166a303959d7257a4607751f17faa2fd8eaa1e65f0"
+    },
+    {
+      "category": "personas/engineer",
+      "filename": "player_engineer_sorting_tickets.png",
+      "url": "/art/waiting-game-v2/personas/engineer/player_engineer_sorting_tickets.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_engineer_sorting_tickets.png",
+      "sha256": "fedc6efb994b04fa6326292ec4f2a51d66bb4dd12eb59dd5d617568abfff11eb"
+    },
+    {
+      "category": "personas/thinker",
+      "filename": "player_thinker_sleep_curl.png",
+      "url": "/art/waiting-game-v2/personas/thinker/player_thinker_sleep_curl.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_thinker_sleep_curl.png",
+      "sha256": "41c586c18570a752a9c4c14d5ae5af02f0a36517957ba7750f4029f75cdb5494"
+    },
+    {
+      "category": "personas/observer",
+      "filename": "player_observer_desk_reading.png",
+      "url": "/art/waiting-game-v2/personas/observer/player_observer_desk_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_observer_desk_reading.png",
+      "sha256": "5338abad17f8c3ea1da063659875d976404c1d4b84c11f446a02bc99275af7e0"
+    },
+    {
+      "category": "personas/thinker",
+      "filename": "player_thinker_desk_reading.png",
+      "url": "/art/waiting-game-v2/personas/thinker/player_thinker_desk_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_thinker_desk_reading.png",
+      "sha256": "9acf661f6600abaf666f8b13f8b8c32de8aa78565af3da70b388c8cdd9c31ee0"
+    },
+    {
+      "category": "personas/thinker",
+      "filename": "player_thinker_wake_up.png",
+      "url": "/art/waiting-game-v2/personas/thinker/player_thinker_wake_up.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_thinker_wake_up.png",
+      "sha256": "deeba89616210d3a04de7e0523af380d93158dfc14d4e9f29407ce8df4b3e579"
+    },
+    {
+      "category": "personas/analyst",
+      "filename": "player_analyst_packing_bag.png",
+      "url": "/art/waiting-game-v2/personas/analyst/player_analyst_packing_bag.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_analyst_packing_bag.png",
+      "sha256": "224112b1677e97eecb11ac82230a1b1ece29712f911cfa05f78e52745ce82124"
+    },
+    {
+      "category": "personas/thinker",
+      "filename": "player_thinker_carry_ticket.png",
+      "url": "/art/waiting-game-v2/personas/thinker/player_thinker_carry_ticket.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_thinker_carry_ticket.png",
+      "sha256": "44f8c3f8dfb4c891b57042259225bb07a768fe3b44cfb3a8190c254758b079ca"
+    },
+    {
+      "category": "personas/analyst",
+      "filename": "player_analyst_sleep_curl.png",
+      "url": "/art/waiting-game-v2/personas/analyst/player_analyst_sleep_curl.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_analyst_sleep_curl.png",
+      "sha256": "3c297c107030166182d92f031fff8adba1eee3dcf4fabf06106296274ed2f27e"
+    },
+    {
+      "category": "personas/observer",
+      "filename": "player_observer_sorting_tickets.png",
+      "url": "/art/waiting-game-v2/personas/observer/player_observer_sorting_tickets.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_observer_sorting_tickets.png",
+      "sha256": "f48b566e5885144754646318bf51ca0e33ad3b3c40230e37920e289753b0a585"
+    },
+    {
+      "category": "personas/analyst",
+      "filename": "player_analyst_wake_up.png",
+      "url": "/art/waiting-game-v2/personas/analyst/player_analyst_wake_up.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_analyst_wake_up.png",
+      "sha256": "8f7e251ee90acdb501fec9cb0c12188221f6c61a1441ed1a7e0866d852830724"
+    },
+    {
+      "category": "personas/analyst",
+      "filename": "player_analyst_carry_ticket.png",
+      "url": "/art/waiting-game-v2/personas/analyst/player_analyst_carry_ticket.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_analyst_carry_ticket.png",
+      "sha256": "d3b2a18fb6f8dec1babcf9cc57d11e88aa7a0551634aff04fe2a8e2a3f6874eb"
+    },
+    {
+      "category": "personas/analyst",
+      "filename": "player_analyst_stretching.png",
+      "url": "/art/waiting-game-v2/personas/analyst/player_analyst_stretching.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_analyst_stretching.png",
+      "sha256": "789528d70739fba52363571d246600fe99ab85c6633ff6fb2fe11a84b505f35f"
+    },
+    {
+      "category": "personas/thinker",
+      "filename": "player_thinker_floor_reading.png",
+      "url": "/art/waiting-game-v2/personas/thinker/player_thinker_floor_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_thinker_floor_reading.png",
+      "sha256": "8fb28904e5f99ae2ae13a682f7a5301ea0feb288ca365bfae0b3a5611f1d1cef"
+    },
+    {
+      "category": "personas/engineer",
+      "filename": "player_engineer_packing_bag.png",
+      "url": "/art/waiting-game-v2/personas/engineer/player_engineer_packing_bag.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_engineer_packing_bag.png",
+      "sha256": "f8c8a3ca3164d7ac29c15f6a63d4fd5eaa2753a618e29f0937cc888f6994f294"
+    },
+    {
+      "category": "personas/thinker",
+      "filename": "player_thinker_packing_bag.png",
+      "url": "/art/waiting-game-v2/personas/thinker/player_thinker_packing_bag.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_thinker_packing_bag.png",
+      "sha256": "b520345812c49636588aaf743ea4ab46f4976d9273c2a77c7c9111384ddc5a01"
+    },
+    {
+      "category": "personas/observer",
+      "filename": "player_observer_wake_up.png",
+      "url": "/art/waiting-game-v2/personas/observer/player_observer_wake_up.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_observer_wake_up.png",
+      "sha256": "e754ad602e2f1529cabadc9cc04f9995a7f62d542eb85b60aeed0fe48afc265b"
+    },
+    {
+      "category": "personas/observer",
+      "filename": "player_observer_carry_ticket.png",
+      "url": "/art/waiting-game-v2/personas/observer/player_observer_carry_ticket.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_observer_carry_ticket.png",
+      "sha256": "28d8de01e63650b1849c44afe7e69ce699956967d4daaa03dbf59983a7f9b085"
+    },
+    {
+      "category": "personas/observer",
+      "filename": "player_observer_sleep_curl.png",
+      "url": "/art/waiting-game-v2/personas/observer/player_observer_sleep_curl.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_observer_sleep_curl.png",
+      "sha256": "93ba7fce0e22b3b6c7af23c1ce026d5f1eea6c5f3dbd76f1b6330f7ee3fa0757"
+    },
+    {
+      "category": "personas/engineer",
+      "filename": "player_engineer_floor_reading.png",
+      "url": "/art/waiting-game-v2/personas/engineer/player_engineer_floor_reading.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_02_first4_batches.zip",
+      "source_entry": "player_engineer_floor_reading.png",
+      "sha256": "45ce892037ec849d760be0efc0150c6f9055f77778db11bbf0178cbe1b249236"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_16.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_16.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_career_16.png",
+      "sha256": "669ef13861ad17dd8c5c86188fe66bb283247e7ba74dbcf196af62dde7f4426c"
+    },
+    {
+      "category": "journey/props",
+      "filename": "journey_prop_archway.png",
+      "url": "/art/waiting-game-v2/journey/props/journey_prop_archway.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_prop_archway.png",
+      "sha256": "9b3b836da9922edeb600979f0534d03cbd8f5b3280fb1a4dcf118f576fa07ac0"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_16.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_16.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_pets_16.png",
+      "sha256": "8163071af5b87492dde8cf618aba8fec63b8e48a545b6a9e60044a32c4e7879e"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_09.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_09.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_ai_09.png",
+      "sha256": "d014c5d4e5971eeb00278d2a428c47f166a78afec1a89f9758973f89beb145c3"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_rice.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_rice.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_encounter_rice.png",
+      "sha256": "1ac5f911f0091e58349fbd45d12c6a51dad83e934c7de1e900621ea733ed8ccd"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_11.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_11.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_unknown_11.png",
+      "sha256": "0d6713d090c9cadf40e359f49f8f55ffd1827fb1f36a132c134b1863aac40e84"
+    },
+    {
+      "category": "journey/props",
+      "filename": "journey_prop_marker_stone.png",
+      "url": "/art/waiting-game-v2/journey/props/journey_prop_marker_stone.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_prop_marker_stone.png",
+      "sha256": "9dc2b6fe582b3b9927a044f15bb8ed6de263c9bdc19b8754017da40f03a8da2a"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_12.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_12.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_career_12.png",
+      "sha256": "d7cd3880085aba767d36fb5be0aac347552380fa7fc9e73fe86433df6989660b"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_13.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_13.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_life_13.png",
+      "sha256": "0abc101a23be81229eae846ba3167b3fde395ab89653f0b1a557f9d56a044dd4"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_14.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_14.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_ai_14.png",
+      "sha256": "ad605a90efffcb7ba98b2ad2af8d92029b38cb1a8289aa1da4f5f260426e573a"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_14.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_14.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_pets_14.png",
+      "sha256": "7aa1d293f1136afec7896a2014682e7fa51cfb44e34836735930012b82aded85"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_16.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_16.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_unknown_16.png",
+      "sha256": "9610117bcc59076c6e2cebf46da83fa2828dfbeb6d9a6340a6bb278e22127c1a"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_14.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_14.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_unknown_14.png",
+      "sha256": "1ceb664a6fa74bb6298c5169985421a70e0039eff2b214980ca378eb5040c151"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_07.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_07.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_unknown_07.png",
+      "sha256": "a8cb3761c636b0e97c2de118c572db3be641a869970555e8db7560e0d73dadf3"
+    },
+    {
+      "category": "journey/props",
+      "filename": "journey_prop_mailbox.png",
+      "url": "/art/waiting-game-v2/journey/props/journey_prop_mailbox.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_prop_mailbox.png",
+      "sha256": "b96e65702d743f793c9f0e91d94eaeef90c76674699e8edadd7cdf39f4e6c8cc"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_10.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_10.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_unknown_10.png",
+      "sha256": "513fe226ec7a0cb8c0d3c2768c9a139b12ff4a3f453f604aefecbc3a04cd033a"
+    },
+    {
+      "category": "journey/props",
+      "filename": "journey_prop_paper_path.png",
+      "url": "/art/waiting-game-v2/journey/props/journey_prop_paper_path.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_prop_paper_path.png",
+      "sha256": "8a146368ba4ed96b7a19fcb35fb1653eb7e1b2189e7ad288bb3e11799bbe8c43"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_14.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_14.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_science_14.png",
+      "sha256": "c4ae63a839a8672c1321a05877e33a72f388116d104847184b579d3d34045b77"
+    },
+    {
+      "category": "journey/backgrounds",
+      "filename": "journey_bg_dusk.png",
+      "url": "/art/waiting-game-v2/journey/backgrounds/journey_bg_dusk.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_bg_dusk.png",
+      "sha256": "bf668a56dad05ed425133dce254499414266878b562e80a4b13a51ec374dea03"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_08.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_08.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_career_08.png",
+      "sha256": "e16b280268158b0d0bbcffac81218fa20411dbee69813dc4ffb09f290d97096f"
+    },
+    {
+      "category": "journey/props",
+      "filename": "journey_prop_road_sign.png",
+      "url": "/art/waiting-game-v2/journey/props/journey_prop_road_sign.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_prop_road_sign.png",
+      "sha256": "d2123c7070fc764544d7139bb4b1c7a08633a5af47530b5c3914295eddb09929"
+    },
+    {
+      "category": "journey/backgrounds",
+      "filename": "journey_bg_night.png",
+      "url": "/art/waiting-game-v2/journey/backgrounds/journey_bg_night.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_bg_night.png",
+      "sha256": "390e57e1b9b8bc62a70658e1c1a050a2589a2c5a16cb2443d05082c029cdc035"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_subzone_life_books.png",
+      "url": "/art/waiting-game-v2/world/zones/world_subzone_life_books.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "world_subzone_life_books.png",
+      "sha256": "46c0ed0b953b449fb129d921da90acca5a51ca6ec34f7c4d3c1826ad828756b8"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_16.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_16.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_ai_16.png",
+      "sha256": "766515e95a646635b04d1460aee528c724a6f82e0f446ab8b3d10ee1db5d860d"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_13.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_13.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_ai_13.png",
+      "sha256": "daf668cd18b55a5bb80021ab2190e5cee0b8d9b1241fcb89c3be6b0bbc4ad14c"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_gear.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_gear.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_encounter_gear.png",
+      "sha256": "80969965527cd8165bc1c7feae2933bc2f349abaab8e1beb6baab9c5c23e0a93"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_ink.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_ink.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_encounter_ink.png",
+      "sha256": "ccaa070ec6aefff0b97cd96aace9d32299d8fab3c5a0335f5e669c46b1e088d0"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_15.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_15.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_life_15.png",
+      "sha256": "0094541a5fa38734ee381eb615d8b6d50cc6dd8dd19181975aa7679ec390b3fe"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_subzone_career_team.png",
+      "url": "/art/waiting-game-v2/world/zones/world_subzone_career_team.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "world_subzone_career_team.png",
+      "sha256": "4e4ee51095612270a4294eba5b79ff3e693c73ab08e9e0319483f0126887d0b8"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_leave_note.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_leave_note.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_encounter_leave_note.png",
+      "sha256": "02fd6d669b344917b9cf2b20eaf8e591e7cef058c4cc53f3f9c1c308173baf1c"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_after_talk.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_after_talk.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_encounter_after_talk.png",
+      "sha256": "544cf54308aadab5a33bf0ba23b5b847fa85c72964ca7c2565021cf045af25ca"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_shared_view.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_shared_view.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_encounter_shared_view.png",
+      "sha256": "41cd48b1067f05a32edddeab70d7ce046d3eb8e7a9d556be26bd4c62743900b2"
+    },
+    {
+      "category": "journey/backgrounds",
+      "filename": "journey_bg_indoor_corridor.png",
+      "url": "/art/waiting-game-v2/journey/backgrounds/journey_bg_indoor_corridor.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_bg_indoor_corridor.png",
+      "sha256": "d38475a13252d7b5a0d506536c6996e58449d067099b73b930cfbfb95f69e1b9"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_15.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_15.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_ai_15.png",
+      "sha256": "514b18a704f27733f1b56d33e96872e3fae34089335bc75ced8190e8b148c6e1"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_subzone_unknown_border.png",
+      "url": "/art/waiting-game-v2/world/zones/world_subzone_unknown_border.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "world_subzone_unknown_border.png",
+      "sha256": "9a910ffaa024c8513378b6538d115c7af26d69c09c1a3920fb0d9d4199a0d298"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_15.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_15.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_unknown_15.png",
+      "sha256": "3ec4de69dfe2b9b1c451c45414c6427a019f9ff189be8325b72cf24a91aff2ed"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_thesis.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_thesis.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_encounter_thesis.png",
+      "sha256": "0b5446087123dfa7374272f47fcbfbcf778f3cd6e681c9ffa079de18663ea5b3"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_13.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_13.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_career_13.png",
+      "sha256": "86bd6b828c270b231b2196587753b5b552c894f0894233911015800f18f72332"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_14.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_14.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_life_14.png",
+      "sha256": "d50f7e80953dc629fc51d2c7658641f420b28e29a9cf79739155c4d0902d47b4"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_subzone_life_daily.png",
+      "url": "/art/waiting-game-v2/world/zones/world_subzone_life_daily.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "world_subzone_life_daily.png",
+      "sha256": "04d041a533f06ac408e6e8c960dac3f839bd4e9c6b59d9d375ff4dc85e44edaf"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_10.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_10.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_career_10.png",
+      "sha256": "24e5caa1ea6f9e5fdbc358939faa3833546b5ad3536fb39a83bf12b08280d94e"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_16.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_16.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_life_16.png",
+      "sha256": "d2d0a9a93953de91520da3447755153b5e6ee43d65b2f01cc491196902d34dda"
+    },
+    {
+      "category": "journey/backgrounds",
+      "filename": "journey_bg_dawn.png",
+      "url": "/art/waiting-game-v2/journey/backgrounds/journey_bg_dawn.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_bg_dawn.png",
+      "sha256": "035377763dd9da71bab39a68a2d59860f2816a780e9952a034b8914f69d9de70"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_13.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_13.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_pets_13.png",
+      "sha256": "71d6a63ea624de668aaf1338f81bd19c66f47a7c6cbe21cb8ab182b312d937b3"
+    },
+    {
+      "category": "journey/backgrounds",
+      "filename": "journey_bg_fog.png",
+      "url": "/art/waiting-game-v2/journey/backgrounds/journey_bg_fog.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_bg_fog.png",
+      "sha256": "327ccc3423a33bb7fdc32e4883f8293abaf9ffa92be2c0be18f0f60232a247bd"
+    },
+    {
+      "category": "journey/props",
+      "filename": "journey_prop_blue_gate.png",
+      "url": "/art/waiting-game-v2/journey/props/journey_prop_blue_gate.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_prop_blue_gate.png",
+      "sha256": "1ad4abc332699083485bb282cc858bd0e078a02cfe534a369b446dc177c0bf71"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_12.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_12.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_life_12.png",
+      "sha256": "4ffe2f2a76bb05ff92a00ce44cf655a7504cc7f368aa26127c8df0cc1618eabf"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_10.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_10.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_life_10.png",
+      "sha256": "15faa4c2b30c26b54d6b42b3b60312ab490bbfa6b06fdca02643baf90e62c346"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_11.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_11.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_pets_11.png",
+      "sha256": "392152efce16fa7c5d89984befb0c563d1545c7d4f53167b82e3beed15195c1a"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_10.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_10.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_ai_10.png",
+      "sha256": "86185474d472662422b01dbe7250cdcb11b4cf6949450cdc8428ca8ee198ec9f"
+    },
+    {
+      "category": "journey/props",
+      "filename": "journey_prop_street_lamp.png",
+      "url": "/art/waiting-game-v2/journey/props/journey_prop_street_lamp.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_prop_street_lamp.png",
+      "sha256": "5be3abb70a662bc95bae8dd0e57f1742a1b5aae4dd21a2e6a0a69f5f8e770024"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_10.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_10.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_pets_10.png",
+      "sha256": "c8ce260b8e8f53749c6c6c935ff28e10896e50cfeda00a82308ca0d50ad30143"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_15.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_15.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_pets_15.png",
+      "sha256": "291abfde598f9c9c7d4f70196830d73e65d6795de1b7730487c213f878347767"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_08.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_08.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_science_08.png",
+      "sha256": "9585c35b813e395d2e5f12649d1e9abcb8ed4cc66dfc6a8c2c31f3c06dcb9d54"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_12.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_12.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_ai_12.png",
+      "sha256": "d1fc8bb3b307571f06d8d9517dbe1b810f03e37ae4eb0f01a3db06baba41ee98"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_13.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_13.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_unknown_13.png",
+      "sha256": "8be6f68e2c7b7b302336e50f964d0b283bac6015ca330c46d3a3958e38390aad"
+    },
+    {
+      "category": "journey/backgrounds",
+      "filename": "journey_bg_wind.png",
+      "url": "/art/waiting-game-v2/journey/backgrounds/journey_bg_wind.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_bg_wind.png",
+      "sha256": "af09de0c5eb1d1dc4542a9553860fc77f54e0e7126471f154135d6bac8731535"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_waypoint.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_waypoint.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_encounter_waypoint.png",
+      "sha256": "abad3bfcb69502756ffb251a5b5e3b14fff6bcdc5afb64a1e7411dd781cc08bb"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_subzone_pets_companion.png",
+      "url": "/art/waiting-game-v2/world/zones/world_subzone_pets_companion.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "world_subzone_pets_companion.png",
+      "sha256": "d767744438a9a9babac2e5b9fbce31cf16ccdee6c95c32445b08d917c162b619"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_15.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_15.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_science_15.png",
+      "sha256": "19c4834ffe3b48493bae7b12ad731a488eded564cd45fd9779b3a03cc3f1861c"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_08.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_08.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_ai_08.png",
+      "sha256": "09bb7e21e85be5d53a29ef5c337b944f54112030bcc22daf4fa9058a540d6cc8"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_09.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_09.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_unknown_09.png",
+      "sha256": "749c8017a112eb1838cdaf6bdefdd362403d7cda73ce7f67cc3442ab6b8b61cc"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_pass_by.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_pass_by.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_encounter_pass_by.png",
+      "sha256": "69b1c2fd3674bdbf164f8710d406467b40afb4023edf93cd9a22b27ac0b5aa94"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_subzone_science_nature.png",
+      "url": "/art/waiting-game-v2/world/zones/world_subzone_science_nature.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "world_subzone_science_nature.png",
+      "sha256": "148b6e73d6b6fbab85a5c5cc69289b6b601e2de872889babc65762d3436b12ca"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_13.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_13.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_science_13.png",
+      "sha256": "e2b583bfcf416c50c908f78e21b57baf41915bffb53b56871a671389198b84d2"
+    },
+    {
+      "category": "journey/props",
+      "filename": "journey_prop_bench.png",
+      "url": "/art/waiting-game-v2/journey/props/journey_prop_bench.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_prop_bench.png",
+      "sha256": "42808efb8b6d189d5ce2831e03d8f5dad6189449400cce41c2114e8073adf034"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_12.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_12.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_pets_12.png",
+      "sha256": "c042a8b0f7e906a905a53c97edb7dec78b0b3b3221f6adee2f86a4542b2f1ccb"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_08.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_08.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_unknown_08.png",
+      "sha256": "681c4b2975e4182cb40439fd14be19d8e5b399cc52b5437fcf6f034b2b9a9008"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_08.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_08.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_pets_08.png",
+      "sha256": "f1cd57c2a40ed594a5f358c0b9c4d43f7c666ac76734c263cfc02f23edd12f52"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_09.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_09.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_life_09.png",
+      "sha256": "bdd61903913698b0c436cacedf8fe9d0a1231f6f7c875452f021e00f03c3245b"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_10.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_10.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_science_10.png",
+      "sha256": "1d842153633e9385387729f8011e2966608226fbcbf29eefc66eb6ebc5751e57"
+    },
+    {
+      "category": "journey/props",
+      "filename": "journey_prop_notice_board.png",
+      "url": "/art/waiting-game-v2/journey/props/journey_prop_notice_board.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_prop_notice_board.png",
+      "sha256": "d743c6a243a899deed7de998568f3375c7ae0b96df97e62e594d3353a8e1ba41"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_subzone_science_evidence.png",
+      "url": "/art/waiting-game-v2/world/zones/world_subzone_science_evidence.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "world_subzone_science_evidence.png",
+      "sha256": "30eda78ceac6d7554e77f5b298f3346629da51494ab85bf023cb71e92b1e7566"
+    },
+    {
+      "category": "journey/backgrounds",
+      "filename": "journey_bg_after_rain.png",
+      "url": "/art/waiting-game-v2/journey/backgrounds/journey_bg_after_rain.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_bg_after_rain.png",
+      "sha256": "dbde5b704d3a772156e281905a44b06bff24f633903000c60c1d219acb06326f"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_14.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_14.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_career_14.png",
+      "sha256": "2c090ba40c4bbe34cee75c6fd1d779066ee9f4d8191a30c430d7d3883b15c643"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_11.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_11.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_ai_11.png",
+      "sha256": "323abc7f04805c7f700b975c9a45c71626d9f4019a16ca8d4674e06ccfa43775"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_07.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_07.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_science_07.png",
+      "sha256": "cf85082923bfec3dfc99be24733231ad0bbbbb131d5ca8c201292a775f5f4278"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_09.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_09.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_pets_09.png",
+      "sha256": "f35483d729fba611f23dcb5226d7a15d98967de7536f346b09c271ff0b774372"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_07.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_07.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_life_07.png",
+      "sha256": "848569e42d7ddae8e0804df0c5c9095f1ad1063c36c2ad88fbbbd0783cfdc613"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_15.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_15.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_career_15.png",
+      "sha256": "b73e483a47e0546d52d543dd8469f4aed4d4a903aae6c50082fdb0c586747ce6"
+    },
+    {
+      "category": "journey/props",
+      "filename": "journey_prop_small_bridge.png",
+      "url": "/art/waiting-game-v2/journey/props/journey_prop_small_bridge.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_prop_small_bridge.png",
+      "sha256": "92518b7c9ab02ac61fff8c41b1c979fe41b54e9501e1eb57eca89b5cb9828844"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_11.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_11.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_life_11.png",
+      "sha256": "181e1dc539fd813e70d23c1f2ec7d584e189a8b1ccd01a0bd41014e9614258b8"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_subzone_ai_tools.png",
+      "url": "/art/waiting-game-v2/world/zones/world_subzone_ai_tools.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "world_subzone_ai_tools.png",
+      "sha256": "77afdd2c8e37d592567665654e3dbb1b462a560e87ec607172901e785c34501b"
+    },
+    {
+      "category": "postcards/unknown",
+      "filename": "postcard_unknown_12.png",
+      "url": "/art/waiting-game-v2/postcards/unknown/postcard_unknown_12.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_unknown_12.png",
+      "sha256": "918f42042fc73f34e318d29798a5edab25959191f223efa09ffcbfff87f2485e"
+    },
+    {
+      "category": "postcards/ai",
+      "filename": "postcard_ai_07.png",
+      "url": "/art/waiting-game-v2/postcards/ai/postcard_ai_07.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_ai_07.png",
+      "sha256": "474b125022187df8f651e7edefb831e459db93633d1e0665445c69b82f89fb0d"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_11.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_11.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_career_11.png",
+      "sha256": "30c92582e45df95f1f443f184cef9c030b04f71ba216ff56b3cc357909fb5a51"
+    },
+    {
+      "category": "postcards/life",
+      "filename": "postcard_life_08.png",
+      "url": "/art/waiting-game-v2/postcards/life/postcard_life_08.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_life_08.png",
+      "sha256": "e72b8ce248ef80a75d65cfb2a3289bfdf66b5946face18613e3441fe4a71e491"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_subzone_career_independent.png",
+      "url": "/art/waiting-game-v2/world/zones/world_subzone_career_independent.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "world_subzone_career_independent.png",
+      "sha256": "f6835369029f56cead9e57819522416ed15d08c54b3feca8af04713061d8ac7e"
+    },
+    {
+      "category": "postcards/encounter",
+      "filename": "postcard_encounter_two_player_cats.png",
+      "url": "/art/waiting-game-v2/postcards/encounter/postcard_encounter_two_player_cats.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_encounter_two_player_cats.png",
+      "sha256": "bbb09a9c44bf1b1db5424b9a7028c83915d5d886d2c020c93f9727389b338910"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_11.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_11.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_science_11.png",
+      "sha256": "d7cc2785bed17754e4f60c23924646e2f62ea896101e7ca13d04e5d9c63047b8"
+    },
+    {
+      "category": "journey/backgrounds",
+      "filename": "journey_bg_rain.png",
+      "url": "/art/waiting-game-v2/journey/backgrounds/journey_bg_rain.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_bg_rain.png",
+      "sha256": "89bd09f9ddba06cf1c236754179a37ff24bf16d42f6402387a03120b19700c8a"
+    },
+    {
+      "category": "journey/backgrounds",
+      "filename": "journey_bg_noon.png",
+      "url": "/art/waiting-game-v2/journey/backgrounds/journey_bg_noon.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_bg_noon.png",
+      "sha256": "e5b20228397a67b7fdc5c991e17df4b22ad55018a8fbac0034bbaaa1ae1c9918"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_07.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_07.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_career_07.png",
+      "sha256": "616273c00dac468db2f7685788f6f3611216c0a6485d25a8529aab060720878f"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_09.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_09.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_science_09.png",
+      "sha256": "3c16e213b01a9bc60005b0519dee1a0752f9cf57558f0dee049463fcea5db64f"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_12.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_12.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_science_12.png",
+      "sha256": "c658c19f155d81d80f2e49db14cb2b22456145fa9e6eb86b09fbb42b2c0eeded"
+    },
+    {
+      "category": "postcards/career",
+      "filename": "postcard_career_09.png",
+      "url": "/art/waiting-game-v2/postcards/career/postcard_career_09.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_career_09.png",
+      "sha256": "e80999bd5eac197fbb20ccc20ba89455b27ca9a02373766565055184b621a66e"
+    },
+    {
+      "category": "world/zones",
+      "filename": "world_subzone_ai_discussion.png",
+      "url": "/art/waiting-game-v2/world/zones/world_subzone_ai_discussion.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "world_subzone_ai_discussion.png",
+      "sha256": "46acdb7261f30c21b1bb0dad4655f665ff9535210b3cb81f411353b67690d5ff"
+    },
+    {
+      "category": "postcards/science",
+      "filename": "postcard_science_16.png",
+      "url": "/art/waiting-game-v2/postcards/science/postcard_science_16.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_science_16.png",
+      "sha256": "9f7727935b17d114f0b6c2d34611ec924f176897426537bef5ae6f05632436bd"
+    },
+    {
+      "category": "postcards/pets",
+      "filename": "postcard_pets_07.png",
+      "url": "/art/waiting-game-v2/postcards/pets/postcard_pets_07.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "postcard_pets_07.png",
+      "sha256": "b6edb4b67e1723dbf6c6a2c89ea5c3d65c3cebdbf717b78b8fcc982bffa8b0b3"
+    },
+    {
+      "category": "journey/backgrounds",
+      "filename": "journey_bg_morning.png",
+      "url": "/art/waiting-game-v2/journey/backgrounds/journey_bg_morning.png",
+      "source_archive": "xieyaomiao_waiting_game_v2_prompt_pack_expansion_03_generated_images.zip",
+      "source_entry": "journey_bg_morning.png",
+      "sha256": "87f0cbb13a830631e456c128f96c4c1ee4e47d443947eb7dd216200ec109ce5c"
+    }
+  ],
+  "conflicts": []
+}
