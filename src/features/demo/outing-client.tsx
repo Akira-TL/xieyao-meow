@@ -9,6 +9,7 @@ import {
   resolveWaitingGameJourneyPostcard,
   resolveWaitingGamePersonaActivity,
   resolveWaitingGameReturnItemArt,
+  type WaitingGameHomeTableState,
   type WaitingGamePersonaActivity,
 } from "@/lib/art/waiting-game";
 import type { JourneyInsightAction, JourneyProjection, JourneyView } from "@/lib/journey/types";
@@ -57,7 +58,7 @@ function WaitingGamePersonaArt({
   );
 }
 
-function HomeTableArt({ state, alt }: { state: "unopened_bag" | "open_bundle"; alt: string }) {
+function HomeTableArt({ state, alt }: { state: WaitingGameHomeTableState; alt: string }) {
   return (
     <div className="home-table-art">
       <Image
@@ -349,6 +350,7 @@ function PreparingStage({
         <span>行囊里唯一由你放进去的东西</span>
         <strong>「{routeBias ?? "随便逛"}」</strong>
         <p>纸条看见了。接下来不用点“出发”，它会自己把门带上。</p>
+        <HomeTableArt alt="桌上摊着正在整理的行囊" state="prepare_trip" />
         <div className="outing-pack-steps" aria-label="出门准备">
           <span className="is-done">纸条收好</span>
           <span className="is-current">自己收包</span>
