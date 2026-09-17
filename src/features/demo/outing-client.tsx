@@ -63,6 +63,7 @@ function HomeTableArt({ state, alt }: { state: "unopened_bag" | "open_bundle"; a
         alt={alt}
         className="home-table-art-image"
         fill
+        priority
         sizes="(max-width: 760px) 78vw, 420px"
         src={resolveWaitingGameHomeTable(state)}
       />
