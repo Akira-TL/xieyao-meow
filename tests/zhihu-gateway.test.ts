@@ -291,9 +291,9 @@ describe("ZhihuGateway", () => {
       requests.push({ url, init });
       return jsonResponse({
         data: {
-          id: "zhihu-user-opaque-id",
-          name: "示例用户",
-          avatar_url: "https://picx.zhimg.com/avatar.jpg",
+          uid: "zhihu-user-opaque-id",
+          fullname: "示例用户",
+          avatar_path: "https://picx.zhimg.com/avatar.jpg",
           headline: "关注 Agent",
           url: "https://www.zhihu.com/people/example",
         },
@@ -313,18 +313,24 @@ describe("ZhihuGateway", () => {
     });
     expect(requests[0]?.url).toBe("https://openapi.zhihu.com/user");
     const headers = new Headers(requests[0]?.init?.headers);
-    expect(headers.get("authorization")).toBe("Bearer test-access-secret");
-    expect(headers.get("x-oauth-token")).toBe("oauth-user-token");
+    expect(headers.get("authorization")).toBe("Bearer oauth-user-token");
+    expect(headers.get("x-oauth-token")).toBeNull();
   });
 
-  it("fails closed when the OAuth /user response has no stable id field", async () => {
+  it("fails closed when the OAuth /user response has no uid", async () => {
     const gateway = createZhihuGateway({
       accessSecret: "test-access-secret",
-      fetchImpl: async () => jsonResponse({ data: { name: "只有昵称", url_token: "mutable-slug" } }),
+      fetchImpl: async () => jsonResponse({
+        data: {
+          id: "legacy-id-must-not-be-used",
+          fullname: "只有昵称",
+          url_token: "mutable-slug",
+        },
+      }),
     });
 
     await expect(gateway.getOAuthUserIdentity("oauth-user-token")).rejects.toThrow(
-      "no stable id field",
+      "Zhihu OAuth user response has no uid",
     );
   });
 });
