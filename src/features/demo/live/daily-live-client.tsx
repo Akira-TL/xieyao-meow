@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { resolveP0Art } from "@/lib/art/p0";
-import { resolveWaitingGameCollectionArt, resolveWaitingGameWorldSubzone } from "@/lib/art/waiting-game";
+import { resolveWaitingGameCollectionArt, resolveWaitingGamePostcard, resolveWaitingGameWorldSubzone } from "@/lib/art/waiting-game";
 import type { JourneyAtlasView } from "@/lib/journey/types";
 
 import { DemoFlowButton } from "../client";
@@ -28,6 +28,16 @@ function questionReason(index: number, primaryInterest: string) {
   if (index === 0) return `它先在这道题前停了下来。你常看「${primaryInterest}」，这题又刚好留了个能继续追问的口子。`;
   if (index === 1) return `和「${primaryInterest}」不完全同路，所以它反而多看了一会儿。`;
   return "完全是顺路拐进去的陌生地方。它觉得这张票根值得带回来。";
+}
+
+function postcardInterest(routeBias: string | null, fallbackInterest: string) {
+  const route = (routeBias ?? "").toLocaleLowerCase("zh-CN");
+  if (route.includes("ai") || route.includes("数码")) return "AI 与数码";
+  if (route.includes("科学")) return "科学";
+  if (route.includes("职场") || route.includes("创业")) return "职场与创业";
+  if (route.includes("宠物")) return "宠物";
+  if (route.includes("生活") || route.includes("文化")) return "文化与生活";
+  return fallbackInterest;
 }
 
 function formatJourneyDate(value: number) {
@@ -582,6 +592,13 @@ export function LiveAtlasSection() {
           <div className="atlas-mobile-journeys">
             {recentJourneys.length ? recentJourneys.map((entry, index) => (
               <article key={entry.journeyId}>
+                <ArtSlot
+                  name={`waiting-game/mobile-postcard-${index + 1}`}
+                  label={`${entry.postcard.headline} · 知识漫游插画`}
+                  aspect="wide"
+                  className="atlas-mobile-postcard-art"
+                  src={resolveWaitingGamePostcard(postcardInterest(entry.routeBias, primaryInterest), (index % 3) + 1)}
+                />
                 <b>{String(index + 1).padStart(2, "0")} · {entry.postcard.headline}</b>
                 <span>{formatJourneyDate(entry.completedAt)} · 纸条「{entry.routeBias ?? "随便逛"}」</span>
                 <p>{compact(entry.postcard.body, 92)}</p>
@@ -634,6 +651,21 @@ export function LiveAtlasSection() {
           <div className="atlas-collection-caption">
             {recentJourneys[0] ? <><b>最近一趟</b><span>{recentJourneys[0].postcard.headline}</span></> : <><b>旅行册</b><span>第一趟回来后，这里会留下真实收藏。</span></>}
           </div>
+          {recentJourneys.length ? (
+            <div className="atlas-postcard-strip" aria-label="最近知识漫游插画">
+              {recentJourneys.slice(0, 3).map((entry, index) => (
+                <article key={entry.journeyId}>
+                  <ArtSlot
+                    name={`waiting-game/postcard-${index + 1}`}
+                    label={`${entry.postcard.headline} · 知识漫游插画`}
+                    aspect="wide"
+                    src={resolveWaitingGamePostcard(postcardInterest(entry.routeBias, primaryInterest), (index % 3) + 1)}
+                  />
+                  <span>{entry.postcard.headline}</span>
+                </article>
+              ))}
+            </div>
+          ) : null}
         </PaperCard>
       </div>
 

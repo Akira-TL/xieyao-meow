@@ -51,6 +51,16 @@ const WORLD_SUBZONE_FILE: Partial<Record<InterestName, string>> = {
   "文化与生活": "world_subzone_life_books.png",
 };
 
+const POSTCARD_FOLDER: Record<InterestName, string> = {
+  "AI 与数码": "ai",
+  "宠物": "pets",
+  "科学": "science",
+  "职场与创业": "career",
+  "游戏": "unknown",
+  "文化与生活": "life",
+  "综合": "unknown",
+};
+
 export function resolveWaitingGamePersonaActivity(
   persona: Pick<PlayerPersona, "visualVariant">,
   activity: WaitingGamePersonaActivity,
@@ -79,6 +89,13 @@ export function resolveWaitingGameReturnItemArt(asset: WaitingGameReturnItemArt)
 
 export function resolveWaitingGameWorldSubzone(interest: InterestName | string): string {
   return `${ROOT}/world/zones/${WORLD_SUBZONE_FILE[interest as InterestName] ?? "world_subzone_unknown_border.png"}`;
+}
+
+export function resolveWaitingGamePostcard(interest: InterestName | string, variant = 1): string {
+  const normalizedInterest = (interest in POSTCARD_FOLDER ? interest : "综合") as InterestName;
+  const folder = POSTCARD_FOLDER[normalizedInterest];
+  const safeVariant = Math.max(1, Math.min(3, Math.trunc(variant)));
+  return `${ROOT}/postcards/${folder}/postcard_${folder}_${String(safeVariant).padStart(2, "0")}.png`;
 }
 
 export const WAITING_GAME_ART_ROOT = ROOT;
