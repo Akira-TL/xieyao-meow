@@ -24,6 +24,8 @@ import type {
   JourneyConversation,
   JourneyDiscoverer,
   JourneyDiscoveryResult,
+  JourneyEventType,
+  JourneyEventView,
   JourneyInsight,
   JourneyInsightAction,
   JourneyInsightFeedback,
@@ -114,6 +116,26 @@ interface WaitingGameHomeActivityRow {
   started_at: number;
   ends_at: number;
   seed: string;
+}
+
+interface JourneyEventRow {
+  id: string;
+  journey_id: string;
+  user_id: string;
+  planned_type: JourneyEventType;
+  event_type: JourneyEventType | null;
+  scheduled_at: number;
+  occurred_at: number | null;
+  seen_at: number | null;
+  headline: string | null;
+  body: string | null;
+  question_title: string | null;
+  question_url: string | null;
+  question_summary: string | null;
+  question_thumbnail_url: string | null;
+  participant_kind: JourneyConversation["kind"] | null;
+  participant_id: string | null;
+  participant_name: string | null;
 }
 
 interface AtlasRow {
@@ -228,6 +250,68 @@ function journeyLeafReward(kind: JourneyKind, seed: string): number {
     : 2 + (hashString(`${seed}:leaf-reward`) % 3);
 }
 
+function journeyEventCount(kind: JourneyKind, seed: string): number {
+  const roll = hashString(`${seed}:event-count`) % 100;
+  if (kind === "FAR") {
+    if (roll < 10) return 0;
+    if (roll < 65) return 1;
+    return 2;
+  }
+  if (roll < 35) return 0;
+  if (roll < 90) return 1;
+  return 2;
+}
+
+function journeyEventTypes(seed: string, count: number): JourneyEventType[] {
+  if (count <= 0) return [];
+  const types: JourneyEventType[] = [
+    "SCENE_POSTCARD",
+    "QUESTION_GLIMPSE",
+    "ENCOUNTER_GLIMPSE",
+  ];
+  const offset = hashString(`${seed}:event-type`) % types.length;
+  return Array.from({ length: count }, (_, index) => types[(offset + index) % types.length]!);
+}
+
+function journeyEventSchedule(input: {
+  seed: string;
+  count: number;
+  departAt: number;
+  returnAt: number;
+}): number[] {
+  if (input.count <= 0) return [];
+  const duration = Math.max(1, input.returnAt - input.departAt);
+  if (input.count === 1) {
+    const permille = 420 + (hashString(`${input.seed}:event-time:0`) % 171);
+    return [input.departAt + Math.round((duration * permille) / 1000)];
+  }
+  const firstPermille = 280 + (hashString(`${input.seed}:event-time:0`) % 151);
+  const secondPermille = 650 + (hashString(`${input.seed}:event-time:1`) % 151);
+  return [
+    input.departAt + Math.round((duration * firstPermille) / 1000),
+    input.departAt + Math.round((duration * secondPermille) / 1000),
+  ];
+}
+
+function sceneEventCopy(seed: string, routeBias: string | null): { headline: string; body: string } {
+  const route = routeBias ?? "随便逛";
+  const variants = [
+    {
+      headline: "桌上多了一张途中纸片。",
+      body: `它还没回来，只从「${route}」这条知识线边上留了一点痕迹。不是现实地点，也不是最终带回物。`,
+    },
+    {
+      headline: "它从知识世界里递回来一眼。",
+      body: `这张图只表示它还在沿「${route}」继续走。它没有告诉你终点，也没有提前把结果拆开。`,
+    },
+    {
+      headline: "途中有一点动静。",
+      body: `它还在外面。这只是「${route}」途中留下的一张知识场景照，真正带回什么要等它回窝。`,
+    },
+  ];
+  return variants[hashString(`${seed}:scene-copy`) % variants.length]!;
+}
+
 function routePostcardFallback(seed: string, routeBias: string | null) {
   const route = routeBias ?? "随便逛";
   const variants = [
@@ -255,6 +339,36 @@ function questionFromRow(row: Pick<JourneyRow, "question_title" | "question_url"
     url: row.question_url,
     summary: row.question_summary ?? "",
     ...(row.question_thumbnail_url ? { thumbnailUrl: row.question_thumbnail_url } : {}),
+  };
+}
+
+function eventFromRow(row: JourneyEventRow): JourneyEventView {
+  const question = row.question_title && row.question_url
+    ? {
+        title: row.question_title,
+        url: row.question_url,
+        summary: row.question_summary ?? "",
+        ...(row.question_thumbnail_url ? { thumbnailUrl: row.question_thumbnail_url } : {}),
+      }
+    : null;
+  const participant = row.participant_kind && row.participant_id && row.participant_name
+    ? {
+        kind: row.participant_kind,
+        id: row.participant_id,
+        name: row.participant_name,
+      }
+    : null;
+  return {
+    id: row.id,
+    plannedType: row.planned_type,
+    type: row.event_type ?? row.planned_type,
+    scheduledAt: row.scheduled_at,
+    occurredAt: row.occurred_at,
+    seenAt: row.seen_at,
+    headline: row.headline,
+    body: row.body,
+    question,
+    participant,
   };
 }
 
@@ -344,6 +458,7 @@ export class JourneyService {
   private readonly createId: () => string;
   private readonly timeScale: number;
   private readonly materializationInFlight = new Map<string, Promise<boolean>>();
+  private readonly discoveryInFlight = new Map<string, Promise<JourneyDiscoveryResult>>();
 
   constructor(private readonly options: JourneyServiceOptions) {
     const dbPath = resolveDatabasePath(options.dbPath);
@@ -394,6 +509,10 @@ export class JourneyService {
         this.syncHomeAccrual(userId, Math.min(now, row.return_at), false);
       } else {
         this.syncHomeAccrual(userId, now, true);
+      }
+
+      if (now >= row.depart_at) {
+        await this.materializeDueEvents(userId, oauthAccessToken, row, now);
       }
 
       if (now >= row.return_at && row.materialized_at === null) {
@@ -584,6 +703,30 @@ export class JourneyService {
     return row ? this.toView(row) : null;
   }
 
+  async markEventSeen(
+    userId: string,
+    oauthAccessToken: string,
+    eventId: string,
+  ): Promise<JourneyEventView | null> {
+    await this.getProjection(userId, oauthAccessToken);
+    const now = this.now();
+    this.db.prepare(`
+      UPDATE journey_events
+      SET seen_at = COALESCE(seen_at, ?)
+      WHERE id = ? AND user_id = ? AND occurred_at IS NOT NULL
+    `).run(now, eventId, userId);
+    const row = this.db.prepare(`
+      SELECT
+        id, journey_id, user_id, planned_type, event_type,
+        scheduled_at, occurred_at, seen_at, headline, body,
+        question_title, question_url, question_summary, question_thumbnail_url,
+        participant_kind, participant_id, participant_name
+      FROM journey_events
+      WHERE id = ? AND user_id = ?
+    `).get(eventId, userId) as unknown as JourneyEventRow | undefined;
+    return row ? eventFromRow(row) : null;
+  }
+
   async getAtlas(userId: string, oauthAccessToken: string): Promise<JourneyAtlasView> {
     await this.getProjection(userId, oauthAccessToken);
     const rows = this.db.prepare(`
@@ -637,6 +780,7 @@ export class JourneyService {
         artifact: artifactFromRow(row),
         insight: insightFromRow(row),
         conversation: conversationFromRow(row),
+        events: this.readJourneyEvents(userId, row.journey_id),
         contentSource: row.content_source,
       };
     });
@@ -684,7 +828,7 @@ export class JourneyService {
     const pending = (async () => {
       const latest = this.readRow(userId, row.id, true);
       if (!latest || latest.materialized_at !== null) return false;
-      const result = await this.discoverOrEmpty(userId, oauthAccessToken, latest, now);
+      const result = await this.discoverForJourney(userId, oauthAccessToken, latest, now);
       this.materialize(latest.id, userId, result, now);
       return true;
     })();
@@ -698,34 +842,180 @@ export class JourneyService {
     }
   }
 
-  private async discoverOrEmpty(
+  private readCachedDiscoveryResult(
+    userId: string,
+    journeyId: string,
+  ): JourneyDiscoveryResult | null {
+    const row = this.db.prepare(`
+      SELECT result_json
+      FROM journey_discovery_cache
+      WHERE journey_id = ? AND user_id = ?
+    `).get(journeyId, userId) as { result_json: string } | undefined;
+    if (!row) return null;
+    try {
+      return JSON.parse(row.result_json) as JourneyDiscoveryResult;
+    } catch {
+      return null;
+    }
+  }
+
+  private async discoverForJourney(
     userId: string,
     oauthAccessToken: string,
     row: JourneyRow,
     now: number,
   ): Promise<JourneyDiscoveryResult> {
+    const cached = this.readCachedDiscoveryResult(userId, row.id);
+    if (cached) return cached;
+
+    const existing = this.discoveryInFlight.get(row.id);
+    if (existing) return existing;
+
+    const pending = (async () => {
+      const fromDb = this.readCachedDiscoveryResult(userId, row.id);
+      if (fromDb) return fromDb;
+
+      let result: JourneyDiscoveryResult;
+      try {
+        result = await this.options.discover({
+          userId,
+          oauthAccessToken,
+          routeBias: row.route_bias,
+          planSeed: row.plan_seed,
+          primaryToolId: row.primary_tool_id,
+          smallItemId: row.small_item_id,
+          recentQuestionUrls: this.readRecentQuestionUrls(userId),
+          recentMemoryTopicRefs: this.readRecentMemoryTopicRefs(userId),
+          recentInsightFeedback: this.readRecentInsightFeedback(userId),
+        });
+      } catch {
+        const fallback = routePostcardFallback(row.plan_seed, row.route_bias);
+        result = {
+          question: null,
+          contentSource: "none",
+          knowledgeSource: "template",
+          sourceFetchedAt: now,
+          ...fallback,
+          insight: createFallbackJourneyInsight(row.route_bias),
+        };
+      }
+
+      this.db.prepare(`
+        INSERT OR IGNORE INTO journey_discovery_cache (
+          journey_id, user_id, result_json, created_at
+        ) VALUES (?, ?, ?, ?)
+      `).run(row.id, userId, JSON.stringify(result), now);
+
+      return this.readCachedDiscoveryResult(userId, row.id) ?? result;
+    })();
+
+    this.discoveryInFlight.set(row.id, pending);
     try {
-      return await this.options.discover({
-        userId,
-        oauthAccessToken,
-        routeBias: row.route_bias,
-        planSeed: row.plan_seed,
-        primaryToolId: row.primary_tool_id,
-        smallItemId: row.small_item_id,
-        recentQuestionUrls: this.readRecentQuestionUrls(userId),
-        recentMemoryTopicRefs: this.readRecentMemoryTopicRefs(userId),
-        recentInsightFeedback: this.readRecentInsightFeedback(userId),
-      });
-    } catch {
-      const fallback = routePostcardFallback(row.plan_seed, row.route_bias);
-      return {
-        question: null,
-        contentSource: "none",
-        knowledgeSource: "template",
-        sourceFetchedAt: now,
-        ...fallback,
-        insight: createFallbackJourneyInsight(row.route_bias),
-      };
+      return await pending;
+    } finally {
+      if (this.discoveryInFlight.get(row.id) === pending) {
+        this.discoveryInFlight.delete(row.id);
+      }
+    }
+  }
+
+  private materializeSceneEvent(row: JourneyEventRow, journey: JourneyRow): void {
+    const copy = sceneEventCopy(`${journey.plan_seed}:${row.id}`, journey.route_bias);
+    this.db.prepare(`
+      UPDATE journey_events
+      SET event_type = 'SCENE_POSTCARD',
+          occurred_at = scheduled_at,
+          headline = ?,
+          body = ?
+      WHERE id = ? AND user_id = ? AND occurred_at IS NULL
+    `).run(copy.headline, copy.body, row.id, row.user_id);
+  }
+
+  private materializeFactualEvent(
+    row: JourneyEventRow,
+    journey: JourneyRow,
+    result: JourneyDiscoveryResult,
+  ): void {
+    if (row.planned_type === "ENCOUNTER_GLIMPSE" && result.conversation) {
+      this.db.prepare(`
+        UPDATE journey_events
+        SET event_type = 'ENCOUNTER_GLIMPSE',
+            occurred_at = scheduled_at,
+            headline = ?,
+            body = ?,
+            participant_kind = ?,
+            participant_id = ?,
+            participant_name = ?
+        WHERE id = ? AND user_id = ? AND occurred_at IS NULL
+      `).run(
+        `路上碰见了 ${result.conversation.participantName}。`,
+        "这里只寄回来一眼。完整对话会等它回窝以后再一起摊开。",
+        result.conversation.kind,
+        result.conversation.participantId,
+        result.conversation.participantName,
+        row.id,
+        row.user_id,
+      );
+      return;
+    }
+
+    if (result.question) {
+      this.db.prepare(`
+        UPDATE journey_events
+        SET event_type = 'QUESTION_GLIMPSE',
+            occurred_at = scheduled_at,
+            headline = ?,
+            body = ?,
+            question_title = ?,
+            question_url = ?,
+            question_summary = ?,
+            question_thumbnail_url = ?
+        WHERE id = ? AND user_id = ? AND occurred_at IS NULL
+      `).run(
+        "它在一个真实问题前停了一会儿。",
+        "这只是途中一眼。它没有替你回答，也还没把问题票根提前拆出来。",
+        result.question.title,
+        result.question.url,
+        result.question.summary,
+        result.question.thumbnailUrl ?? null,
+        row.id,
+        row.user_id,
+      );
+      return;
+    }
+
+    this.materializeSceneEvent(row, journey);
+  }
+
+  private async materializeDueEvents(
+    userId: string,
+    oauthAccessToken: string,
+    journey: JourneyRow,
+    now: number,
+  ): Promise<void> {
+    const due = this.db.prepare(`
+      SELECT
+        id, journey_id, user_id, planned_type, event_type,
+        scheduled_at, occurred_at, seen_at, headline, body,
+        question_title, question_url, question_summary, question_thumbnail_url,
+        participant_kind, participant_id, participant_name
+      FROM journey_events
+      WHERE journey_id = ? AND user_id = ?
+        AND occurred_at IS NULL
+        AND scheduled_at <= ?
+      ORDER BY scheduled_at ASC, id ASC
+    `).all(journey.id, userId, Math.min(now, journey.return_at)) as unknown as JourneyEventRow[];
+
+    if (!due.length) return;
+
+    let discovery: JourneyDiscoveryResult | null = null;
+    for (const event of due) {
+      if (event.planned_type === "SCENE_POSTCARD") {
+        this.materializeSceneEvent(event, journey);
+        continue;
+      }
+      discovery ??= await this.discoverForJourney(userId, oauthAccessToken, journey, now);
+      this.materializeFactualEvent(event, journey, discovery);
     }
   }
 
@@ -783,6 +1073,30 @@ export class JourneyService {
       returnAt,
       planSeed,
     );
+
+    const eventCount = journeyEventCount(plan.kind, planSeed);
+    const eventTypes = journeyEventTypes(planSeed, eventCount);
+    const eventTimes = journeyEventSchedule({
+      seed: planSeed,
+      count: eventCount,
+      departAt,
+      returnAt,
+    });
+    for (let index = 0; index < eventCount; index += 1) {
+      this.db.prepare(`
+        INSERT INTO journey_events (
+          id, journey_id, user_id, planned_type, scheduled_at, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `).run(
+        `${id}:event:${index + 1}`,
+        id,
+        userId,
+        eventTypes[index],
+        eventTimes[index],
+        scheduledAt,
+      );
+    }
+
     this.ensureUserState(userId);
     this.db.prepare(`
       UPDATE journey_user_state
@@ -1377,6 +1691,20 @@ export class JourneyService {
     });
   }
 
+  private readJourneyEvents(userId: string, journeyId: string): JourneyEventView[] {
+    const rows = this.db.prepare(`
+      SELECT
+        id, journey_id, user_id, planned_type, event_type,
+        scheduled_at, occurred_at, seen_at, headline, body,
+        question_title, question_url, question_summary, question_thumbnail_url,
+        participant_kind, participant_id, participant_name
+      FROM journey_events
+      WHERE user_id = ? AND journey_id = ?
+      ORDER BY scheduled_at ASC, id ASC
+    `).all(userId, journeyId) as unknown as JourneyEventRow[];
+    return rows.map(eventFromRow);
+  }
+
   private countJourneys(userId: string): number {
     const row = this.db.prepare(`
       SELECT COUNT(*) AS count FROM journeys WHERE user_id = ?
@@ -1408,6 +1736,7 @@ export class JourneyService {
       artifact: artifactFromRow(row),
       insight: insightFromRow(row),
       conversation: conversationFromRow(row),
+      events: this.readJourneyEvents(row.user_id, row.id),
     };
   }
 
@@ -1503,6 +1832,42 @@ export class JourneyService {
         body TEXT NOT NULL,
         question_title TEXT,
         question_url TEXT,
+        created_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS journey_events (
+        id TEXT PRIMARY KEY,
+        journey_id TEXT NOT NULL REFERENCES journeys(id) ON DELETE CASCADE,
+        user_id TEXT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        planned_type TEXT NOT NULL CHECK (planned_type IN (
+          'SCENE_POSTCARD', 'QUESTION_GLIMPSE', 'ENCOUNTER_GLIMPSE'
+        )),
+        event_type TEXT CHECK (event_type IN (
+          'SCENE_POSTCARD', 'QUESTION_GLIMPSE', 'ENCOUNTER_GLIMPSE'
+        )),
+        scheduled_at INTEGER NOT NULL,
+        occurred_at INTEGER,
+        seen_at INTEGER,
+        headline TEXT,
+        body TEXT,
+        question_title TEXT,
+        question_url TEXT,
+        question_summary TEXT,
+        question_thumbnail_url TEXT,
+        participant_kind TEXT CHECK (participant_kind IN ('NPC', 'USER')),
+        participant_id TEXT,
+        participant_name TEXT,
+        created_at INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_journey_events_journey_scheduled
+        ON journey_events(journey_id, scheduled_at ASC);
+      CREATE INDEX IF NOT EXISTS idx_journey_events_user_unseen
+        ON journey_events(user_id, seen_at, occurred_at);
+
+      CREATE TABLE IF NOT EXISTS journey_discovery_cache (
+        journey_id TEXT PRIMARY KEY REFERENCES journeys(id) ON DELETE CASCADE,
+        user_id TEXT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        result_json TEXT NOT NULL,
         created_at INTEGER NOT NULL
       );
 

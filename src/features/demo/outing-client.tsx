@@ -34,7 +34,7 @@ import type {
 } from "@/lib/journey/types";
 import type { PlayerPersona } from "@/lib/persona";
 
-import { PaperCard } from "./components";
+import { ArtSlot, PaperCard } from "./components";
 import { DEMO_FIXTURE } from "./fixtures";
 import { BottomSheet } from "./interaction-client";
 import { useCatProfile } from "./profile/client";
@@ -214,6 +214,89 @@ function JourneyPostcardArt({
   );
 }
 
+function JourneyEventInbox({
+  journey,
+  fallbackInterest,
+  onSeen,
+}: {
+  journey: JourneyView;
+  fallbackInterest: string;
+  onSeen: (eventId: string) => void;
+}) {
+  const occurred = journey.events.filter((event) => event.occurredAt !== null);
+  if (!occurred.length) return null;
+  const unread = occurred.filter((event) => event.seenAt === null).length;
+
+  return (
+    <section className="journey-event-inbox" aria-label="途中留下的纸片">
+      <header>
+        <div>
+          <small>途中纸片 · JOURNEY MAIL</small>
+          <b>{unread > 0 ? `${unread} 张还没看` : `${occurred.length} 张已经收好`}</b>
+        </div>
+        <span>只是途中痕迹，不是回家奖励。</span>
+      </header>
+      <div className="journey-event-list">
+        {occurred.map((event) => {
+          const art = event.type === "QUESTION_GLIMPSE"
+            ? event.question?.thumbnailUrl ?? null
+            : resolveWaitingGameJourneyPostcard({
+                journeyKey: `${journey.id}:${event.id}`,
+                routeBias: journey.routeBias,
+                fallbackInterest,
+                participantName: event.participant?.name,
+                sharedUser: event.participant?.kind === "USER",
+              });
+          const label = event.type === "ENCOUNTER_GLIMPSE"
+            ? "途中相遇"
+            : event.type === "QUESTION_GLIMPSE"
+              ? "问题一瞥"
+              : "知识场景";
+
+          return (
+            <details
+              className={event.seenAt === null ? "is-unread" : ""}
+              key={event.id}
+              onToggle={(toggleEvent) => {
+                if ((toggleEvent.currentTarget as HTMLDetailsElement).open && event.seenAt === null) {
+                  onSeen(event.id);
+                }
+              }}
+            >
+              <summary>
+                <span>{label}</span>
+                <b>{event.headline ?? "途中留下一点动静。"}</b>
+                <em>{event.seenAt === null ? "NEW" : "看过了"}</em>
+              </summary>
+              <div className="journey-event-body">
+                {art ? (
+                  <ArtSlot
+                    aspect="wide"
+                    label={event.type === "QUESTION_GLIMPSE" ? "真实知乎问题配图" : `${label} · 知识漫游插画`}
+                    name={`journey/event-${event.id}`}
+                    src={art}
+                  />
+                ) : null}
+                {event.question ? <h3>{event.question.title}</h3> : null}
+                {event.participant ? <h3>碰见了 {event.participant.name}</h3> : null}
+                <p>{event.body ?? "这一页只留下了时间和一点痕迹。"}</p>
+                {event.question ? (
+                  <a href={event.question.url} rel="noreferrer" target="_blank">看知乎原问题 →</a>
+                ) : null}
+                <small>
+                  {event.occurredAt
+                    ? new Date(event.occurredAt).toLocaleString("zh-CN", { hour: "2-digit", minute: "2-digit" })
+                    : ""}
+                </small>
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function DemoOutingHome() {
   const [projection, setProjection] = useState<JourneyProjection | null>(null);
   const [journeyError, setJourneyError] = useState<string | null>(null);
@@ -274,6 +357,20 @@ export function DemoOutingHome() {
     }
   }, [runAction]);
 
+  const markEventSeen = useCallback(async (eventId: string) => {
+    try {
+      const response = await fetch("/api/journey", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "event_seen", eventId }),
+      });
+      if (!response.ok) return;
+      await refreshJourney();
+    } catch {
+      // Seeing a postcard should never block the Journey itself.
+    }
+  }, [refreshJourney]);
+
   useEffect(() => {
     void refreshJourney();
   }, [refreshJourney]);
@@ -295,7 +392,13 @@ export function DemoOutingHome() {
     return <PreparingStage catName={catName} journey={projection.journey} playerPersona={playerPersona} />;
   }
   if (projection.state === "AWAY" && projection.journey) {
-    return <AwayStage journey={projection.journey} />;
+    return (
+      <AwayStage
+        fallbackInterest={primaryInterest}
+        journey={projection.journey}
+        onEventSeen={markEventSeen}
+      />
+    );
   }
   if (projection.state === "RETURNED" && projection.journey) {
     return (
@@ -305,6 +408,7 @@ export function DemoOutingHome() {
         playerPersona={playerPersona}
         primaryInterest={primaryInterest}
         onArchive={() => void runAction({ action: "archive" })}
+        onEventSeen={markEventSeen}
         onInsightFeedback={async (response) => {
           await runAction({ action: "insight_feedback", journeyId: projection.journey!.id, response });
         }}
@@ -627,7 +731,15 @@ function awayMood(journey: JourneyView): string {
   return "外面安静了很久。也许快回来了。";
 }
 
-function AwayStage({ journey }: { journey: JourneyView }) {
+function AwayStage({
+  journey,
+  fallbackInterest,
+  onEventSeen,
+}: {
+  journey: JourneyView;
+  fallbackInterest: string;
+  onEventSeen: (eventId: string) => void;
+}) {
   const primaryTool = journey.primaryToolId ? PRIMARY_TOOL_BY_ID[journey.primaryToolId] : null;
   const smallItem = journey.smallItemId ? SMALL_ITEM_BY_ID[journey.smallItemId] : null;
   const journeyLabel = journey.kind === "FAR" ? "走得更远的一趟" : journey.kind === "WARMUP" ? "刚开始熟悉路" : "普通的一趟";
@@ -647,6 +759,11 @@ function AwayStage({ journey }: { journey: JourneyView }) {
           <span>小物 <b>{smallItem?.name ?? "没带"}</b></span>
         </div>
       </PaperCard>
+      <JourneyEventInbox
+        fallbackInterest={fallbackInterest}
+        journey={journey}
+        onSeen={onEventSeen}
+      />
       <div className="outing-away-actions">
         <a href="/atlas">翻翻以前的旅行册 →</a>
         <span>等门自己响。</span>
@@ -659,6 +776,7 @@ function ReturnedStage({
   catName,
   journey,
   onArchive,
+  onEventSeen,
   onInsightFeedback,
   playerPersona,
   primaryInterest,
@@ -666,6 +784,7 @@ function ReturnedStage({
   catName: string;
   journey: JourneyView;
   onArchive: () => void;
+  onEventSeen: (eventId: string) => void;
   onInsightFeedback: (response: JourneyInsightAction) => Promise<void>;
   playerPersona: PlayerPersona;
   primaryInterest: string;
@@ -732,6 +851,11 @@ function ReturnedStage({
       />
       {!opened ? (
         <PaperCard className="returned-artifact returned-artifact--sealed">
+          <JourneyEventInbox
+            fallbackInterest={primaryInterest}
+            journey={journey}
+            onSeen={onEventSeen}
+          />
           <span>旅包 · SEALED</span>
           <h2>东西还没摊开。</h2>
           <p>可能是一张问题票，也可能是它对你的一个新发现。这一趟回来，总会留下能继续看的东西。</p>
@@ -740,6 +864,11 @@ function ReturnedStage({
         </PaperCard>
       ) : (
         <PaperCard className="returned-artifact is-opened">
+          <JourneyEventInbox
+            fallbackInterest={primaryInterest}
+            journey={journey}
+            onSeen={onEventSeen}
+          />
           <span>{artifactLabel}</span>
           <HomeTableArt alt="旅包已经在桌上摊开" state="open_bundle" />
           <JourneyPostcardArt fallbackInterest={primaryInterest} journey={journey} />

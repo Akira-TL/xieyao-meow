@@ -53,6 +53,30 @@ export interface JourneyPostcard {
 
 export type JourneyConversationKind = "NPC" | "USER";
 
+export type JourneyEventType =
+  | "SCENE_POSTCARD"
+  | "QUESTION_GLIMPSE"
+  | "ENCOUNTER_GLIMPSE";
+
+export interface JourneyEventParticipant {
+  kind: JourneyConversationKind;
+  id: string;
+  name: string;
+}
+
+export interface JourneyEventView {
+  id: string;
+  plannedType: JourneyEventType;
+  type: JourneyEventType;
+  scheduledAt: number;
+  occurredAt: number | null;
+  seenAt: number | null;
+  headline: string | null;
+  body: string | null;
+  question: JourneyQuestion | null;
+  participant: JourneyEventParticipant | null;
+}
+
 export interface JourneyConversationTurn {
   speaker: "self" | "other";
   text: string;
@@ -124,6 +148,7 @@ export interface JourneyView {
   artifact: ReturnArtifact | null;
   insight: JourneyInsight | null;
   conversation: JourneyConversation | null;
+  events: JourneyEventView[];
 }
 
 export interface JourneyProjection {
@@ -145,6 +170,7 @@ export interface JourneyAtlasEntry {
   artifact: ReturnArtifact | null;
   insight: JourneyInsight | null;
   conversation: JourneyConversation | null;
+  events: JourneyEventView[];
   contentSource: JourneyContentSource;
 }
 

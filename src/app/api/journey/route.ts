@@ -28,6 +28,10 @@ const actionSchema = z.discriminatedUnion("action", [
     journeyId: z.string().trim().min(1).max(100),
     response: z.enum(["CONFIRM_INTEREST", "CORRECT_INTEREST", "REDUCE_INTEREST"]),
   }),
+  z.object({
+    action: z.literal("event_seen"),
+    eventId: z.string().trim().min(1).max(100),
+  }),
 ]);
 
 function json(data: unknown, init?: ResponseInit) {
@@ -94,6 +98,14 @@ export async function POST(request: Request) {
         },
       ));
     }
+    if (parsed.action === "event_seen") {
+      const event = await service.markEventSeen(
+        identity.userId,
+        identity.oauthAccessToken,
+        parsed.eventId,
+      );
+      return event ? json({ event }) : json({ error: "journey event not found" }, { status: 404 });
+    }
     return json(await service.respondToInsight(
       identity.userId,
       identity.oauthAccessToken,
@@ -102,7 +114,7 @@ export async function POST(request: Request) {
     ));
   } catch (error) {
     const message = error instanceof Error ? error.message : "journey action failed";
-    const status = parsed.action === "insight_feedback" ? 404 : 409;
+    const status = parsed.action === "insight_feedback" || parsed.action === "event_seen" ? 404 : 409;
     return json({ error: message }, { status });
   }
 }

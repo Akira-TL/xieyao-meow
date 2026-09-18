@@ -145,6 +145,149 @@ describe("server Journey", () => {
     service.close();
   });
 
+  it("freezes Journey Event plans, materializes them on schedule, and reuses one discovery snapshot", async () => {
+    const dbPath = createDbPath();
+    const userId = createUser(dbPath, "subject-events", "user-events");
+    let now = 3_000_000;
+    let idIndex = 0;
+    const ids = ["event-30", "event-row-a", "event-row-b"];
+    const discover = vi.fn(async () => ({
+      question: {
+        title: "途中看见的真实问题",
+        url: "https://www.zhihu.com/question/777",
+        summary: "这张问题一瞥和回家后的问题票来自同一份冻结结果。",
+        thumbnailUrl: "https://pic.example.com/777.jpg",
+      },
+      contentSource: "live" as const,
+      knowledgeSource: "template" as const,
+      sourceFetchedAt: now,
+      postcardHeadline: "回家以后才把整页摊开。",
+      postcardBody: "途中纸片没有提前拆掉回家结果。",
+      conversation: {
+        kind: "NPC" as const,
+        participantId: "resident-gear",
+        participantName: "齿轮",
+        turns: [
+          { speaker: "self" as const, text: "先看看这个问题。" },
+          { speaker: "other" as const, text: "我更想知道为什么。" },
+        ],
+        sourceLabel: "测试对话",
+        textCharCount: 18,
+      },
+    }));
+    const service = new JourneyService({
+      dbPath,
+      now: () => now,
+      createId: () => ids[idIndex++] ?? ("event-generated-" + idIndex),
+      discover,
+    });
+
+    const started = await service.start(userId, "oauth-events", "看看科学");
+    expect(started.journey?.events).toHaveLength(2);
+    expect(started.journey?.events.map((event) => event.plannedType)).toEqual([
+      "QUESTION_GLIMPSE",
+      "ENCOUNTER_GLIMPSE",
+    ]);
+    expect(started.journey?.events.every((event) => event.occurredAt === null)).toBe(true);
+    const [firstPlan, secondPlan] = started.journey!.events;
+    expect(firstPlan!.scheduledAt).toBeGreaterThan(started.journey!.departAt);
+    expect(secondPlan!.scheduledAt).toBeGreaterThan(firstPlan!.scheduledAt);
+    expect(secondPlan!.scheduledAt).toBeLessThan(started.journey!.returnAt);
+
+    now = firstPlan!.scheduledAt - 1;
+    const beforeFirst = await service.getProjection(userId, "oauth-events");
+    expect(beforeFirst.journey?.events[0]?.occurredAt).toBeNull();
+    expect(discover).toHaveBeenCalledTimes(0);
+
+    now = firstPlan!.scheduledAt;
+    const firstOccurred = await service.getProjection(userId, "oauth-events");
+    expect(firstOccurred.state).toBe("AWAY");
+    expect(firstOccurred.journey?.events[0]).toMatchObject({
+      plannedType: "QUESTION_GLIMPSE",
+      type: "QUESTION_GLIMPSE",
+      occurredAt: firstPlan!.scheduledAt,
+      seenAt: null,
+      question: { url: "https://www.zhihu.com/question/777" },
+    });
+    expect(discover).toHaveBeenCalledTimes(1);
+
+    const seen = await service.markEventSeen(userId, "oauth-events", firstPlan!.id);
+    expect(seen?.seenAt).toBe(now);
+    expect((await service.getProjection(userId, "oauth-events")).journey?.events[0]?.seenAt).toBe(now);
+
+    now = secondPlan!.scheduledAt;
+    const secondOccurred = await service.getProjection(userId, "oauth-events");
+    expect(secondOccurred.journey?.events[1]).toMatchObject({
+      plannedType: "ENCOUNTER_GLIMPSE",
+      type: "ENCOUNTER_GLIMPSE",
+      occurredAt: secondPlan!.scheduledAt,
+      participant: {
+        kind: "NPC",
+        id: "resident-gear",
+        name: "齿轮",
+      },
+    });
+    expect(discover).toHaveBeenCalledTimes(1);
+
+    const frozenEvents = secondOccurred.journey!.events;
+    expect((await service.getProjection(userId, "oauth-events")).journey?.events).toEqual(frozenEvents);
+
+    now = started.journey!.returnAt;
+    const returned = await service.getProjection(userId, "oauth-events");
+    expect(returned.state).toBe("RETURNED");
+    expect(returned.journey?.question?.url).toBe("https://www.zhihu.com/question/777");
+    expect(returned.journey?.conversation?.participantName).toBe("齿轮");
+    expect(returned.journey?.events).toEqual(frozenEvents);
+    expect(discover).toHaveBeenCalledTimes(1);
+
+    const atlas = await service.getAtlas(userId, "oauth-events");
+    expect(atlas.journeys[0]?.events).toEqual(frozenEvents);
+    service.close();
+  });
+
+  it("falls a factual Journey Event back to a scene without inventing a question", async () => {
+    const dbPath = createDbPath();
+    const userId = createUser(dbPath, "subject-event-fallback", "user-event-fallback");
+    let now = 4_000_000;
+    const discover = vi.fn(async () => {
+      throw new Error("source unavailable");
+    });
+    const service = new JourneyService({
+      dbPath,
+      now: () => now,
+      createId: (() => {
+        let first = true;
+        return () => {
+          if (first) {
+            first = false;
+            return "event-27";
+          }
+          return "fallback-generated";
+        };
+      })(),
+      discover,
+    });
+
+    const started = await service.start(userId, "oauth-event-fallback", null);
+    expect(started.journey?.events).toHaveLength(1);
+    const plan = started.journey!.events[0]!;
+    expect(plan.plannedType).toBe("QUESTION_GLIMPSE");
+
+    now = started.journey!.returnAt;
+    const returned = await service.getProjection(userId, "oauth-event-fallback");
+    expect(returned.state).toBe("RETURNED");
+    expect(returned.journey?.events[0]).toMatchObject({
+      plannedType: "QUESTION_GLIMPSE",
+      type: "SCENE_POSTCARD",
+      occurredAt: plan.scheduledAt,
+      question: null,
+      participant: null,
+    });
+    expect(returned.journey?.question).toBeNull();
+    expect(discover).toHaveBeenCalledTimes(1);
+    service.close();
+  });
+
   it("coalesces concurrent return polls into one discovery/materialization", async () => {
     const dbPath = createDbPath();
     const userId = createUser(dbPath, "subject-a", "user-a");

@@ -42,6 +42,99 @@ function journeyPostcardArt(entry: JourneyAtlasEntry, fallbackInterest: string) 
   });
 }
 
+
+function JourneyArchiveEvents({
+  entry,
+  fallbackInterest,
+}: {
+  entry: JourneyAtlasEntry;
+  fallbackInterest: string;
+}) {
+  const occurred = entry.events.filter((event) => event.occurredAt !== null);
+  const [locallySeen, setLocallySeen] = useState(
+    () => new Set(occurred.filter((event) => event.seenAt !== null).map((event) => event.id)),
+  );
+  if (!occurred.length) return null;
+
+  const markSeen = async (eventId: string) => {
+    if (locallySeen.has(eventId)) return;
+    try {
+      const response = await fetch("/api/journey", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "event_seen", eventId }),
+      });
+      if (!response.ok) return;
+      setLocallySeen((current) => new Set([...current, eventId]));
+    } catch {
+      // The archive remains readable even if seen-state persistence is temporarily unavailable.
+    }
+  };
+
+  return (
+    <PaperCard className="journey-archive-events">
+      <span>JOURNEY MAIL · 途中纸片</span>
+      <h2>它在回来以前，留下过这些动静。</h2>
+      <p>这些只是途中痕迹，不是奖励，也不会改变已经发生的 Journey。</p>
+      <div className="journey-event-list">
+        {occurred.map((event) => {
+          const seen = event.seenAt !== null || locallySeen.has(event.id);
+          const label = event.type === "ENCOUNTER_GLIMPSE"
+            ? "途中相遇"
+            : event.type === "QUESTION_GLIMPSE"
+              ? "问题一瞥"
+              : "知识场景";
+          const art = event.type === "QUESTION_GLIMPSE"
+            ? event.question?.thumbnailUrl ?? null
+            : resolveWaitingGameJourneyPostcard({
+                journeyKey: `${entry.journeyId}:${event.id}`,
+                routeBias: entry.routeBias,
+                fallbackInterest,
+                participantName: event.participant?.name,
+                sharedUser: event.participant?.kind === "USER",
+              });
+
+          return (
+            <details
+              className={seen ? "" : "is-unread"}
+              key={event.id}
+              onToggle={(toggleEvent) => {
+                if ((toggleEvent.currentTarget as HTMLDetailsElement).open && !seen) {
+                  void markSeen(event.id);
+                }
+              }}
+            >
+              <summary>
+                <span>{label}</span>
+                <b>{event.headline ?? "途中留下一点动静。"}</b>
+                <em>{seen ? "看过了" : "NEW"}</em>
+              </summary>
+              <div className="journey-event-body">
+                {art ? (
+                  <ArtSlot
+                    aspect="wide"
+                    label={event.type === "QUESTION_GLIMPSE" ? "真实知乎问题配图" : `${label} · 知识漫游插画`}
+                    name={`journey/archive-event-${event.id}`}
+                    src={art}
+                  />
+                ) : null}
+                {event.question ? <h3>{event.question.title}</h3> : null}
+                {event.participant ? <h3>碰见了 {event.participant.name}</h3> : null}
+                <p>{event.body ?? "这一页只留下了时间和一点痕迹。"}</p>
+                {event.question ? (
+                  <a href={event.question.url} rel="noreferrer" target="_blank">
+                    看知乎原问题 <OpenInNewRoundedIcon fontSize="inherit" />
+                  </a>
+                ) : null}
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    </PaperCard>
+  );
+}
+
 function formatJourneyDate(value: number) {
   return new Intl.DateTimeFormat("zh-CN", {
     month: "numeric",
@@ -447,6 +540,8 @@ export function LiveJourneyDetail({ journeyId }: { journeyId: string }) {
           </div>
         </PaperCard>
 
+        <JourneyArchiveEvents entry={entry} fallbackInterest={primaryInterest} />
+
         <div className="journey-gallery-and-why">
           <PaperCard>
             <h2>知识漫游插画</h2>
@@ -707,6 +802,11 @@ export function LiveAtlasSection() {
                 <span>{formatJourneyDate(entry.completedAt)} · 纸条「{entry.routeBias ?? "随便逛"}」</span>
                 <p>{compact(entry.postcard.body, 92)}</p>
                 {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">看知乎原问题 →</a> : entry.insight ? <em>{entry.insight.headline} · {entry.insight.textCharCount} 字</em> : <em>这趟留下了一页旅行记录</em>}
+                {entry.events.some((event) => event.occurredAt !== null && event.seenAt === null) ? (
+                  <em className="atlas-event-unread">
+                    途中纸片 {entry.events.filter((event) => event.occurredAt !== null && event.seenAt === null).length} 未读
+                  </em>
+                ) : null}
                 <Link className="atlas-journey-detail-link" href={`/journey/${entry.journeyId}`}>打开这一趟 →</Link>
               </article>
             )) : <p className="atlas-mobile-trace">等它第一次真正回家，这里会出现第一张旅行页。</p>}
@@ -767,6 +867,11 @@ export function LiveAtlasSection() {
                     src={journeyPostcardArt(entry, primaryInterest)}
                   />
                   <span>{entry.postcard.headline}</span>
+                  {entry.events.some((event) => event.occurredAt !== null && event.seenAt === null) ? (
+                    <em className="atlas-event-unread">
+                      {entry.events.filter((event) => event.occurredAt !== null && event.seenAt === null).length} 张途中纸片未读
+                    </em>
+                  ) : null}
                   <Link className="atlas-journey-detail-link" href={`/journey/${entry.journeyId}`}>打开 →</Link>
                 </article>
               ))}
