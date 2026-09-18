@@ -98,6 +98,24 @@ export interface ReturnArtifact {
   sourceUrl: string;
 }
 
+export type ReturnItemType =
+  | "TRIP_PHOTO"
+  | "INSPIRATION_LEAVES"
+  | "QUESTION_TICKET"
+  | "RELATION_NOTE"
+  | "ODDITY_SOUVENIR"
+  | "MILESTONE_UNLOCK";
+
+export interface ReturnItem {
+  id: string;
+  type: ReturnItemType;
+  title: string;
+  sourceUrl: string | null;
+  sourceKey: string;
+  provenance: Record<string, unknown>;
+  createdAt: number;
+}
+
 export interface WaitingGameToolView {
   id: PrimaryToolId;
   unlocked: boolean;
@@ -146,6 +164,7 @@ export interface JourneyView {
   question: JourneyQuestion | null;
   postcard: JourneyPostcard | null;
   artifact: ReturnArtifact | null;
+  returnItems: ReturnItem[];
   insight: JourneyInsight | null;
   conversation: JourneyConversation | null;
   events: JourneyEventView[];
@@ -168,6 +187,7 @@ export interface JourneyAtlasEntry {
   inspirationLeaves: number;
   postcard: JourneyPostcard;
   artifact: ReturnArtifact | null;
+  returnItems: ReturnItem[];
   insight: JourneyInsight | null;
   conversation: JourneyConversation | null;
   events: JourneyEventView[];

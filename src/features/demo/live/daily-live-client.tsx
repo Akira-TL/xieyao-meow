@@ -536,11 +536,43 @@ export function LiveJourneyDetail({ journeyId }: { journeyId: string }) {
             <i>→</i>
             <span><b>相遇</b><small>{conversation ? `碰见了 ${conversation.participantName}，留下 ${conversation.turns.length} 句对话。` : "这趟没有停下来聊天。"}</small></span>
             <i>→</i>
-            <span><b>回窝</b><small>{entry.artifact?.title ?? "把这一页旅行记录带了回来。"}</small></span>
+            <span><b>回窝</b><small>{entry.returnItems.find((item) => !["TRIP_PHOTO", "INSPIRATION_LEAVES"].includes(item.type))?.title ?? entry.artifact?.title ?? "把这一页旅行记录带了回来。"}</small></span>
           </div>
         </PaperCard>
 
         <JourneyArchiveEvents entry={entry} fallbackInterest={primaryInterest} />
+
+        {entry.returnItems.length ? (
+          <PaperCard className="journey-return-items">
+            <span>RETURN BUNDLE · 回家包</span>
+            <h2>这一趟真正留下来的东西</h2>
+            <div>
+              {entry.returnItems.map((item) => (
+                <article key={item.id}>
+                  <small>
+                    {item.type === "TRIP_PHOTO"
+                      ? "知识场景照"
+                      : item.type === "INSPIRATION_LEAVES"
+                        ? "灵感叶"
+                        : item.type === "QUESTION_TICKET"
+                          ? "问题票根"
+                          : item.type === "RELATION_NOTE"
+                            ? "关系纸条"
+                            : item.type === "ODDITY_SOUVENIR"
+                              ? "奇怪纪念物"
+                              : "里程碑"}
+                  </small>
+                  <b>{item.title}</b>
+                  {item.sourceUrl ? (
+                    <a href={item.sourceUrl} rel={item.sourceUrl.startsWith("http") ? "noreferrer" : undefined} target={item.sourceUrl.startsWith("http") ? "_blank" : undefined}>
+                      查看来源 →
+                    </a>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          </PaperCard>
+        ) : null}
 
         <div className="journey-gallery-and-why">
           <PaperCard>
@@ -726,8 +758,14 @@ export function LiveAtlasSection() {
   const recentJourneys = journeyAtlas?.journeys.slice(0, 4) ?? [];
   const allJourneys = journeyAtlas?.journeys ?? [];
   const journeyCount = allJourneys.length;
-  const questionTicketCount = allJourneys.filter((entry) => Boolean(entry.postcard.question)).length;
-  const relationTicketCount = allJourneys.filter((entry) => entry.artifact?.type === "RELATION_TICKET").length;
+  const questionTicketCount = allJourneys.reduce(
+    (count, entry) => count + entry.returnItems.filter((item) => item.type === "QUESTION_TICKET").length,
+    0,
+  );
+  const relationTicketCount = allJourneys.reduce(
+    (count, entry) => count + entry.returnItems.filter((item) => item.type === "RELATION_NOTE").length,
+    0,
+  );
   const insightCount = allJourneys.filter((entry) => Boolean(entry.insight)).length;
   const recentInsights = allJourneys.flatMap((entry) => entry.insight ? [entry.insight] : []).slice(0, 3);
 

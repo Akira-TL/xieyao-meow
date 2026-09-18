@@ -101,6 +101,20 @@ describe("server Journey", () => {
     expect(returned.journey?.question?.url).toBe("https://www.zhihu.com/question/123");
     expect(returned.journey?.postcard?.body).toBe("它把这个真实问题叼回来了。");
     expect(returned.journey?.artifact?.type).toBe("QUESTION_TICKET");
+    expect(returned.journey?.returnItems.map((item) => item.type)).toEqual([
+      "TRIP_PHOTO",
+      "INSPIRATION_LEAVES",
+      "QUESTION_TICKET",
+      "RELATION_NOTE",
+    ]);
+    expect(returned.journey?.returnItems.find((item) => item.type === "QUESTION_TICKET")).toMatchObject({
+      title: "真实问题",
+      sourceUrl: "https://www.zhihu.com/question/123",
+      sourceKey: "https://www.zhihu.com/question/123",
+      provenance: { source: "zhihu" },
+    });
+    expect(returned.journey?.returnItems.find((item) => item.type === "INSPIRATION_LEAVES")?.title)
+      .toBe(`灵感叶 +${returned.journey?.inspirationLeaves}`);
     expect(returned.journey?.insight).toMatchObject({
       headline: "它发现你会多问一步",
       model: "deepseek-flash",
@@ -142,6 +156,11 @@ describe("server Journey", () => {
     expect(secondDiscoveryInput.recentInsightFeedback).toEqual([
       { action: "CONFIRM_INTEREST", topic: "AI 与数码" },
     ]);
+    const atlasAfterSecond = await service.getAtlas(userId, "oauth-a");
+    expect(
+      atlasAfterSecond.journeys.flatMap((entry) => entry.returnItems)
+        .filter((item) => item.type === "QUESTION_TICKET"),
+    ).toHaveLength(1);
     service.close();
   });
 
@@ -496,9 +515,24 @@ describe("server Journey", () => {
       now = journey.returnAt;
       const returned = await service.getProjection(userId, "oauth-cadence");
       expect(returned.state).toBe("RETURNED");
+      expect(returned.journey?.returnItems.length).toBeLessThanOrEqual(5);
+      expect(returned.journey?.returnItems.slice(0, 2).map((item) => item.type)).toEqual([
+        "TRIP_PHOTO",
+        "INSPIRATION_LEAVES",
+      ]);
       if (trip === 3) {
         expect(returned.game.primaryTools.find((tool) => tool.id === "magnifier")?.unlocked).toBe(true);
         expect(returned.game.primaryTools.find((tool) => tool.id === "old_camera")?.unlocked).toBe(false);
+        expect(returned.journey?.returnItems).toHaveLength(3);
+        expect(returned.journey?.returnItems.find((item) => item.type === "MILESTONE_UNLOCK")).toMatchObject({
+          title: "旧放大镜 解锁",
+          sourceKey: "tool:magnifier",
+          provenance: {
+            source: "server-state",
+            toolId: "magnifier",
+            unlockAtJourneys: 3,
+          },
+        });
       }
 
       if (trip < 4) {
@@ -664,7 +698,30 @@ describe("server Journey", () => {
         queued_route_bias TEXT,
         updated_at INTEGER NOT NULL
       );
+      CREATE TABLE return_artifacts (
+        id TEXT PRIMARY KEY,
+        owner_user_id TEXT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        origin_journey_id TEXT NOT NULL UNIQUE REFERENCES journeys(id) ON DELETE CASCADE,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        source_url TEXT NOT NULL,
+        source_key TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        UNIQUE(owner_user_id, type, source_key)
+      );
     `);
+    legacy.prepare(`
+      INSERT INTO journeys (
+        id, user_id, state, route_bias, created_at, depart_at, return_at,
+        plan_seed, engine_version, materialized_at, returned_at, archived_at
+      ) VALUES (?, ?, 'RETURNED', NULL, 1_000, 2_000, 5_000, 'legacy-seed', 'journey-v1', 5_000, 5_000, 6_000)
+    `).run("legacy-trip", userId);
+    legacy.prepare(`
+      INSERT INTO return_artifacts (
+        id, owner_user_id, origin_journey_id, type, title,
+        source_url, source_key, created_at
+      ) VALUES (?, ?, ?, 'QUESTION_TICKET', '旧问题票', ?, ?, 5_000)
+    `).run("legacy-artifact", userId, "legacy-trip", "https://www.zhihu.com/question/legacy", "https://www.zhihu.com/question/legacy");
     legacy.prepare(`
       INSERT INTO journey_user_state (user_id, next_eligible_at, queued_route_bias, updated_at)
       VALUES (?, ?, ?, ?)
@@ -705,6 +762,24 @@ describe("server Journey", () => {
       "small_item_consumed_at",
     ]));
     expect(stateColumns.map((column) => column.name)).toContain("queued_ready");
+    const migratedReturnItem = migrated.prepare(`
+      SELECT type, title, source_url, source_key, provenance_json
+      FROM return_items
+      WHERE owner_user_id = ? AND origin_journey_id = ?
+    `).get(userId, "legacy-trip") as {
+      type: string;
+      title: string;
+      source_url: string | null;
+      source_key: string;
+      provenance_json: string;
+    };
+    expect(migratedReturnItem).toMatchObject({
+      type: "QUESTION_TICKET",
+      title: "旧问题票",
+      source_url: "https://www.zhihu.com/question/legacy",
+      source_key: "https://www.zhihu.com/question/legacy",
+    });
+    expect(JSON.parse(migratedReturnItem.provenance_json)).toEqual({ source: "legacy-artifact" });
     migrated.close();
   });
 

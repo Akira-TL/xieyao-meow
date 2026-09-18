@@ -30,6 +30,7 @@ import type {
   JourneyInsightAction,
   JourneyProjection,
   JourneyView,
+  ReturnItem,
   WaitingGameStateView,
 } from "@/lib/journey/types";
 import type { PlayerPersona } from "@/lib/persona";
@@ -183,6 +184,47 @@ function ReturnItemArt({ kind, alt }: { kind: "question_ticket" | "relation_note
         src={resolveWaitingGameReturnItemArt(kind)}
       />
     </div>
+  );
+}
+
+function StructuredReturnItem({ item }: { item: ReturnItem }) {
+  const artKind = item.type === "QUESTION_TICKET"
+    ? "question_ticket"
+    : item.type === "RELATION_NOTE"
+      ? "relation_note"
+      : item.type === "ODDITY_SOUVENIR"
+        ? "oddity"
+        : null;
+  const toolId = item.type === "MILESTONE_UNLOCK" && typeof item.provenance.toolId === "string"
+    && item.provenance.toolId in PRIMARY_TOOL_BY_ID
+    ? item.provenance.toolId as PrimaryToolId
+    : null;
+  const label = item.type === "QUESTION_TICKET"
+    ? "问题票根"
+    : item.type === "RELATION_NOTE"
+      ? "关系纸条"
+      : item.type === "ODDITY_SOUVENIR"
+        ? "奇怪纪念物"
+        : item.type === "MILESTONE_UNLOCK"
+          ? "里程碑"
+          : item.type;
+
+  return (
+    <article className="returned-bundle-item" data-return-item-type={item.type}>
+      {artKind ? <ReturnItemArt alt={item.title} kind={artKind} /> : null}
+      {toolId ? (
+        <span className="returned-bundle-tool-art">
+          <Image alt="" fill sizes="110px" src={resolveWaitingGamePrimaryToolArt(toolId)} />
+        </span>
+      ) : null}
+      <small>{label}</small>
+      <b>{item.title}</b>
+      {item.sourceUrl ? (
+        <a href={item.sourceUrl} rel={item.sourceUrl.startsWith("http") ? "noreferrer" : undefined} target={item.sourceUrl.startsWith("http") ? "_blank" : undefined}>
+          {item.type === "QUESTION_TICKET" ? "看知乎原问题 →" : "查看 →"}
+        </a>
+      ) : null}
+    </article>
   );
 }
 
@@ -796,8 +838,13 @@ function ReturnedStage({
   const relationTicket = journey.artifact?.type === "RELATION_TICKET";
   const conversation = journey.conversation;
   const insight = journey.insight;
-  const artifactLabel = relationTicket
-    ? "关系票根 · RELATION TICKET"
+  const bundleCollectibles = journey.returnItems.filter((item) =>
+    item.type !== "TRIP_PHOTO" && item.type !== "INSPIRATION_LEAVES"
+  );
+  const artifactLabel = journey.returnItems.length
+    ? `回家包 · RETURN BUNDLE · ${journey.returnItems.length} 件`
+    : relationTicket
+      ? "关系票根 · RELATION TICKET"
     : journey.artifact?.type === "OPINION_FRAGMENT"
       ? "观点碎片 · OPINION FRAGMENT"
       : journey.artifact?.type === "ODDITY_SPECIMEN"
@@ -884,7 +931,11 @@ function ReturnedStage({
               </div>
             </div>
           ) : null}
-          {returnItemArt ? <ReturnItemArt alt={returnItemArt.alt} kind={returnItemArt.kind} /> : null}
+          {bundleCollectibles.length ? (
+            <div className="returned-bundle-items">
+              {bundleCollectibles.map((item) => <StructuredReturnItem item={item} key={item.id} />)}
+            </div>
+          ) : returnItemArt ? <ReturnItemArt alt={returnItemArt.alt} kind={returnItemArt.kind} /> : null}
           <h2>{artifactTitle}</h2>
           <p>你塞的纸条：{journey.routeBias ?? "随便逛"}</p>
           {question || relationTicket ? <blockquote>“{thought}”</blockquote> : null}

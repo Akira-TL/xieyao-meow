@@ -35,6 +35,8 @@ import type {
   JourneyView,
   PersonaMemoryView,
   ReturnArtifact,
+  ReturnItem,
+  ReturnItemType,
   WaitingGameStateView,
 } from "./types";
 import { createFallbackJourneyInsight } from "./insight";
@@ -116,6 +118,18 @@ interface WaitingGameHomeActivityRow {
   started_at: number;
   ends_at: number;
   seed: string;
+}
+
+interface ReturnItemRow {
+  id: string;
+  owner_user_id: string;
+  origin_journey_id: string;
+  type: ReturnItemType;
+  title: string;
+  source_url: string | null;
+  source_key: string;
+  provenance_json: string;
+  created_at: number;
 }
 
 interface JourneyEventRow {
@@ -381,6 +395,27 @@ function artifactFromRow(row: Pick<JourneyRow, "artifact_id" | "artifact_type" |
     type: row.artifact_type,
     title: row.artifact_title,
     sourceUrl: row.artifact_source_url,
+  };
+}
+
+function returnItemFromRow(row: ReturnItemRow): ReturnItem {
+  let provenance: Record<string, unknown> = {};
+  try {
+    const parsed = JSON.parse(row.provenance_json) as unknown;
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      provenance = parsed as Record<string, unknown>;
+    }
+  } catch {
+    provenance = { source: "unknown" };
+  }
+  return {
+    id: row.id,
+    type: row.type,
+    title: row.title,
+    sourceUrl: row.source_url,
+    sourceKey: row.source_key,
+    provenance,
+    createdAt: row.created_at,
   };
 }
 
@@ -778,6 +813,7 @@ export class JourneyService {
         inspirationLeaves: row.reward_leaves ?? 0,
         postcard,
         artifact: artifactFromRow(row),
+        returnItems: this.readReturnItems(userId, row.journey_id),
         insight: insightFromRow(row),
         conversation: conversationFromRow(row),
         events: this.readJourneyEvents(userId, row.journey_id),
@@ -1137,6 +1173,111 @@ export class JourneyService {
     const memoryId = question ? this.createId() : null;
     const nextEligibleAt = row.return_at + restDurationMs(row.plan_seed, this.timeScale);
     const rewardLeaves = journeyLeafReward(row.journey_kind, row.plan_seed);
+    const completedBefore = this.countCompletedJourneys(userId);
+    const milestoneTool = PRIMARY_TOOLS.find((tool) =>
+      tool.unlockAtJourneys > 0 &&
+      completedBefore < tool.unlockAtJourneys &&
+      completedBefore + 1 >= tool.unlockAtJourneys
+    ) ?? null;
+    const returnItems: Array<{
+      id: string;
+      type: ReturnItemType;
+      title: string;
+      sourceUrl: string | null;
+      sourceKey: string;
+      provenance: Record<string, unknown>;
+    }> = [
+      {
+        id: `${journeyId}:return:photo`,
+        type: "TRIP_PHOTO",
+        title: "这一趟的知识场景照",
+        sourceUrl: null,
+        sourceKey: `trip-photo:${journeyId}`,
+        provenance: {
+          source: "game-world",
+          semantic: "knowledge-scene",
+          journeyId,
+        },
+      },
+      {
+        id: `${journeyId}:return:leaves`,
+        type: "INSPIRATION_LEAVES",
+        title: `灵感叶 +${rewardLeaves}`,
+        sourceUrl: null,
+        sourceKey: `leaves:${journeyId}`,
+        provenance: {
+          source: "server-state",
+          amount: rewardLeaves,
+          journeyKind: row.journey_kind,
+        },
+      },
+    ];
+
+    if (question) {
+      returnItems.push({
+        id: `${journeyId}:return:question`,
+        type: "QUESTION_TICKET",
+        title: question.title,
+        sourceUrl: question.url,
+        sourceKey: question.url,
+        provenance: {
+          source: "zhihu",
+          contentSource: result.contentSource,
+          fetchedAt: result.sourceFetchedAt,
+          url: question.url,
+        },
+      });
+    }
+
+    if (result.conversation && returnItems.length < 4) {
+      returnItems.push({
+        id: `${journeyId}:return:relation`,
+        type: "RELATION_NOTE",
+        title: `和 ${result.conversation.participantName} 的途中纸条`,
+        sourceUrl: "/encounter",
+        sourceKey: `conversation:${journeyId}:${result.conversation.participantId}`,
+        provenance: {
+          source: "relationship",
+          kind: result.conversation.kind,
+          participantId: result.conversation.participantId,
+          participantName: result.conversation.participantName,
+        },
+      });
+    }
+
+    if (
+      artifactSeed?.type === "ODDITY_SPECIMEN" &&
+      returnItems.length < 4
+    ) {
+      returnItems.push({
+        id: `${journeyId}:return:oddity`,
+        type: "ODDITY_SOUVENIR",
+        title: artifactSeed.title,
+        sourceUrl: artifactSeed.sourceUrl,
+        sourceKey: artifactSeed.sourceKey,
+        provenance: {
+          source: "game-world",
+          semantic: "knowledge-keepsake",
+          journeyId,
+        },
+      });
+    }
+
+    if (milestoneTool) {
+      returnItems.push({
+        id: `${journeyId}:return:milestone:${milestoneTool.id}`,
+        type: "MILESTONE_UNLOCK",
+        title: `${milestoneTool.name} 解锁`,
+        sourceUrl: null,
+        sourceKey: `tool:${milestoneTool.id}`,
+        provenance: {
+          source: "server-state",
+          toolId: milestoneTool.id,
+          unlockAtJourneys: milestoneTool.unlockAtJourneys,
+        },
+      });
+    }
+
     this.ensureGameState(userId, row.return_at);
 
     try {
@@ -1256,6 +1397,26 @@ export class JourneyService {
           SET balance = balance + ?, updated_at = ?
           WHERE user_id = ?
         `).run(rewardLeaves, latest.return_at, userId);
+      }
+
+      const insertReturnItem = this.db.prepare(`
+        INSERT OR IGNORE INTO return_items (
+          id, owner_user_id, origin_journey_id, type, title,
+          source_url, source_key, provenance_json, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      for (const item of returnItems.slice(0, 5)) {
+        insertReturnItem.run(
+          item.id,
+          userId,
+          journeyId,
+          item.type,
+          item.title,
+          item.sourceUrl,
+          item.sourceKey,
+          JSON.stringify(item.provenance),
+          latest.return_at,
+        );
       }
 
       if (question && memoryId) {
@@ -1691,6 +1852,29 @@ export class JourneyService {
     });
   }
 
+  private readReturnItems(userId: string, journeyId: string): ReturnItem[] {
+    const rows = this.db.prepare(`
+      SELECT
+        id, owner_user_id, origin_journey_id, type, title,
+        source_url, source_key, provenance_json, created_at
+      FROM return_items
+      WHERE owner_user_id = ? AND origin_journey_id = ?
+      ORDER BY
+        CASE type
+          WHEN 'TRIP_PHOTO' THEN 1
+          WHEN 'INSPIRATION_LEAVES' THEN 2
+          WHEN 'QUESTION_TICKET' THEN 3
+          WHEN 'RELATION_NOTE' THEN 4
+          WHEN 'ODDITY_SOUVENIR' THEN 5
+          WHEN 'MILESTONE_UNLOCK' THEN 6
+          ELSE 99
+        END,
+        created_at ASC,
+        id ASC
+    `).all(userId, journeyId) as unknown as ReturnItemRow[];
+    return rows.map(returnItemFromRow);
+  }
+
   private readJourneyEvents(userId: string, journeyId: string): JourneyEventView[] {
     const rows = this.db.prepare(`
       SELECT
@@ -1734,6 +1918,7 @@ export class JourneyService {
           ? { headline: row.postcard_headline, body: row.postcard_body, question }
           : null,
       artifact: artifactFromRow(row),
+      returnItems: this.readReturnItems(row.user_id, row.id),
       insight: insightFromRow(row),
       conversation: conversationFromRow(row),
       events: this.readJourneyEvents(row.user_id, row.id),
@@ -1921,6 +2106,42 @@ export class JourneyService {
         created_at INTEGER NOT NULL,
         UNIQUE(owner_user_id, type, source_key)
       );
+
+      CREATE TABLE IF NOT EXISTS return_items (
+        id TEXT PRIMARY KEY,
+        owner_user_id TEXT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        origin_journey_id TEXT NOT NULL REFERENCES journeys(id) ON DELETE CASCADE,
+        type TEXT NOT NULL CHECK (type IN (
+          'TRIP_PHOTO', 'INSPIRATION_LEAVES', 'QUESTION_TICKET',
+          'RELATION_NOTE', 'ODDITY_SOUVENIR', 'MILESTONE_UNLOCK'
+        )),
+        title TEXT NOT NULL,
+        source_url TEXT,
+        source_key TEXT NOT NULL,
+        provenance_json TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        UNIQUE(owner_user_id, type, source_key)
+      );
+      CREATE INDEX IF NOT EXISTS idx_return_items_journey_created
+        ON return_items(origin_journey_id, created_at ASC);
+      CREATE INDEX IF NOT EXISTS idx_return_items_owner_created
+        ON return_items(owner_user_id, created_at DESC);
+
+      INSERT OR IGNORE INTO return_items (
+        id, owner_user_id, origin_journey_id, type, title,
+        source_url, source_key, provenance_json, created_at
+      )
+      SELECT
+        id, owner_user_id, origin_journey_id,
+        CASE
+          WHEN type = 'QUESTION_TICKET' THEN 'QUESTION_TICKET'
+          WHEN type = 'RELATION_TICKET' THEN 'RELATION_NOTE'
+          ELSE 'ODDITY_SOUVENIR'
+        END,
+        title, source_url, source_key,
+        '{"source":"legacy-artifact"}',
+        created_at
+      FROM return_artifacts;
 
       CREATE TABLE IF NOT EXISTS journey_user_state (
         user_id TEXT PRIMARY KEY REFERENCES app_users(id) ON DELETE CASCADE,
