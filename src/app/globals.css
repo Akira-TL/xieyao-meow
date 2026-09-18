@@ -2480,6 +2480,11 @@ body.sheet-open .app-bottom-nav { opacity: 0; pointer-events: none; }
 .journey-gallery .art-slot { width: 100%; }
 .journey-gallery-and-why .paper-card p { color: #625e57; font-size: 11px; line-height: 1.8; }
 .journey-collect { display: flex; width: min(100%, 420px); margin: 22px auto 0; }
+.journey-conversation-paper { margin-top:16px; }
+.journey-conversation-paper h2 { margin:8px 0 12px; font-size:22px; }
+.journey-conversation-paper > a { display:inline-block; margin-top:12px; color:#176fd2; font-size:10px; font-weight:800; }
+.journey-insight-headline { display:block; margin-top:10px; color:#176fd2; font-size:18px; line-height:1.35; }
+.atlas-journey-detail-link { display:inline-block; margin-top:6px; color:#176fd2; font-size:9px; font-weight:800; }
 
 .relationship-detail-stage { min-height: calc(100vh - 125px); padding: clamp(22px, 3vw, 42px); text-align: center; }
 .relationship-detail-stage > h1 { margin: 14px auto 0; max-width: 16ch; font-size: clamp(52px, 6vw, 80px); line-height: 1.02; letter-spacing: -.06em; font-weight: 950; }

@@ -32,12 +32,6 @@ function compact(value: string, max = 112) {
   return normalized.length > max ? `${normalized.slice(0, max).trim()}…` : normalized;
 }
 
-function questionReason(index: number, primaryInterest: string) {
-  if (index === 0) return `它先在这道题前停了下来。你常看「${primaryInterest}」，这题又刚好留了个能继续追问的口子。`;
-  if (index === 1) return `和「${primaryInterest}」不完全同路，所以它反而多看了一会儿。`;
-  return "完全是顺路拐进去的陌生地方。它觉得这张票根值得带回来。";
-}
-
 function journeyPostcardArt(entry: JourneyAtlasEntry, fallbackInterest: string) {
   return resolveWaitingGameJourneyPostcard({
     journeyKey: entry.journeyId,
@@ -343,96 +337,145 @@ export function LiveEncounterSection({ showFeatured }: { showFeatured: boolean }
   );
 }
 
-export function LiveJourneyDetail() {
+export function LiveJourneyDetail({ journeyId }: { journeyId: string }) {
   const personaSnapshot = useLivePersonaSnapshot();
-  const questionSnapshot = useLiveQuestionSnapshot();
-  const question = questionSnapshot?.question ?? {
-    title: DEMO_FIXTURE.outing.returnArtifact.topic.title,
-    url: DEMO_FIXTURE.outing.returnArtifact.topic.url,
-    summary: "",
-    thumbnailUrl: "",
-  };
   const primaryInterest = personaSnapshot?.composition.primaryInterest ?? DEMO_FIXTURE.persona.interests[0];
   const basePersona = personaSnapshot?.persona ?? DEMO_FIXTURE.persona;
   const { profile, persona: playerPersona } = useCatProfile(basePersona);
   const catName = profile.catName;
-  const summary = compact(question.summary, 180);
-  const galleryQuestions = questionSnapshot?.questions?.length
-    ? questionSnapshot.questions.slice(0, 3)
-    : [question];
+  const [atlas, setAtlas] = useState<JourneyAtlasView | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/atlas", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`atlas HTTP ${response.status}`);
+        return (await response.json()) as JourneyAtlasView;
+      })
+      .then((next) => {
+        if (!cancelled) setAtlas(next);
+      })
+      .catch(() => {
+        if (!cancelled) setAtlas({ journeys: [], memories: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (atlas === null) {
+    return <section className="journey-detail-stage"><div className="journey-main"><p className="outing-loading">正在翻这一页旅行册……</p></div></section>;
+  }
+
+  const entry = atlas.journeys.find((item) => item.journeyId === journeyId);
+  if (!entry) {
+    return (
+      <section className="journey-detail-stage">
+        <aside className="journey-side-nav">
+          <a href="/atlas">← 回旅行册</a>
+        </aside>
+        <div className="journey-main">
+          <PaperCard className="journey-title-paper">
+            <span>JOURNEY ARCHIVE</span>
+            <h1>这页没有找到。</h1>
+            <p>它可能还没被收进旅行册，或者这条记录已经不属于当前账号。</p>
+            <a className="theatre-button theatre-button-primary journey-collect" href="/atlas">回旅行册 <span>→</span></a>
+          </PaperCard>
+        </div>
+      </section>
+    );
+  }
+
+  const question = entry.postcard.question;
+  const conversation = entry.conversation;
+  const insight = entry.insight;
+  const zone = inferWaitingGameWorldZone({ routeBias: entry.routeBias, questionTitle: question?.title ?? "" });
+  const postcardArt = journeyPostcardArt(entry, primaryInterest);
+  const summary = question ? compact(question.summary || entry.postcard.body, 180) : compact(entry.postcard.body, 180);
 
   return (
     <section className="journey-detail-stage">
       <aside className="journey-side-nav">
-        <a href="/explore?mode=app">⌂ 探索首页</a>
-        <strong>▣ 旅途详情</strong>
-        <a href="/atlas">▤ 收集图鉴</a>
-        <a href="/encounter">◎ 喵的足迹</a>
+        <a href="/atlas">← 回旅行册</a>
+        <strong>▣ 这一趟</strong>
+        <a href="/explore?mode=app">⌂ 知识世界</a>
+        <a href="/encounter">◎ 关系簿</a>
       </aside>
 
       <div className="journey-main">
         <PaperCard className="journey-title-paper">
-          <span>今天带回的一张问题票根</span>
-          <h1><em>它</em>为什么去了那里？</h1>
-          <blockquote>“不是因为这题最像你，而是因为它值得你多问一步。”</blockquote>
+          <span>JOURNEY ARCHIVE · {formatJourneyDate(entry.completedAt)}</span>
+          <h1><em>这一趟</em><br />它自己走完了。</h1>
+          <blockquote>“{entry.postcard.headline}”</blockquote>
           <div className="journey-meta">
-            <span>出门方向 <b>{primaryInterest}</b></span>
-            <span>内容来源 <b>{questionSnapshot?.mode === "live" ? "知乎当前公开内容" : "备用内容"}</b></span>
-            <span>随行装备 <b>好奇心 × 1</b></span>
+            <span>你塞的纸条 <b>{entry.routeBias ?? "随便逛"}</b></span>
+            <span>知识地带 <b>{zone === "ai" ? "AI 与数码" : zone === "science" ? "科学" : zone === "career" ? "职场与创业" : zone === "pets" ? "宠物" : zone === "life" ? "文化与生活" : "未知边界"}</b></span>
+            <span>来源 <b>{entry.contentSource === "live" ? "真实知乎 Journey" : "旅途记录"}</b></span>
           </div>
         </PaperCard>
 
         <div className="journey-art-and-topic">
-          <div
-            className="journey-scene-visual"
-            style={{ backgroundImage: `url(${resolveWaitingGameWorldSubzone(primaryInterest)})` }}
-          >
-            <PersonaArt alt={`${catName}穿过知乎知识世界`} className="journey-persona-art" persona={playerPersona} state="walking" />
+          <div className="journey-scene-visual journey-scene-visual--postcard" style={{ backgroundImage: `url(${postcardArt})` }}>
+            <PersonaArt alt={`${catName}正在知识世界里漫游`} className="journey-persona-art" persona={playerPersona} state="walking" />
           </div>
           <PaperCard className="journey-topic-paper">
-            <span>带回的问题 · 知乎</span>
-            <h2>{question.title}</h2>
+            <span>{question ? "带回的问题 · 知乎" : "这一趟的明信片"}</span>
+            <h2>{question?.title ?? entry.postcard.headline}</h2>
             <p>{summary}</p>
-            <a href={question.url} rel="noreferrer" target="_blank">在知乎看看大家怎么说 <OpenInNewRoundedIcon fontSize="inherit" /></a>
+            {question ? <a href={question.url} rel="noreferrer" target="_blank">在知乎看原问题 <OpenInNewRoundedIcon fontSize="inherit" /></a> : null}
           </PaperCard>
         </div>
 
         <PaperCard className="journey-timeline-paper">
-          <h2>旅途轨迹</h2>
+          <h2>这一趟留下了什么</h2>
           <div className="journey-timeline">
-            <span><b>出门</b><small>你只给了一个方向，它自己决定去哪。</small></span>
+            <span><b>出门</b><small>只带着「{entry.routeBias ?? "随便逛"}」这张模糊纸条。</small></span>
             <i>→</i>
-            <span><b>路过</b><small>从当前知乎公开问题里寻找值得停下来的讨论。</small></span>
+            <span><b>停下</b><small>{question ? "在一个真实知乎问题前多看了一会儿。" : "没有强行制造问题票根。"}</small></span>
             <i>→</i>
-            <span><b>停下来</b><small>这题和「{primaryInterest}」之间产生了新的连接。</small></span>
+            <span><b>相遇</b><small>{conversation ? `碰见了 ${conversation.participantName}，留下 ${conversation.turns.length} 句对话。` : "这趟没有停下来聊天。"}</small></span>
             <i>→</i>
-            <span><b>带回来</b><small>{question.title}</small></span>
+            <span><b>回窝</b><small>{entry.artifact?.title ?? "把这一页旅行记录带了回来。"}</small></span>
           </div>
         </PaperCard>
 
         <div className="journey-gallery-and-why">
-          <div>
-            <h2>路上的一些画面</h2>
-            <div className="journey-gallery">
-              {galleryQuestions.filter((item) => Boolean(item.thumbnailUrl)).map((item, index) => (
-                <ArtSlot
-                  key={`${item.url}-${index}`}
-                  name={`journey/photo-${String(index + 1).padStart(2, "0")}`}
-                  label={`知乎内容配图 ${String(index + 1).padStart(2, "0")}`}
-                  aspect="polaroid"
-                  src={item.thumbnailUrl!}
-                />
-              ))}
-            </div>
-          </div>
           <PaperCard>
-            <h2>{catName}为什么把这个带给你？</h2>
-            <p>{questionReason(0, primaryInterest)}</p>
-            <p>你可以去看原问题，也可以什么都不做。旅途的意义不是完成任务，而是让人格真的多见一点东西。</p>
+            <h2>知识漫游插画</h2>
+            <ArtSlot name={`journey/archive-${entry.journeyId}`} label={`${entry.postcard.headline} · 知识漫游插画`} aspect="wide" src={postcardArt} />
+            <p>这张图是知识漫游的游戏化表达，不代表它真的去了某个现实城市。</p>
+          </PaperCard>
+          <PaperCard>
+            <h2>{catName}带回来的理解</h2>
+            {insight ? (
+              <>
+                <strong className="journey-insight-headline">{insight.headline}</strong>
+                <p>{insight.insight}</p>
+                <small>{insight.whyItMatters}</small>
+              </>
+            ) : (
+              <p>这一趟没有额外生成新的 Persona 理解；旅行册只保留真实发生过的内容。</p>
+            )}
           </PaperCard>
         </div>
 
-        <a className="theatre-button theatre-button-primary journey-collect" href="/atlas">收进图鉴 <span>→</span></a>
+        {conversation ? (
+          <PaperCard className="journey-conversation-paper">
+            <span>{conversation.kind === "USER" ? "SHARED ENCOUNTER · 真实用户 Persona" : "ROADSIDE CHAT · 社区 NPC"}</span>
+            <h2>路上碰见了 {conversation.participantName}</h2>
+            <div className="returned-conversation-turns">
+              {conversation.turns.map((turn, index) => (
+                <p className={turn.speaker === "other" ? "is-other" : ""} key={`${turn.speaker}-${index}`}>
+                  <b>{turn.speaker === "self" ? catName : conversation.participantName}</b>
+                  {turn.text}
+                </p>
+              ))}
+            </div>
+            <a href="/encounter">去关系簿看这些相遇 →</a>
+          </PaperCard>
+        ) : null}
+
+        <a className="theatre-button theatre-button-primary journey-collect" href="/atlas">回到旅行册 <span>→</span></a>
       </div>
     </section>
   );
@@ -656,6 +699,7 @@ export function LiveAtlasSection() {
                 <span>{formatJourneyDate(entry.completedAt)} · 纸条「{entry.routeBias ?? "随便逛"}」</span>
                 <p>{compact(entry.postcard.body, 92)}</p>
                 {entry.postcard.question ? <a href={entry.postcard.question.url} rel="noreferrer" target="_blank">看知乎原问题 →</a> : entry.insight ? <em>{entry.insight.headline} · {entry.insight.textCharCount} 字</em> : <em>这趟留下了一页旅行记录</em>}
+                <Link className="atlas-journey-detail-link" href={`/journey/${entry.journeyId}`}>打开这一趟 →</Link>
               </article>
             )) : <p className="atlas-mobile-trace">等它第一次真正回家，这里会出现第一张旅行页。</p>}
           </div>
@@ -715,6 +759,7 @@ export function LiveAtlasSection() {
                     src={journeyPostcardArt(entry, primaryInterest)}
                   />
                   <span>{entry.postcard.headline}</span>
+                  <Link className="atlas-journey-detail-link" href={`/journey/${entry.journeyId}`}>打开 →</Link>
                 </article>
               ))}
             </div>
