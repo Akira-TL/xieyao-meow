@@ -1,3 +1,5 @@
+import type { HomeActivityType, JourneyKind, PrimaryToolId, SmallItemId } from "./game";
+
 export type JourneyState = "AT_HOME" | "PREPARING" | "AWAY" | "RETURNED";
 export type JourneyContentSource = "live" | "none";
 export type JourneyKnowledgeSource = "template" | "none";
@@ -72,10 +74,45 @@ export interface ReturnArtifact {
   sourceUrl: string;
 }
 
+export interface WaitingGameToolView {
+  id: PrimaryToolId;
+  unlocked: boolean;
+}
+
+export interface WaitingGameSupplyView {
+  id: SmallItemId;
+  quantity: number;
+}
+
+export interface WaitingGameHomeActivityView {
+  type: HomeActivityType;
+  startedAt: number;
+  endsAt: number;
+}
+
+export interface WaitingGameStateView {
+  leaves: {
+    balance: number;
+    pendingHome: number;
+    passiveCap: number;
+  };
+  primaryTools: WaitingGameToolView[];
+  supplies: WaitingGameSupplyView[];
+  loadout: {
+    primaryToolId: PrimaryToolId | null;
+    smallItemId: SmallItemId | null;
+  };
+  homeActivity: WaitingGameHomeActivityView | null;
+}
+
 export interface JourneyView {
   id: string;
   state: Exclude<JourneyState, "AT_HOME">;
   routeBias: string | null;
+  kind: JourneyKind;
+  primaryToolId: PrimaryToolId | null;
+  smallItemId: SmallItemId | null;
+  inspirationLeaves: number | null;
   createdAt: number;
   departAt: number;
   returnAt: number;
@@ -93,14 +130,17 @@ export interface JourneyProjection {
   state: JourneyState;
   journey: JourneyView | null;
   resting: boolean;
+  queuedJourney: boolean;
   queuedRouteBias: string | null;
   nextJourneyAt: number | null;
+  game: WaitingGameStateView;
 }
 
 export interface JourneyAtlasEntry {
   journeyId: string;
   completedAt: number;
   routeBias: string | null;
+  inspirationLeaves: number;
   postcard: JourneyPostcard;
   artifact: ReturnArtifact | null;
   insight: JourneyInsight | null;
@@ -147,6 +187,8 @@ export interface JourneyDiscoveryInput {
   oauthAccessToken: string;
   routeBias: string | null;
   planSeed: string;
+  primaryToolId: PrimaryToolId | null;
+  smallItemId: SmallItemId | null;
   recentQuestionUrls: string[];
   recentMemoryTopicRefs: string[];
   recentInsightFeedback: JourneyInsightFeedback[];

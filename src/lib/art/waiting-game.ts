@@ -1,3 +1,5 @@
+import type { HomeActivityType, PrimaryToolId, SmallItemId } from "@/lib/journey/game";
+import { PRIMARY_TOOL_BY_ID, SMALL_ITEM_BY_ID } from "@/lib/journey/game";
 import type { InterestName, PersonaVisualVariant, PlayerPersona } from "@/lib/persona";
 
 export type WaitingGamePersonaActivity =
@@ -98,12 +100,41 @@ export function resolveWaitingGameHomeRoom(empty = false): string {
   return `${ROOT}/home/rooms/${empty ? "home_room_empty_02" : "home_room_empty_01"}.png`;
 }
 
+export function resolveWaitingGameHomeActivityRoom(activity: HomeActivityType): string {
+  const slug = activity === "RESTING"
+    ? "resting"
+    : activity === "READING"
+      ? "reading"
+      : activity === "SORTING"
+        ? "sorting"
+        : activity === "WINDOW_WATCHING"
+          ? "window"
+          : "idle";
+  return `${ROOT}/home/rooms/home_room_${slug}_01.png`;
+}
+
 export function resolveWaitingGameHomeTable(state: WaitingGameHomeTableState): string {
   return `${ROOT}/home/tables/home_table_${state}.png`;
 }
 
 export function resolveWaitingGameCollectionArt(asset: WaitingGameCollectionArt): string {
   return `${ROOT}/collections/${asset}.png`;
+}
+
+export function resolveWaitingGamePrimaryToolArt(toolId: PrimaryToolId): string {
+  return `${ROOT}/tools/${PRIMARY_TOOL_BY_ID[toolId].artFile}`;
+}
+
+export function resolveWaitingGameSmallItemArt(itemId: SmallItemId): string {
+  return `${ROOT}/supplies/${SMALL_ITEM_BY_ID[itemId].artFile}`;
+}
+
+export function resolveWaitingGameSupplyShelfArt(state: "empty" | "low" | "normal" | "full" | "leaves"): string {
+  return `${ROOT}/home/supply-shelves/supply_shelf_${state}.png`;
+}
+
+export function resolveWaitingGameInspirationLeafArt(cluster = false): string {
+  return `${ROOT}/supplies/${cluster ? "resource_inspiration_leaf_cluster" : "resource_inspiration_leaf_01"}.png`;
 }
 
 export function resolveWaitingGameReturnItemArt(asset: WaitingGameReturnItemArt): string {

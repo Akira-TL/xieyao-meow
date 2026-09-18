@@ -418,6 +418,7 @@ export function LiveJourneyDetail({ journeyId }: { journeyId: string }) {
             <span>你塞的纸条 <b>{entry.routeBias ?? "随便逛"}</b></span>
             <span>知识地带 <b>{zone === "ai" ? "AI 与数码" : zone === "science" ? "科学" : zone === "career" ? "职场与创业" : zone === "pets" ? "宠物" : zone === "life" ? "文化与生活" : "未知边界"}</b></span>
             <span>来源 <b>{entry.contentSource === "live" ? "真实知乎 Journey" : "旅途记录"}</b></span>
+            <span>灵感叶 <b>{entry.inspirationLeaves > 0 ? `+${entry.inspirationLeaves} 片` : "旧旅途未记录"}</b></span>
           </div>
         </PaperCard>
 

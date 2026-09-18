@@ -10,9 +10,19 @@ export const runtime = "nodejs";
 const actionSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("start"),
-    routeBias: z.string().trim().min(1).max(40).nullable().optional(),
+    routeBias: z.string().trim().max(20).nullable().optional(),
   }),
   z.object({ action: z.literal("archive") }),
+  z.object({ action: z.literal("collect_leaves") }),
+  z.object({
+    action: z.literal("buy_supply"),
+    supplyId: z.enum(["dried_fish", "pocket_calendar", "luck_charm"]),
+  }),
+  z.object({
+    action: z.literal("set_loadout"),
+    primaryToolId: z.enum(["notebook", "magnifier", "old_camera", "clipboard"]).nullable(),
+    smallItemId: z.enum(["dried_fish", "pocket_calendar", "luck_charm"]).nullable(),
+  }),
   z.object({
     action: z.literal("insight_feedback"),
     journeyId: z.string().trim().min(1).max(100),
@@ -64,13 +74,35 @@ export async function POST(request: Request) {
     return json(await service.archive(identity.userId, identity.oauthAccessToken));
   }
   try {
+    if (parsed.action === "collect_leaves") {
+      return json(await service.collectHomeLeaves(identity.userId, identity.oauthAccessToken));
+    }
+    if (parsed.action === "buy_supply") {
+      return json(await service.buySupply(
+        identity.userId,
+        identity.oauthAccessToken,
+        parsed.supplyId,
+      ));
+    }
+    if (parsed.action === "set_loadout") {
+      return json(await service.setLoadout(
+        identity.userId,
+        identity.oauthAccessToken,
+        {
+          primaryToolId: parsed.primaryToolId,
+          smallItemId: parsed.smallItemId,
+        },
+      ));
+    }
     return json(await service.respondToInsight(
       identity.userId,
       identity.oauthAccessToken,
       parsed.journeyId,
       parsed.response,
     ));
-  } catch {
-    return json({ error: "journey insight not found" }, { status: 404 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "journey action failed";
+    const status = parsed.action === "insight_feedback" ? 404 : 409;
+    return json({ error: message }, { status });
   }
 }

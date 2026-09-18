@@ -1,6 +1,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -29,7 +30,7 @@ function createUser(dbPath: string, providerSubject: string, userId: string) {
 }
 
 describe("server Journey", () => {
-  it("freezes a sub-90-second first Journey and materializes its return only once", async () => {
+  it("freezes the first 2–3 minute warm-up Journey and materializes its return only once", async () => {
     const dbPath = createDbPath();
     const userId = createUser(dbPath, "subject-a", "user-a");
     let now = 1_000_000;
@@ -82,8 +83,11 @@ describe("server Journey", () => {
     const preparing = await service.start(userId, "oauth-a", "多看看 AI");
     expect(preparing.state).toBe("PREPARING");
     expect(preparing.journey?.routeBias).toBe("多看看 AI");
-    expect(preparing.journey!.returnAt - now).toBeGreaterThanOrEqual(45_000);
-    expect(preparing.journey!.returnAt - now).toBeLessThanOrEqual(90_000);
+    expect(preparing.journey!.kind).toBe("WARMUP");
+    expect(preparing.journey!.departAt - preparing.journey!.createdAt).toBeGreaterThanOrEqual(10_000);
+    expect(preparing.journey!.departAt - preparing.journey!.createdAt).toBeLessThanOrEqual(30_000);
+    expect(preparing.journey!.returnAt - preparing.journey!.departAt).toBeGreaterThanOrEqual(2 * 60_000);
+    expect(preparing.journey!.returnAt - preparing.journey!.departAt).toBeLessThanOrEqual(3 * 60_000);
     const frozenReturnAt = preparing.journey!.returnAt;
 
     now = preparing.journey!.departAt;
@@ -125,6 +129,8 @@ describe("server Journey", () => {
     expect(discover).toHaveBeenCalledTimes(1);
 
     const resting = await service.archive(userId, "oauth-a");
+    const queuedNext = await service.start(userId, "oauth-a", null);
+    expect(queuedNext.queuedJourney).toBe(true);
     now = resting.nextJourneyAt!;
     const second = await service.getProjection(userId, "oauth-a");
     now = second.journey!.returnAt;
@@ -220,7 +226,7 @@ describe("server Journey", () => {
     service.close();
   });
 
-  it("uses warm-up bands, rests, consumes one route bias, and caps offline catch-up at three", async () => {
+  it("uses warm-up bands, rests, queues only prepared next trips, and stays home otherwise", async () => {
     const dbPath = createDbPath();
     const userId = createUser(dbPath, "subject-a", "user-a");
     const otherUserId = createUser(dbPath, "subject-b", "user-b");
@@ -240,54 +246,225 @@ describe("server Journey", () => {
     const service = new JourneyService({
       dbPath,
       now: () => now,
-      createId: () => `id-${++sequence}`,
+      createId: () => "id-" + (++sequence),
       discover,
     });
 
     const first = await service.start(userId, "oauth-a", "多看看 AI");
+    expect(first.journey?.kind).toBe("WARMUP");
+    expect(first.journey!.returnAt - first.journey!.departAt).toBeGreaterThanOrEqual(2 * 60_000);
+    expect(first.journey!.returnAt - first.journey!.departAt).toBeLessThanOrEqual(3 * 60_000);
+
     now = first.journey!.returnAt;
     const firstReturned = await service.getProjection(userId, "oauth-a");
-    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeGreaterThanOrEqual(30_000);
-    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeLessThanOrEqual(60_000);
+    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeGreaterThanOrEqual(20 * 60_000);
+    expect(firstReturned.nextJourneyAt! - first.journey!.returnAt).toBeLessThanOrEqual(60 * 60_000);
+    expect(firstReturned.journey?.inspirationLeaves).toBeGreaterThanOrEqual(2);
+    expect(firstReturned.journey?.inspirationLeaves).toBeLessThanOrEqual(4);
 
     const resting = await service.archive(userId, "oauth-a");
-    expect(resting).toMatchObject({ state: "AT_HOME", resting: true });
-    const queued = await service.start(userId, "oauth-a", "去陌生地方");
+    expect(resting).toMatchObject({ state: "AT_HOME", resting: true, queuedJourney: false });
+    expect(resting.game.homeActivity?.type).toBe("RESTING");
+
+    const queued = await service.start(userId, "oauth-a", null);
     expect(queued).toMatchObject({
       state: "AT_HOME",
       resting: true,
-      queuedRouteBias: "去陌生地方",
+      queuedJourney: true,
+      queuedRouteBias: null,
     });
 
     now = queued.nextJourneyAt!;
     const second = await service.getProjection(userId, "oauth-a");
     expect(second.state).toBe("PREPARING");
-    expect(second.journey?.routeBias).toBe("去陌生地方");
-    expect(second.journey!.returnAt - second.journey!.createdAt).toBeGreaterThanOrEqual(1 * 60_000);
-    expect(second.journey!.returnAt - second.journey!.createdAt).toBeLessThanOrEqual(2 * 60_000);
+    expect(second.journey?.routeBias).toBeNull();
+    expect(second.journey?.kind).toBe("WARMUP");
+    expect(second.journey!.returnAt - second.journey!.departAt).toBeGreaterThanOrEqual(3 * 60_000);
+    expect(second.journey!.returnAt - second.journey!.departAt).toBeLessThanOrEqual(5 * 60_000);
 
     now = second.journey!.returnAt;
     const secondReturned = await service.getProjection(userId, "oauth-a");
-    await service.archive(userId, "oauth-a");
-    now = secondReturned.nextJourneyAt!;
-    const third = await service.getProjection(userId, "oauth-a");
-    expect(third.journey?.routeBias).toBeNull();
-    expect(third.journey!.returnAt - third.journey!.createdAt).toBeGreaterThanOrEqual(90_000);
-    expect(third.journey!.returnAt - third.journey!.createdAt).toBeLessThanOrEqual(150_000);
+    const afterSecondArchive = await service.archive(userId, "oauth-a");
+    expect(afterSecondArchive.queuedJourney).toBe(false);
 
-    now = third.journey!.createdAt + 24 * 60 * 60_000;
-    const caughtUp = await service.getProjection(userId, "oauth-a");
-    expect(caughtUp).toMatchObject({ state: "AT_HOME", resting: true });
-    expect(discover).toHaveBeenCalledTimes(5);
-    await service.getProjection(userId, "oauth-a");
-    expect(discover).toHaveBeenCalledTimes(5);
+    now = secondReturned.nextJourneyAt! + 1;
+    const staysHome = await service.getProjection(userId, "oauth-a");
+    expect(staysHome).toMatchObject({
+      state: "AT_HOME",
+      resting: false,
+      queuedJourney: false,
+      journey: null,
+    });
+    expect(discover).toHaveBeenCalledTimes(2);
 
     const atlas = await service.getAtlas(userId, "oauth-a");
-    expect(atlas.journeys).toHaveLength(5);
-    expect(atlas.journeys.filter((entry) => entry.artifact)).toHaveLength(1);
-    expect(atlas.memories).toHaveLength(5);
-    expect(atlas.memories[0]?.sourceEventId).toBeTruthy();
+    expect(atlas.journeys).toHaveLength(2);
+    expect(atlas.journeys[0]?.inspirationLeaves).toBeGreaterThanOrEqual(2);
+    expect(atlas.memories).toHaveLength(2);
     expect(await service.getAtlas(otherUserId, "oauth-b")).toEqual({ journeys: [], memories: [] });
+    service.close();
+  });
+
+  it("uses production cadence after warm-up, never chains FAR trips, and unlocks milestone tools", async () => {
+    const dbPath = createDbPath();
+    const userId = createUser(dbPath, "subject-cadence", "user-cadence");
+    let now = 2_000_000;
+    let idSequence = 0;
+    const service = new JourneyService({
+      dbPath,
+      now: () => now,
+      createId: () => "cadence-" + (++idSequence),
+      discover: async () => ({
+        question: null,
+        contentSource: "none" as const,
+        knowledgeSource: "template" as const,
+        sourceFetchedAt: now,
+        postcardBody: "沿知识世界走了一趟。",
+      }),
+    });
+
+    let current = await service.start(userId, "oauth-cadence", null);
+    let previousKind: string | null = null;
+    for (let trip = 1; trip <= 4; trip += 1) {
+      expect(current.state).toBe("PREPARING");
+      const journey = current.journey!;
+      const awayDuration = journey.returnAt - journey.departAt;
+
+      if (trip === 1) {
+        expect(journey.kind).toBe("WARMUP");
+        expect(awayDuration).toBeGreaterThanOrEqual(2 * 60_000);
+        expect(awayDuration).toBeLessThanOrEqual(3 * 60_000);
+      } else if (trip === 2) {
+        expect(journey.kind).toBe("WARMUP");
+        expect(awayDuration).toBeGreaterThanOrEqual(3 * 60_000);
+        expect(awayDuration).toBeLessThanOrEqual(5 * 60_000);
+      } else if (journey.kind === "FAR") {
+        expect(awayDuration).toBeGreaterThanOrEqual(2 * 60 * 60_000);
+        expect(awayDuration).toBeLessThanOrEqual(6 * 60 * 60_000);
+      } else {
+        expect(journey.kind).toBe("NORMAL");
+        const inNormalBand = awayDuration >= 30 * 60_000 && awayDuration <= 90 * 60_000;
+        const inLongBand = awayDuration >= 90 * 60_000 && awayDuration <= 180 * 60_000;
+        expect(inNormalBand || inLongBand).toBe(true);
+      }
+      if (previousKind === "FAR") expect(journey.kind).not.toBe("FAR");
+      previousKind = journey.kind;
+
+      now = journey.returnAt;
+      const returned = await service.getProjection(userId, "oauth-cadence");
+      expect(returned.state).toBe("RETURNED");
+      if (trip === 3) {
+        expect(returned.game.primaryTools.find((tool) => tool.id === "magnifier")?.unlocked).toBe(true);
+        expect(returned.game.primaryTools.find((tool) => tool.id === "old_camera")?.unlocked).toBe(false);
+      }
+
+      if (trip < 4) {
+        const home = await service.archive(userId, "oauth-cadence");
+        await service.start(userId, "oauth-cadence", null);
+        now = home.nextJourneyAt!;
+        current = await service.getProjection(userId, "oauth-cadence");
+      }
+    }
+    service.close();
+  });
+
+  it("persists Home Activity, accrues and spends leaves, and consumes a small item only on departure", async () => {
+    const dbPath = createDbPath();
+    const userId = createUser(dbPath, "subject-game", "user-game");
+    let now = 1_000_000;
+    let sequence = 0;
+    const service = new JourneyService({
+      dbPath,
+      now: () => now,
+      createId: () => "game-" + (++sequence),
+      discover: async () => ({
+        question: null,
+        contentSource: "none" as const,
+        knowledgeSource: "template" as const,
+        sourceFetchedAt: now,
+        postcardBody: "这一趟只留下知识漫游札记。",
+      }),
+    });
+
+    const initial = await service.getProjection(userId, "oauth-game");
+    expect(initial).toMatchObject({
+      state: "AT_HOME",
+      queuedJourney: false,
+      game: {
+        leaves: { balance: 6, pendingHome: 0, passiveCap: 6 },
+        loadout: { primaryToolId: "notebook", smallItemId: null },
+      },
+    });
+    expect(initial.game.homeActivity?.type).toMatch(/READING|SORTING|WINDOW_WATCHING|IDLING/);
+    expect(initial.game.primaryTools.find((tool) => tool.id === "notebook")?.unlocked).toBe(true);
+    expect(initial.game.primaryTools.find((tool) => tool.id === "magnifier")?.unlocked).toBe(false);
+
+    now += 60 * 60_000;
+    const oneLeaf = await service.getProjection(userId, "oauth-game");
+    expect(oneLeaf.game.leaves.pendingHome).toBe(1);
+
+    now += 10 * 60 * 60_000;
+    const capped = await service.getProjection(userId, "oauth-game");
+    expect(capped.game.leaves.pendingHome).toBe(6);
+
+    const collected = await service.collectHomeLeaves(userId, "oauth-game");
+    expect(collected.game.leaves).toMatchObject({ balance: 12, pendingHome: 0 });
+
+    const fish = await service.buySupply(userId, "oauth-game", "dried_fish");
+    expect(fish.game.leaves.balance).toBe(10);
+    const calendar = await service.buySupply(userId, "oauth-game", "pocket_calendar");
+    expect(calendar.game.leaves.balance).toBe(7);
+    const charm = await service.buySupply(userId, "oauth-game", "luck_charm");
+    expect(charm.game.leaves.balance).toBe(3);
+    expect(charm.game.supplies.map((item) => [item.id, item.quantity])).toEqual([
+      ["dried_fish", 1],
+      ["pocket_calendar", 1],
+      ["luck_charm", 1],
+    ]);
+
+    await expect(service.setLoadout(userId, "oauth-game", {
+      primaryToolId: "magnifier",
+      smallItemId: null,
+    })).rejects.toThrow("primary tool is locked");
+
+    const loaded = await service.setLoadout(userId, "oauth-game", {
+      primaryToolId: "notebook",
+      smallItemId: "dried_fish",
+    });
+    expect(loaded.game.loadout).toEqual({
+      primaryToolId: "notebook",
+      smallItemId: "dried_fish",
+    });
+
+    const preparing = await service.start(userId, "oauth-game", null);
+    expect(preparing.state).toBe("PREPARING");
+    expect(preparing.journey).toMatchObject({
+      primaryToolId: "notebook",
+      smallItemId: "dried_fish",
+      routeBias: null,
+    });
+    expect(preparing.game.supplies.find((item) => item.id === "dried_fish")?.quantity).toBe(1);
+
+    now = preparing.journey!.departAt - 1;
+    const stillPacking = await service.getProjection(userId, "oauth-game");
+    expect(stillPacking.state).toBe("PREPARING");
+    expect(stillPacking.game.supplies.find((item) => item.id === "dried_fish")?.quantity).toBe(1);
+
+    now = preparing.journey!.departAt;
+    const away = await service.getProjection(userId, "oauth-game");
+    expect(away.state).toBe("AWAY");
+    expect(away.journey?.smallItemId).toBe("dried_fish");
+    expect(away.game.supplies.find((item) => item.id === "dried_fish")?.quantity).toBe(0);
+    expect(away.game.loadout.smallItemId).toBeNull();
+
+    now = preparing.journey!.returnAt;
+    const returned = await service.getProjection(userId, "oauth-game");
+    expect(returned.state).toBe("RETURNED");
+    expect(returned.journey?.inspirationLeaves).toBeGreaterThanOrEqual(2);
+    expect(returned.journey?.inspirationLeaves).toBeLessThanOrEqual(4);
+    expect(returned.game.leaves.balance).toBe(
+      3 + returned.journey!.inspirationLeaves!,
+    );
     service.close();
   });
 
@@ -310,11 +487,82 @@ describe("server Journey", () => {
     });
 
     const started = await service.start(userId, "oauth-a", null);
-    expect(started.journey!.returnAt - started.journey!.createdAt).toBeGreaterThanOrEqual(1_000);
-    expect(started.journey!.returnAt - started.journey!.createdAt).toBeLessThanOrEqual(1_800);
+    expect(started.journey!.departAt - started.journey!.createdAt).toBe(1_000);
+    expect(started.journey!.returnAt - started.journey!.departAt).toBeGreaterThanOrEqual(2_400);
+    expect(started.journey!.returnAt - started.journey!.departAt).toBeLessThanOrEqual(3_600);
     now = started.journey!.returnAt;
     expect((await service.getProjection(userId, "oauth-a")).state).toBe("RETURNED");
     service.close();
+  });
+
+  it("migrates the legacy Journey schema and preserves an already queued paper note", async () => {
+    const dbPath = createDbPath();
+    const userId = createUser(dbPath, "subject-legacy", "user-legacy");
+    const legacy = new DatabaseSync(dbPath);
+    legacy.exec(`
+      PRAGMA foreign_keys = ON;
+      CREATE TABLE journeys (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        state TEXT NOT NULL CHECK (state IN ('PREPARING', 'AWAY', 'RETURNED')),
+        route_bias TEXT,
+        created_at INTEGER NOT NULL,
+        depart_at INTEGER NOT NULL,
+        return_at INTEGER NOT NULL,
+        plan_seed TEXT NOT NULL,
+        engine_version TEXT NOT NULL,
+        materialized_at INTEGER,
+        returned_at INTEGER,
+        archived_at INTEGER
+      );
+      CREATE TABLE journey_user_state (
+        user_id TEXT PRIMARY KEY REFERENCES app_users(id) ON DELETE CASCADE,
+        next_eligible_at INTEGER,
+        queued_route_bias TEXT,
+        updated_at INTEGER NOT NULL
+      );
+    `);
+    legacy.prepare(`
+      INSERT INTO journey_user_state (user_id, next_eligible_at, queued_route_bias, updated_at)
+      VALUES (?, ?, ?, ?)
+    `).run(userId, 20_000, "看看反对意见", 1_000);
+    legacy.close();
+
+    let now = 10_000;
+    const service = new JourneyService({
+      dbPath,
+      now: () => now,
+      createId: () => "legacy-journey",
+      discover: async () => ({
+        question: null,
+        contentSource: "none" as const,
+        knowledgeSource: "template" as const,
+        sourceFetchedAt: now,
+        postcardBody: "迁移后的旧纸条仍然有效。",
+      }),
+    });
+
+    const home = await service.getProjection(userId, "oauth-legacy");
+    expect(home).toMatchObject({
+      state: "AT_HOME",
+      resting: true,
+      queuedJourney: true,
+      queuedRouteBias: "看看反对意见",
+      game: { leaves: { balance: 6 } },
+    });
+    service.close();
+
+    const migrated = new DatabaseSync(dbPath);
+    const journeyColumns = migrated.prepare("PRAGMA table_info(journeys)").all() as unknown as Array<{ name: string }>;
+    const stateColumns = migrated.prepare("PRAGMA table_info(journey_user_state)").all() as unknown as Array<{ name: string }>;
+    expect(journeyColumns.map((column) => column.name)).toEqual(expect.arrayContaining([
+      "journey_kind",
+      "primary_tool_id",
+      "small_item_id",
+      "small_item_consumed_at",
+    ]));
+    expect(stateColumns.map((column) => column.name)).toContain("queued_ready");
+    migrated.close();
   });
 
   it("returns on schedule without fabricating content when discovery fails", async () => {

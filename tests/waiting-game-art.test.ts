@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   inferWaitingGameWorldZone,
+  resolveWaitingGameHomeActivityRoom,
+  resolveWaitingGameInspirationLeafArt,
   resolveWaitingGameJourneyPostcard,
+  resolveWaitingGamePrimaryToolArt,
+  resolveWaitingGameSmallItemArt,
+  resolveWaitingGameSupplyShelfArt,
   resolveWaitingGameWorldZone,
 } from "@/lib/art/waiting-game";
 
@@ -38,6 +43,15 @@ describe("waiting game art mapping", () => {
       routeBias: "随便逛",
       questionTitle: "为什么大家对这件事看法不一样？",
     })).toBe("unknown");
+  });
+
+  it("maps persisted Home Activity and loadout state to the generated game assets", () => {
+    expect(resolveWaitingGameHomeActivityRoom("READING")).toContain("home_room_reading_01.png");
+    expect(resolveWaitingGameHomeActivityRoom("SORTING")).toContain("home_room_sorting_01.png");
+    expect(resolveWaitingGamePrimaryToolArt("magnifier")).toContain("/tools/tool_magnifier.png");
+    expect(resolveWaitingGameSmallItemArt("dried_fish")).toContain("/supplies/supply_dried_fish.png");
+    expect(resolveWaitingGameSupplyShelfArt("leaves")).toContain("supply_shelf_leaves.png");
+    expect(resolveWaitingGameInspirationLeafArt(true)).toContain("resource_inspiration_leaf_cluster.png");
   });
 
   it("resolves generated world and postcard assets without inventing a geographic destination", () => {

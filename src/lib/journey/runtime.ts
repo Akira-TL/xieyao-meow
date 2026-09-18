@@ -177,6 +177,8 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
   oauthAccessToken,
   routeBias,
   planSeed,
+  primaryToolId,
+  smallItemId,
   recentQuestionUrls,
   recentMemoryTopicRefs,
   recentInsightFeedback,
@@ -263,8 +265,11 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     }
   }
 
+  const encounterChance = smallItemId === "dried_fish" ? 75 : 55;
+  const shouldEncounter = stableTieBreak(`${planSeed}:encounter-roll`) % 100 < encounterChance;
+
   if (!unseenQuestions.length) {
-    const conversation = actor
+    const conversation = actor && shouldEncounter
       ? await createNpcJourneyConversation({
           actor,
           planSeed,
@@ -331,14 +336,32 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
         return route.includes(key) || (topic === "AI 与数码" && (route.includes("ai") || route.includes("数码")));
       });
       if (routeTopic) {
-        score += routeTopic[1].some((term) => haystack.includes(term)) ? 8 : 0;
+        score += routeTopic[1].some((term) => haystack.includes(term)) ? 2 : 0;
       }
-      if (route.includes("陌生") || route.includes("不会点开")) score += interestHits === 0 ? 7 : 0;
+      if (route.includes("陌生") || route.includes("不会点开")) score += interestHits === 0 ? 2 : 0;
+
+      if (primaryToolId === "notebook" && item.summary.trim().length >= 180) score += 3;
+      if (primaryToolId === "magnifier") {
+        score += ["证据", "数据", "研究", "实验", "机制", "报告", "样本"].some((term) =>
+          haystack.includes(term),
+        )
+          ? 4
+          : 0;
+      }
+      if (primaryToolId === "old_camera" && item.thumbnailUrl) score += 4;
+      if (primaryToolId === "clipboard") {
+        score += ["争议", "反对", "是否", "为什么", "如何看待", "支持"].some((term) =>
+          haystack.includes(term),
+        )
+          ? 4
+          : 0;
+      }
+
       if (route.includes("吵") || route.includes("争议") || route.includes("反对")) {
         score += ["争议", "应该", "是否", "为什么", "如何看待"].some((term) =>
           haystack.includes(term),
         )
-          ? 5
+          ? 2
           : 0;
       }
       return {
@@ -375,7 +398,7 @@ const discoverJourneyContent: JourneyDiscoverer = async ({
     ...(selected.thumbnailUrl ? { thumbnailUrl: selected.thumbnailUrl } : {}),
   };
 
-  if (actor) {
+  if (actor && shouldEncounter) {
     const store = getSharedEncounterStore();
     const target = store.findPersonaCandidate(userId);
     const relationship = target ? store.getRelationship(userId, target.userId) : null;
