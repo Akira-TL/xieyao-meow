@@ -104,7 +104,14 @@ function LiveKnowledgeWorldExplore() {
   const journeys = atlas?.journeys ?? [];
   const zoneRows = KNOWLEDGE_WORLD_ZONES.map((zone) => {
     const entries = journeys.filter((entry) => journeyWorldZone(entry) === zone.key);
-    return { ...zone, entries, unlocked: entries.length > 0 };
+    const seenTraceKeys = new Set<string>();
+    const traceEntries = entries.filter((entry) => {
+      const traceKey = entry.postcard.question?.url ?? entry.postcard.question?.title ?? entry.postcard.headline;
+      if (seenTraceKeys.has(traceKey)) return false;
+      seenTraceKeys.add(traceKey);
+      return true;
+    }).slice(0, 2);
+    return { ...zone, entries, traceEntries, unlocked: entries.length > 0 };
   });
   const unlockedCount = zoneRows.filter((zone) => zone.unlocked).length;
 
@@ -141,8 +148,8 @@ function LiveKnowledgeWorldExplore() {
               <h2>{zone.label}</h2>
               <p>{zone.unlocked ? zone.description : "这里还没有真实旅途痕迹。等它自己走进去以后，这块地图才会展开。"}</p>
               <div className="knowledge-zone-traces">
-                {zone.unlocked ? zone.entries.slice(0, 2).map((entry) => (
-                  <small key={entry.journeyId}>· {entry.postcard.question?.title ?? entry.postcard.headline}</small>
+                {zone.unlocked ? zone.traceEntries.map((entry) => (
+                  <Link href={`/journey/${entry.journeyId}`} key={entry.journeyId}>· {entry.postcard.question?.title ?? entry.postcard.headline}</Link>
                 )) : <small>不是目的地按钮，也不会提前剧透下一趟。</small>}
               </div>
             </div>

@@ -2008,7 +2008,9 @@ body.sheet-open .app-bottom-nav { opacity: 0; pointer-events: none; }
 .knowledge-zone-copy h2 { margin:0; color:#f1f3f6; font-size:19px; line-height:1.1; }
 .knowledge-zone-copy p { margin:7px 0 0; color:#9ca2aa; font-size:10px; line-height:1.55; }
 .knowledge-zone-traces { display:grid; gap:3px; margin-top:9px; border-top:1px solid rgba(255,255,255,.08); padding-top:8px; }
-.knowledge-zone-traces small { display:block; overflow:hidden; color:#6faaff; font-size:8px; line-height:1.45; text-overflow:ellipsis; white-space:nowrap; }
+.knowledge-zone-traces small, .knowledge-zone-traces a { display:block; overflow:hidden; color:#6faaff; font-size:8px; line-height:1.45; text-overflow:ellipsis; white-space:nowrap; }
+.knowledge-zone-traces a { text-decoration:none; }
+.knowledge-zone-traces a:hover, .knowledge-zone-traces a:focus-visible { text-decoration:underline; }
 .knowledge-zone-card.is-locked .knowledge-zone-traces small { color:#777d86; }
 .explore-log-strip { grid-area: log; margin-top: 0; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; border: 1px solid rgba(255,255,255,.12); padding: 14px 16px; }
 .explore-log-strip strong { color: #fff; font-size: 12px; }
@@ -2061,7 +2063,7 @@ body.sheet-open .app-bottom-nav { opacity: 0; pointer-events: none; }
   .knowledge-zone-copy h2 { font-size:16px; }
   .knowledge-zone-copy p { display:-webkit-box; margin-top:5px; overflow:hidden; font-size:9px; -webkit-box-orient:vertical; -webkit-line-clamp:3; }
   .knowledge-zone-traces { margin-top:7px; padding-top:6px; }
-  .knowledge-zone-traces small { font-size:7.5px; }
+  .knowledge-zone-traces small, .knowledge-zone-traces a { font-size:7.5px; }
   .explore-log-strip { grid-template-columns: 1fr; gap: 3px; padding: 11px 12px; }
   .explore-log-strip a { margin-top: 4px; }
 }
